@@ -12,7 +12,7 @@ func Index(c *gin.Context) {
 }
 
 func main() {
-	session, err := mgo.Dial("server1.example.com,server2.example.com")
+	session, err := mgo.Dial("localhost:27017")
 	if err != nil {
 		panic(err)
 	}
