@@ -4,6 +4,7 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"net/http"
 	"github.com/pushpal-api/controllers"
+	"gopkg.in/mgo.v2"
 )
 
 func Index(c *gin.Context) {
@@ -11,6 +12,15 @@ func Index(c *gin.Context) {
 }
 
 func main() {
+	session, err := mgo.Dial("server1.example.com,server2.example.com")
+	if err != nil {
+		panic(err)
+	}
+
+	db := session.DB("pushpal")
+
+	defer session.Close()
+
 	router := gin.Default()
 
 	v1 := router.Group("/v1")
@@ -18,7 +28,7 @@ func main() {
 		v1.GET("/", Index)
 		users := v1.Group("/users")
 		{
-			userController := controllers.NewUserController()
+			userController := controllers.NewUserController(db.C("users"))
 			users.GET("/:id", userController.GetUser)
 			users.POST("/", userController.CreateUser)
 		}
