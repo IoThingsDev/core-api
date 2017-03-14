@@ -16,13 +16,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	defer session.Close()
-
 	database := session.DB("pushpal")
 
 	router := gin.Default()
-
 	v1 := router.Group("/v1")
 	{
 		v1.GET("/", Index)
@@ -33,7 +30,12 @@ func main() {
 			users.GET("/:id", userController.GetUser)
 			users.POST("/", userController.CreateUser)
 		}
-	}
 
+		auth := v1.Group("/auth")
+		{
+			authController := controllers.NewAuthController(database)
+			auth.POST("/", authController.Authentication)
+		}
+	}
 	router.Run(":12345")
 }
