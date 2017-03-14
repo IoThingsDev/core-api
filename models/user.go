@@ -1,10 +1,10 @@
 package models
 
 type User struct {
-	Id        string   `json:"id,omitempty"`
-	Firstname string   `json:"firstname,omitempty"`
-	Lastname  string   `json:"lastname,omitempty"`
-	Address   *Address `json:"address,omitempty"`
+	Id        string   `json:"id" bson:"_id,omitempty"`
+	Firstname string   `json:"firstname" bson:"firstname"`
+	Lastname  string   `json:"lastname" bson:"lastname"`
+	Address   *Address `json:"address" bson:"address"`
 }
 
-type Users []User
+const UsersCollection = "users"

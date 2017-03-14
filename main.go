@@ -17,9 +17,9 @@ func main() {
 		panic(err)
 	}
 
-	db := session.DB("pushpal")
-
 	defer session.Close()
+
+	database := session.DB("pushpal")
 
 	router := gin.Default()
 
@@ -28,7 +28,8 @@ func main() {
 		v1.GET("/", Index)
 		users := v1.Group("/users")
 		{
-			userController := controllers.NewUserController(db.C("users"))
+			userController := controllers.NewUserController(database)
+			users.GET("/", userController.GetUsers)
 			users.GET("/:id", userController.GetUser)
 			users.POST("/", userController.CreateUser)
 		}
