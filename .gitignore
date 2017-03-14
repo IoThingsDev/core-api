@@ -1,2 +1,4 @@
-.idea/*
 pushpal-api
+.idea/
+pushpal.rsa
+pushpal.rsa.pub
