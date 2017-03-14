@@ -7,6 +7,7 @@ import (
 	"github.com/dernise/pushpal-api/models"
 	"gopkg.in/mgo.v2/bson"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/asaskevich/govalidator"
 )
 
 type UserController struct {
@@ -34,7 +35,6 @@ func (uc UserController) GetUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data":user})
-	return
 }
 
 func (uc UserController) CreateUser(c *gin.Context) {
@@ -44,6 +44,12 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	user := models.User{}
 	err := c.Bind(&user)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	_, err = govalidator.ValidateStruct(user)
 	if err != nil {
 		c.Error(err)
 		return
