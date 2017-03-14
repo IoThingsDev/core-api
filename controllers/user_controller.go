@@ -6,6 +6,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"github.com/pushpal-api/models"
 	"gopkg.in/mgo.v2/bson"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserController struct {
@@ -48,8 +49,15 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	err = users.Insert(user)
+	password := []byte(user.Password)
+	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	user.Password = string(hashedPassword)
+	if err != nil {
+		c.Error(err)
+		return
+	}
 
+	err = users.Insert(user)
 	if err != nil {
 		c.Error(err)
 		return
