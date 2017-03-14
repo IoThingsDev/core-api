@@ -25,7 +25,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
 	user := models.User{}
-	err := users.Find(bson.M{"id": c.Param("id")}).One(&user)
+	err := users.Find(bson.M{"_id": bson.ObjectIdHex(c.Param("id"))}).One(&user)
 
 	if err != nil {
 		c.Error(err)
