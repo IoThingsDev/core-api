@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"github.com/pushpal-api/controllers"
 	"gopkg.in/mgo.v2"
+	"github.com/pushpal-api/middlewares"
 )
 
 func Index(c *gin.Context) {
@@ -31,10 +32,15 @@ func main() {
 			users.POST("/", userController.CreateUser)
 		}
 
-		auth := v1.Group("/auth")
+		authentication := v1.Group("/auth")
 		{
 			authController := controllers.NewAuthController(database)
-			auth.POST("/", authController.Authentication)
+			authentication.POST("/", authController.Authentication)
+		}
+
+		authorized := v1.Group("/authorized").Use(middlewares.AuthMiddleware())
+		{
+			authorized.GET("/", Index)
 		}
 	}
 	router.Run(":12345")
