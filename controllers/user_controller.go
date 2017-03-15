@@ -4,7 +4,7 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"net/http"
 	"gopkg.in/mgo.v2"
-	"github.com/pushpal-api/models"
+	"github.com/dernise/pushpal-api/models"
 	"gopkg.in/mgo.v2/bson"
 	"golang.org/x/crypto/bcrypt"
 )

@@ -3,7 +3,7 @@ package controllers
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/gin-gonic/gin.v1"
-	"github.com/pushpal-api/models"
+	"github.com/dernise/pushpal-api/models"
 	"gopkg.in/mgo.v2/bson"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/dgrijalva/jwt-go"
