@@ -7,7 +7,6 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
-	"log"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -33,7 +32,6 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		if token.Header["alg"] != jwt.SigningMethodRS256.Alg() {
-			log.Println(jwt.SigningMethodRS256)
 			c.AbortWithError(http.StatusUnauthorized, errors.New("Signing method not valid"))
 			return
 		}
