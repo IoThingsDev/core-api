@@ -19,7 +19,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		publicKeyFile, err := ioutil.ReadFile("pushpal.rsa.pub")
+		publicKeyFile, _ := ioutil.ReadFile("pushpal.rsa.pub")
 		publicKey, _ := jwt.ParseRSAPublicKeyFromPEM(publicKeyFile)
 
 		token, err := jwt.Parse(authHeaderParts[1], func(token *jwt.Token) (interface{}, error) {
