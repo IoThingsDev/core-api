@@ -3,6 +3,8 @@ language: go
 go:
   - master
 
+go_import_path: github.com/dernise/pushpal-api
+
 before_install:
   - cp .netrc ~
   - chmod 600 .netrc
