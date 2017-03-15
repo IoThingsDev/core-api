@@ -3,9 +3,9 @@ package main
 import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"net/http"
-	"github.com/pushpal-api/controllers"
+	"github.com/dernise/pushpal-api/controllers"
 	"gopkg.in/mgo.v2"
-	"github.com/pushpal-api/middlewares"
+	"github.com/dernise/pushpal-api/middlewares"
 )
 
 func Index(c *gin.Context) {
