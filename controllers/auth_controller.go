@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"errors"
 )
 
 type AuthController struct {
@@ -35,15 +36,15 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	c.Bind(&userInput) // TODO: HANDLE ERROR
 
 	user := models.User{}
-	err := users.Find(bson.M{"username": userInput.Username}).One(&user)
+	err := users.Find(bson.M{"$or": []bson.M{{"username":userInput.Username}, {"email": userInput.Email}}}).One(&user)
 	if err != nil {
-		c.Error(err)
+		c.AbortWithError(http.StatusNotFound, errors.New("User does not exist"))
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInput.Password))
 	if err != nil {
-		c.Error(err)
+		c.AbortWithError(http.StatusUnauthorized, errors.New("Password is not correct"))
 		return
 	}
 
@@ -57,5 +58,4 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	tokenString, err := token.SignedString(privateKey)
 
 	c.JSON(http.StatusOK, gin.H{"status":"success", "data":gin.H{"token":tokenString}})
-	return
 }
