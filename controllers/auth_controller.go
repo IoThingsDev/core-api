@@ -35,7 +35,7 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	c.Bind(&userInput) // TODO: HANDLE ERROR
 
 	user := models.User{}
-	err := users.Find(bson.M{"username": userInput.Username}).One(&user)
+	err := users.Find(bson.M{"$or": []bson.M{{"username":userInput.Username}, {"email": userInput.EmailAddress}}}).One(&user)
 	if err != nil {
 		c.Error(err)
 		return

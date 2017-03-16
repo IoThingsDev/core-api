@@ -31,7 +31,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 	err := users.Find(bson.M{"_id": bson.ObjectIdHex(c.Param("id"))}).One(&user)
 
 	if err != nil {
-		c.Error(err)
+		c.AbortWithError(http.StatusNotFound, errors.New("User not found"))
 		return
 	}
 
@@ -46,7 +46,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	user := models.User{}
 	err := c.Bind(&user)
 	if err != nil {
-		c.Error(err)
+		c.AbortWithError(http.StatusBadRequest, errors.New("Failed to bind the body data"))
 		return
 	}
 
@@ -66,18 +66,17 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
 	if err != nil {
-		c.Error(err)
+		c.AbortWithError(http.StatusInternalServerError, errors.New("Failed to generate the encrypted password"))
 		return
 	}
 
 	err = users.Insert(user)
 	if err != nil {
-		c.Error(err)
+		c.AbortWithError(http.StatusInternalServerError, errors.New("Failed to insert the user"))
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"status": "success", "data":user})
-	return
 }
 
 func (uc UserController) GetUsers(c *gin.Context) {
@@ -88,7 +87,7 @@ func (uc UserController) GetUsers(c *gin.Context) {
 	list := []models.User{}
 	err := users.Find(nil).All(&list)
 	if err != nil {
-		c.Error(err)
+		c.AbortWithError(http.StatusNotFound, errors.New("Users not found"))
 		return
 	}
 
