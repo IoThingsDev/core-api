@@ -8,6 +8,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/asaskevich/govalidator"
+	"errors"
 )
 
 type UserController struct {
@@ -46,6 +47,12 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	err := c.Bind(&user)
 	if err != nil {
 		c.Error(err)
+		return
+	}
+
+	count, _ := users.Find(bson.M{"email": user.Email}).Count()
+	if count > 0 {
+		c.AbortWithError(http.StatusConflict, errors.New("User already exists"))
 		return
 	}
 

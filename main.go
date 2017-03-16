@@ -4,6 +4,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"github.com/dernise/pushpal-api/server"
 	"gopkg.in/gin-gonic/gin.v1"
+	"github.com/asaskevich/govalidator"
 )
 
 func main() {
@@ -13,10 +14,11 @@ func main() {
 	}
 	defer session.Close()
 
+	govalidator.SetFieldsRequiredByDefault(true)
+
 	database := session.DB("pushpal")
+
 	api := server.API{ Router: gin.Default() }
-
-
 	api.SetupRouter(database)
 	api.Router.Run(":4000")
 }
