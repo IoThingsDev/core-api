@@ -1,4 +1,4 @@
-package main
+package tests
 
 import (
 	"gopkg.in/mgo.v2"
