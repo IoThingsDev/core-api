@@ -1,16 +1,10 @@
 package main
 
 import (
-	"gopkg.in/gin-gonic/gin.v1"
-	"net/http"
-	"github.com/dernise/pushpal-api/controllers"
 	"gopkg.in/mgo.v2"
-	"github.com/dernise/pushpal-api/middlewares"
+	"github.com/dernise/pushpal-api/server"
+	"gopkg.in/gin-gonic/gin.v1"
 )
-
-func Index(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully reached the Pushpal API."})
-}
 
 func main() {
 	session, err := mgo.Dial("localhost:27017")
@@ -18,30 +12,11 @@ func main() {
 		panic(err)
 	}
 	defer session.Close()
+
 	database := session.DB("pushpal")
+	api := server.API{ Router: gin.Default() }
 
-	router := gin.Default()
-	v1 := router.Group("/v1")
-	{
-		v1.GET("/", Index)
-		users := v1.Group("/users")
-		{
-			userController := controllers.NewUserController(database)
-			users.GET("/", userController.GetUsers)
-			users.GET("/:id", userController.GetUser)
-			users.POST("/", userController.CreateUser)
-		}
 
-		authentication := v1.Group("/auth")
-		{
-			authController := controllers.NewAuthController(database)
-			authentication.POST("/", authController.Authentication)
-		}
-
-		authorized := v1.Group("/authorized").Use(middlewares.AuthMiddleware())
-		{
-			authorized.GET("/", Index)
-		}
-	}
-	router.Run(":12345")
+	api.SetupRouter(database)
+	api.Router.Run(":4000")
 }
