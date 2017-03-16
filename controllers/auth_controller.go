@@ -47,7 +47,7 @@ func (ac AuthController) Authentication(c *gin.Context) {
 		return
 	}
 
-	token := jwt.New(jwt.GetSigningMethod("RS256"))
+	token := jwt.New(jwt.GetSigningMethod(jwt.SigningMethodRS256.Alg()))
 	claims := make(jwt.MapClaims)
 	// TODO: ADD EXPIRATION
 	//claims["exp"] = time.Now().Add(time.Hour * time.Duration(settings.Get().JWTExpirationDelta)).Unix()
