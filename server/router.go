@@ -14,6 +14,9 @@ func Index(c *gin.Context) {
 
 func (a API) SetupRouter(database *mgo.Database) {
 	router := a.Router
+
+	router.Use(middlewares.ErrorMiddleware())
+
 	v1 := router.Group("/v1")
 	{
 		v1.GET("/", Index)
