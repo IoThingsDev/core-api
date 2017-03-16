@@ -50,15 +50,15 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	count, _ := users.Find(bson.M{"email": user.Email}).Count()
-	if count > 0 {
-		c.AbortWithError(http.StatusConflict, errors.New("User already exists"))
+	_, err = govalidator.ValidateStruct(user)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	_, err = govalidator.ValidateStruct(user)
-	if err != nil {
-		c.Error(err)
+	count, _ := users.Find(bson.M{"email": user.Email}).Count()
+	if count > 0 {
+		c.AbortWithError(http.StatusConflict, errors.New("User already exists"))
 		return
 	}
 
