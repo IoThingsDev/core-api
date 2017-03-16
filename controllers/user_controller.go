@@ -92,5 +92,4 @@ func (uc UserController) GetUsers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"status": "success", "data":list})
-	return
 }

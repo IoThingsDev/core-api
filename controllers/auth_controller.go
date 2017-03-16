@@ -58,5 +58,4 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	tokenString, err := token.SignedString(privateKey)
 
 	c.JSON(http.StatusOK, gin.H{"status":"success", "data":gin.H{"token":tokenString}})
-	return
 }
