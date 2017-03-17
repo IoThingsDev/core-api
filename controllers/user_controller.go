@@ -9,6 +9,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"github.com/asaskevich/govalidator"
 	"errors"
+	"os/exec"
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"bytes"
+	"github.com/sendgrid/rest"
+	"text/template"
+	"strings"
 )
 
 type UserController struct {
@@ -70,13 +77,26 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
+	user.Active = false
+	activationKey, _ := exec.Command("uuidgen").Output()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, errors.New("Failed to generate the activation key"))
+		return
+	}
+	activationKeyString := string(activationKey)
+	user.ActivationKey = strings.TrimSpace(activationKeyString)
+
+	user.Id = bson.NewObjectId()
+
 	err = users.Insert(user)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, errors.New("Failed to insert the user"))
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"status": "success", "data":user})
+	uc.SendActivationEmail(&user)
+
+	c.JSON(http.StatusCreated, gin.H{"status": "success", "message":"User created"})
 }
 
 func (uc UserController) GetUsers(c *gin.Context) {
@@ -92,4 +112,45 @@ func (uc UserController) GetUsers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"status": "success", "data":list})
+}
+
+func (uc UserController) ActivateUser(c *gin.Context) {
+	session := uc.mgo.Session.Copy()
+	defer session.Close()
+	users := uc.mgo.C(models.UsersCollection).With(session)
+
+	key := c.Param("key")
+	userId := c.Param("id")
+
+	change := bson.M{"$set": bson.M{"active": true}}
+	//bson.M{"$and": []bson.M{{"_id":bson.ObjectIdHex(userId)}, {"activationKey": key}}}
+	err := users.Update(bson.M{"$and": []bson.M{{"_id":bson.ObjectIdHex(userId)}, {"activationKey": key}}}, change)
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message":"User has been activated"})
+}
+
+func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response, error) {
+	// TODO: USE CONFIGURATION FOR HARD CODED SETTINGS
+
+	from := mail.NewEmail("Pushpal", "no-reply@pushpal.com")
+	subject := "Welcome to Pushpal! Confirm your email"
+	to := mail.NewEmail(user.Firstname, user.Email)
+
+	url := "Please confirm your email address by clicking on the following link: http://localhost:4000/users/{{.Id.Hex}}/activate/{{.ActivationKey}}"
+	buffer := new(bytes.Buffer)
+	template := template.Must(template.New("emailTemplate").Parse(url))
+	template.Execute(buffer, user)
+
+	content := mail.NewContent("text/plain", buffer.String())
+	m := mail.NewV3MailInit(from, subject, to, content)
+	key := "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"
+	request := sendgrid.GetRequest(key, "/v3/mail/send", "")
+	request.Method = "POST"
+	request.Body = mail.GetRequestBody(m)
+	response, err := sendgrid.API(request)
+	return response, err
 }
