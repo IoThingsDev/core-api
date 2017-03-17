@@ -11,6 +11,8 @@ type User struct {
 	Password  string   `json:"password" bson:"password" valid:"required"`
 	Email     string `json:"email" bson:"email" valid:"email"`
 	Username  string `json:"username" bson:"username" valid:"required"`
+	Active    bool   `json:"active" bson:"active" valid:"-"`
+	ActivationKey string `json:"activationKey" bson:"activationKey" valid:"-"`
 }
 
 const UsersCollection = "users"
