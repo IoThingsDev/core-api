@@ -17,10 +17,10 @@ func main() {
 		panic(err)
 	}
 	defer session.Close()
-	database := session.DB(api.Config.GetString("database.dbName"))
+	api.Database = session.DB(api.Config.GetString("database.dbName"))
 
 	govalidator.SetFieldsRequiredByDefault(true)
 
-	api.SetupRouter(database)
+	api.SetupRouter()
 	api.Router.Run(api.Config.GetString("host.port"))
 }
