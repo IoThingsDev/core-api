@@ -5,20 +5,22 @@ import (
 	"github.com/dernise/pushpal-api/server"
 	"gopkg.in/gin-gonic/gin.v1"
 	"github.com/asaskevich/govalidator"
+	"github.com/spf13/viper"
 )
 
 func main() {
-	session, err := mgo.Dial("localhost:27017")
+	api := server.API{ Router: gin.Default(), Config: viper.New() }
+	api.SetupViper("prod")
+
+	session, err := mgo.Dial(api.Config.GetString("database.address"))
 	if err != nil {
 		panic(err)
 	}
 	defer session.Close()
+	api.Database = session.DB(api.Config.GetString("database.dbName"))
 
 	govalidator.SetFieldsRequiredByDefault(true)
 
-	database := session.DB("pushpal")
-
-	api := server.API{ Router: gin.Default() }
-	api.SetupRouter(database)
-	api.Router.Run(":4000")
+	api.SetupRouter()
+	api.Router.Run(api.Config.GetString("host.port"))
 }
