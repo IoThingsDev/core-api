@@ -10,7 +10,7 @@ import (
 
 func main() {
 	api := server.API{ Router: gin.Default(), Config: viper.New() }
-	api.SetupViper()
+	api.SetupViper("prod")
 
 	session, err := mgo.Dial(api.Config.GetString("database.address"))
 	if err != nil {
