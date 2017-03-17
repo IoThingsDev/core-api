@@ -9,7 +9,7 @@ type User struct {
 	Firstname string   `json:"firstname" bson:"firstname" valid:"required"`
 	Lastname  string   `json:"lastname" bson:"lastname" valid:"required"`
 	Password  string   `json:"password" bson:"password" valid:"required"`
-	Email     string `json:"email" bson:"email" valid:"email"`
+	Email     string `json:"email" bson:"email" valid:"email,required"`
 	Username  string `json:"username" bson:"username" valid:"required"`
 }
 

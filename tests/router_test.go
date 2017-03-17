@@ -12,6 +12,7 @@ import (
 
 func TestHomePage(t *testing.T) {
 	api := SetupRouterAndDatabase()
+	defer api.Database.Session.Close()
 
 	req, err := http.NewRequest("GET", "/v1/", nil)
 	if err != nil {
