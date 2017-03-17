@@ -10,13 +10,13 @@ import (
 func SetupRouterAndDatabase() *server.API {
 	api := server.API{ Router: gin.Default(), Config: viper.New() }
 	api.SetupViper("test")
-	session, err := mgo.Dial("localhost:27017")
+	session, err := mgo.Dial(api.Config.GetString("database.address"))
 	if err != nil {
 		panic(err)
 	}
 	defer session.Close()
 
-	api.Database = session.DB("pushpal-tests")
+	api.Database = session.DB(api.Config.GetString("database.dbName"))
 	api.SetupRouter()
 	return &api
 }
