@@ -14,9 +14,10 @@ func SetupRouterAndDatabase() *server.API {
 	if err != nil {
 		panic(err)
 	}
-	defer session.Close()
 
 	api.Database = session.DB(api.Config.GetString("database.dbName"))
+	api.Database.DropDatabase()
 	api.SetupRouter()
+
 	return &api
 }
