@@ -13,21 +13,24 @@ import (
 	"github.com/dernise/pushpal-api/helpers"
 	"github.com/sendgrid/rest"
 	"bytes"
-	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"html/template"
+	"github.com/dernise/pushpal-api/services"
 )
 
 
 type UserController struct {
 	mgo    *mgo.Database
 	config *viper.Viper
+	emailSender services.EmailSender
 }
 
-func NewUserController(mgo *mgo.Database, config *viper.Viper) *UserController {
+
+func NewUserController(mgo *mgo.Database, config *viper.Viper, emailSender services.EmailSender) *UserController {
 	return &UserController{
 		mgo,
 		config,
+		emailSender,
 	}
 }
 
@@ -128,21 +131,14 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 }
 
 func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response, error) {
-	from := mail.NewEmail("Pushpal", "no-reply@pushpal.io")
 	subject := "Welcome to Pushpal! Confirm your email"
 	to := mail.NewEmail(user.Firstname, user.Email)
-
 
 	url := "Please confirm your email address by clicking on the following link: http://localhost:4000/users/{{.Id.Hex}}/activate/{{.ActivationKey}}"
 	buffer := new(bytes.Buffer)
 	template := template.Must(template.New("emailTemplate").Parse(url))
 	template.Execute(buffer, user)
 
-	content := mail.NewContent("text/plain", buffer.String())
-	m := mail.NewV3MailInit(from, subject, to, content)
-	request := sendgrid.GetRequest(uc.config.GetString("sendgrid.apiKey"), "/v3/mail/send", "")
-	request.Method = "POST"
-	request.Body = mail.GetRequestBody(m)
-	response, err := sendgrid.API(request)
+	response, err := uc.emailSender.SendEmail([]*mail.Email{ to }, "text/plain", subject, buffer.String())
 	return response, err
 }

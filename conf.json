@@ -7,6 +7,8 @@
     "dbName": "pushpal"
   },
   "sendgrid": {
-    "apiKey": "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"
+    "apiKey": "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",
+    "address": "no-reply@pushpal.io",
+    "name": "Pushpal"
   }
 }
