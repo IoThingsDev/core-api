@@ -42,6 +42,11 @@ func (ac AuthController) Authentication(c *gin.Context) {
 		return
 	}
 
+	if !user.Active {
+		c.AbortWithError(http.StatusNotFound, errors.New("User needs to be activated"))
+		return
+	}
+
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInput.Password))
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, errors.New("Password is not correct"))
