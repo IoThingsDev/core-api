@@ -9,15 +9,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"github.com/asaskevich/govalidator"
 	"errors"
-	"os/exec"
+	"github.com/spf13/viper"
+	"github.com/dernise/pushpal-api/helpers"
+	"github.com/sendgrid/rest"
+	"bytes"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"bytes"
-	"github.com/sendgrid/rest"
-	"text/template"
-	"strings"
-	"github.com/spf13/viper"
+	"html/template"
 )
+
 
 type UserController struct {
 	mgo    *mgo.Database
@@ -80,12 +80,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	}
 
 	user.Active = false
-	activationKey, _ := exec.Command("uuidgen").Output()
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, errors.New("Failed to generate the activation key"))
-		return
-	}
-	user.ActivationKey = strings.TrimSpace(string(activationKey))
+	user.ActivationKey = helpers.RandomString(20)
 
 	user.Id = bson.NewObjectId()
 
