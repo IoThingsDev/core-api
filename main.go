@@ -22,5 +22,5 @@ func main() {
 	govalidator.SetFieldsRequiredByDefault(true)
 
 	api.SetupRouter()
-	api.Router.Run(api.Config.GetString("host.port"))
+	api.Router.Run(api.Config.GetString("host.address"))
 }
