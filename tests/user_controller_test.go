@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+
 func TestCreateAccount(t *testing.T) {
 	api := SetupRouterAndDatabase()
 	defer api.Database.Session.Close()
