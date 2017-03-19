@@ -4,18 +4,18 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"net/http"
 	"gopkg.in/mgo.v2"
-	"github.com/dernise/pushpal-api/models"
+	"github.com/dernise/base-api/models"
 	"gopkg.in/mgo.v2/bson"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/asaskevich/govalidator"
 	"errors"
 	"github.com/spf13/viper"
-	"github.com/dernise/pushpal-api/helpers"
+	"github.com/dernise/base-api/helpers"
 	"github.com/sendgrid/rest"
 	"bytes"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"html/template"
-	"github.com/dernise/pushpal-api/services"
+	"github.com/dernise/base-api/services"
 )
 
 
@@ -131,7 +131,7 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 }
 
 func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response, error) {
-	subject := "Welcome to Pushpal! Confirm your email"
+	subject := "Welcome to base! Confirm your email"
 	to := mail.NewEmail(user.Firstname, user.Email)
 
 	url := "Please confirm your email address by clicking on the following link: http://localhost:4000/users/{{.Id.Hex}}/activate/{{.ActivationKey}}"

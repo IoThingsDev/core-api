@@ -4,7 +4,7 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"github.com/spf13/viper"
 	"gopkg.in/mgo.v2"
-	"github.com/dernise/pushpal-api/services"
+	"github.com/dernise/base-api/services"
 )
 
 type API struct {

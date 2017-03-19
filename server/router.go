@@ -2,13 +2,13 @@ package server
 
 import (
 	"gopkg.in/gin-gonic/gin.v1"
-	"github.com/dernise/pushpal-api/controllers"
-	"github.com/dernise/pushpal-api/middlewares"
+	"github.com/dernise/base-api/controllers"
+	"github.com/dernise/base-api/middlewares"
 	"net/http"
 )
 
 func Index(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully reached the Pushpal API."})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully reached the base API."})
 }
 
 func (a API) SetupRouter() {

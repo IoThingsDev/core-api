@@ -5,8 +5,8 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"github.com/asaskevich/govalidator"
 	"github.com/spf13/viper"
-	"github.com/dernise/pushpal-api/server"
-	"github.com/dernise/pushpal-api/services"
+	"github.com/dernise/base-api/server"
+	"github.com/dernise/base-api/services"
 )
 
 func main() {

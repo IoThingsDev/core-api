@@ -5,6 +5,6 @@
   },
   "database": {
     "address": "localhost:27017",
-    "dbName": "pushpal-tests"
+    "dbName": "base-tests"
   }
 }

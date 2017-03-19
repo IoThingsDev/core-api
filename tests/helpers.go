@@ -3,7 +3,7 @@ package tests
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/gin-gonic/gin.v1"
-	"github.com/dernise/pushpal-api/server"
+	"github.com/dernise/base-api/server"
 	"github.com/spf13/viper"
 	"bytes"
 	"net/http/httptest"

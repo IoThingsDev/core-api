@@ -3,7 +3,7 @@ package controllers
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/gin-gonic/gin.v1"
-	"github.com/dernise/pushpal-api/models"
+	"github.com/dernise/base-api/models"
 	"gopkg.in/mgo.v2/bson"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/dgrijalva/jwt-go"
@@ -25,7 +25,7 @@ func NewAuthController(mgo *mgo.Database) *AuthController {
 
 
 func (ac AuthController) Authentication(c *gin.Context) {
-	privateKeyFile, _ := ioutil.ReadFile("pushpal.rsa")
+	privateKeyFile, _ := ioutil.ReadFile("base.rsa")
 	privateKey, _ := jwt.ParseRSAPrivateKeyFromPEM(privateKeyFile)
 
 	session := ac.mgo.Session.Copy()
