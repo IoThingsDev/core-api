@@ -10,7 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
-	"errors"
+	"github.com/dernise/base-api/helpers"
 )
 
 type AuthController struct {
@@ -38,18 +38,18 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	user := models.User{}
 	err := users.Find(bson.M{"$or": []bson.M{{"username":userInput.Username}, {"email": userInput.Email}}}).One(&user)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, errors.New("User does not exist"))
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User does not exist"))
 		return
 	}
 
 	if !user.Active {
-		c.AbortWithError(http.StatusNotFound, errors.New("User needs to be activated"))
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_needs_activation", "User needs to be activated"))
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInput.Password))
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, errors.New("Password is not correct"))
+		c.AbortWithError(http.StatusUnauthorized, helpers.ErrorWithCode("incorrect_password","Password is not correct"))
 		return
 	}
 

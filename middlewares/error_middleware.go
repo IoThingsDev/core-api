@@ -1,6 +1,9 @@
 package middlewares
 
-import "gopkg.in/gin-gonic/gin.v1"
+import (
+	"gopkg.in/gin-gonic/gin.v1"
+	"github.com/dernise/base-api/helpers"
+)
 
 func ErrorMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -8,10 +11,20 @@ func ErrorMiddleware() gin.HandlerFunc {
 
 		errorToPrint := c.Errors.Last()
 		if errorToPrint != nil {
-			c.JSON(-1, gin.H {
-				"status": "error",
-				"message": errorToPrint.Error(),
-			})
+			original, ok := errorToPrint.Err.(helpers.Error)
+			if ok {
+				c.JSON(-1, gin.H{
+					"status":  "error",
+					"message": original.Message,
+					"code": original.Code,
+				})
+			} else {
+				c.JSON(-1, gin.H{
+					"status":  "error",
+					"message": errorToPrint.Error(),
+					"code": "unknown",
+				})
+			}
 		}
 	}
 }

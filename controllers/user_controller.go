@@ -8,7 +8,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/asaskevich/govalidator"
-	"errors"
 	"github.com/spf13/viper"
 	"github.com/dernise/base-api/helpers"
 	"github.com/sendgrid/rest"
@@ -43,7 +42,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 	err := users.Find(bson.M{"_id": bson.ObjectIdHex(c.Param("id"))}).One(&user)
 
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, errors.New("User not found"))
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found","User not found"))
 		return
 	}
 
@@ -58,7 +57,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	user := models.User{}
 	err := c.Bind(&user)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("Failed to bind the body data"))
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input","Failed to bind the body data"))
 		return
 	}
 
@@ -70,7 +69,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	count, _ := users.Find(bson.M{"email": user.Email}).Count()
 	if count > 0 {
-		c.AbortWithError(http.StatusConflict, errors.New("User already exists"))
+		c.AbortWithError(http.StatusConflict, helpers.ErrorWithCode("user_already_exists","User already exists"))
 		return
 	}
 
@@ -78,7 +77,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, errors.New("Failed to generate the encrypted password"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("encryption_failed","Failed to generate the encrypted password"))
 		return
 	}
 
@@ -89,7 +88,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	err = users.Insert(user)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, errors.New("Failed to insert the user"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("creation_failed","Failed to insert the user"))
 		return
 	}
 
@@ -106,7 +105,7 @@ func (uc UserController) GetUsers(c *gin.Context) {
 	list := []models.User{}
 	err := users.Find(nil).All(&list)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, errors.New("Users not found"))
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found","Users not found"))
 		return
 	}
 
@@ -123,7 +122,7 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 
 	err := users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"activationKey": key}}}, bson.M{"$set": bson.M{"active": true}})
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("activation_failed", "Couldn't find the user to activate"))
 		return
 	}
 
