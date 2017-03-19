@@ -26,7 +26,10 @@ func (f *FakeEmailSender) SendEmail(to []*mail.Email, contentType, subject, body
 
 func SetupRouterAndDatabase() *server.API {
 	api := server.API{ Router: gin.Default(), Config: viper.New() }
+
+	api.LoadEnvVariables()
 	api.SetupViper("test")
+
 	session, err := mgo.Dial(api.Config.GetString("database.address"))
 	if err != nil {
 		panic(err)

@@ -8,27 +8,24 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/asaskevich/govalidator"
-	"github.com/spf13/viper"
 	"github.com/dernise/base-api/helpers"
-	"github.com/sendgrid/rest"
 	"bytes"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"html/template"
 	"github.com/dernise/base-api/services"
+	"github.com/sendgrid/rest"
 )
 
 
 type UserController struct {
 	mgo    *mgo.Database
-	config *viper.Viper
 	emailSender services.EmailSender
 }
 
 
-func NewUserController(mgo *mgo.Database, config *viper.Viper, emailSender services.EmailSender) *UserController {
+func NewUserController(mgo *mgo.Database, emailSender services.EmailSender) *UserController {
 	return &UserController{
 		mgo,
-		config,
 		emailSender,
 	}
 }

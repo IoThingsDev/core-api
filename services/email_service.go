@@ -5,6 +5,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/sendgrid/rest"
 	"github.com/spf13/viper"
+	"os"
 )
 
 type EmailSender interface {
@@ -14,14 +15,14 @@ type EmailSender interface {
 type SendGridEmailSender struct {
 	senderEmail string
 	senderName  string
-	apiKey 	    string
+	apiKey      string
 }
 
 func NewSendGridEmailSender(config *viper.Viper) EmailSender {
 	return &SendGridEmailSender{
 		config.GetString("sendgrid.address"),
 		config.GetString("sendgrid.name"),
-		config.GetString("sendgrid.apiKey"),
+		os.Getenv("SENDGRID_API_KEY"),
 	}
 }
 
@@ -34,8 +35,8 @@ func (s *SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, 
 	m.SetFrom(from)
 	m.Subject = subject
 	p := mail.NewPersonalization()
-	for _,receipient := range to {
-		p.AddTos(receipient)
+	for _, recipient := range to {
+		p.AddTos(recipient)
 	}
 	m.AddPersonalizations(p)
 	m.AddContent(content)
