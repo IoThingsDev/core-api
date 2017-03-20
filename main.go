@@ -18,7 +18,10 @@ func main() {
 		panic(err)
 	}
 
-	api.SetupViper("prod")
+	err = api.SetupViper("prod")
+	if err != nil {
+		panic(err)
+	}
 
 	api.EmailSender = services.NewSendGridEmailSender(api.Config)
 
