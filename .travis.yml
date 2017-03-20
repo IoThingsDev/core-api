@@ -6,10 +6,6 @@ go:
 services: mongodb
 
 go_import_path: github.com/dernise/base-api
-
-before_install:
-  - cp .netrc ~
-  - chmod 600 .netrc
   
 notifications:
   email: false
