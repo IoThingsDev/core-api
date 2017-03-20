@@ -21,7 +21,7 @@ func (a API) SetupRouter() {
 		v1.GET("/", Index)
 		users := v1.Group("/users")
 		{
-			userController := controllers.NewUserController(a.Database, a.Config, a.EmailSender)
+			userController := controllers.NewUserController(a.Database, a.EmailSender)
 			users.GET("/", userController.GetUsers)
 			users.GET("/:id", userController.GetUser)
 			users.POST("/", userController.CreateUser)

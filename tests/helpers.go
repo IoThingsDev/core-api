@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"os"
 )
 
 type FakeEmailSender struct {
@@ -26,13 +27,16 @@ func (f *FakeEmailSender) SendEmail(to []*mail.Email, contentType, subject, body
 
 func SetupRouterAndDatabase() *server.API {
 	api := server.API{ Router: gin.Default(), Config: viper.New() }
+
+	api.LoadEnvVariables()
 	api.SetupViper("test")
-	session, err := mgo.Dial(api.Config.GetString("database.address"))
+
+	session, err := mgo.Dial(os.Getenv("DB_HOST"))
 	if err != nil {
 		panic(err)
 	}
 
-	api.Database = session.DB(api.Config.GetString("database.dbName"))
+	api.Database = session.DB(os.Getenv("DB_NAME_TEST"))
 	api.Database.DropDatabase()
 
 	api.EmailSender = &FakeEmailSender{}

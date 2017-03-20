@@ -1,6 +1,6 @@
 package server
 
-func (a API) SetupViper(env string) {
+func (a API) SetupViper(env string) error {
 	if env == "prod" {
 		a.Config.SetConfigName("conf")
 		a.Config.AddConfigPath(".")
@@ -10,7 +10,5 @@ func (a API) SetupViper(env string) {
 	}
 	a.Config.SetConfigType("json")
 	err := a.Config.ReadInConfig()
-	if err != nil {
-		panic(err)
-	}
+	return err
 }

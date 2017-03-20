@@ -1,10 +1,9 @@
 {
   "host": {
-    "address": "localhost",
-    "port": ":4000"
+    "address": "localhost:4000"
   },
-  "database": {
-    "address": "localhost:27017",
-    "dbName": "base-tests"
+  "sendgrid": {
+    "address": "no-reply@pushpal.io",
+    "name": "Pushpal"
   }
 }
