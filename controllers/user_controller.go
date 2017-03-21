@@ -14,22 +14,26 @@ import (
 	"html/template"
 	"github.com/dernise/base-api/services"
 	"github.com/sendgrid/rest"
+	"io/ioutil"
+	"github.com/spf13/viper"
+	"errors"
 )
 
 
 type UserController struct {
 	mgo    *mgo.Database
 	emailSender services.EmailSender
+	config *viper.Viper
 }
 
 
-func NewUserController(mgo *mgo.Database, emailSender services.EmailSender) *UserController {
+func NewUserController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper) *UserController {
 	return &UserController{
 		mgo,
 		emailSender,
+		config,
 	}
 }
-
 func (uc UserController) GetUser(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
@@ -127,14 +131,29 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 }
 
 func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response, error) {
-	subject := "Welcome to base! Confirm your email"
+	servername := uc.config.GetString("sendgrid.name")
+	//hostname := uc.config.GetString("host.address")
+
+	subject := "Welcome to " + servername + "! Account confirmation"
+
 	to := mail.NewEmail(user.Firstname, user.Email)
 
-	url := "Please confirm your email address by clicking on the following link: http://localhost:4000/users/{{.Id.Hex}}/activate/{{.ActivationKey}}"
 	buffer := new(bytes.Buffer)
-	template := template.Must(template.New("emailTemplate").Parse(url))
+
+	fil, err := ioutil.ReadFile("./services/mail_confirm_account.html")
+	str := string(fil)
+	str_length := len(str)
+
+	if err != nil || str_length == 0 {
+		errors.New("Error openning template mail confirm account")
+	}
+	template := template.Must(template.New("emailTemplate").Parse(str))
+
 	template.Execute(buffer, user)
 
-	response, err := uc.emailSender.SendEmail([]*mail.Email{ to }, "text/plain", subject, buffer.String())
+	response, err := uc.emailSender.SendEmail([]*mail.Email{ to }, "text/html", subject, buffer.String())
 	return response, err
 }
+
+//TODO: func (uc UserController) SendResetPasswordEmail(user *models.User) (*rest.Response, error)
+//TODO: func (uc UserController) ResetPassword(c *gin.Context)
