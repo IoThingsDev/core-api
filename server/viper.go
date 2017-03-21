@@ -6,7 +6,7 @@ func (a API) SetupViper(env string) error {
 		a.Config.AddConfigPath(".")
 	} else if env == "test" {
 		a.Config.SetConfigName("conf.test")
-		a.Config.AddConfigPath("..")  // TODO: REFACTOR THIS
+		a.Config.AddConfigPath("..") // TODO: REFACTOR THIS
 	}
 	a.Config.SetConfigType("json")
 	err := a.Config.ReadInConfig()

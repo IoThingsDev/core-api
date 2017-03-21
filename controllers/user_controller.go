@@ -1,21 +1,21 @@
 package controllers
 
 import (
-	"gopkg.in/gin-gonic/gin.v1"
-	"net/http"
-	"gopkg.in/mgo.v2"
-	"github.com/dernise/base-api/models"
-	"gopkg.in/mgo.v2/bson"
-	"golang.org/x/crypto/bcrypt"
+	"bytes"
 	"github.com/asaskevich/govalidator"
 	"github.com/dernise/base-api/helpers"
-	"bytes"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"html/template"
+	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
 	"github.com/sendgrid/rest"
+	"gopkg.in/mgo.v2"
 	"io/ioutil"
 	"github.com/spf13/viper"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/gin-gonic/gin.v1"
+	"gopkg.in/mgo.v2/bson"
+	"html/template"
+	"net/http"
 )
 
 type UserController struct {
@@ -37,7 +37,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
 	user := models.User{}
-	err := users.Find(bson.M{"_id": bson.ObjectIdHex(c.Param("id"))}).One(&user)
+	err := users.FindId(bson.ObjectIdHex(c.Param("id"))).One(&user)
 
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User not found"))
@@ -81,6 +81,8 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	user.Active = false
 	user.ActivationKey = helpers.RandomString(20)
+
+	user.StripeId = ""
 
 	user.Id = bson.NewObjectId()
 

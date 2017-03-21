@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"gopkg.in/gin-gonic/gin.v1"
 	"github.com/dernise/base-api/helpers"
+	"gopkg.in/gin-gonic/gin.v1"
 )
 
 func ErrorMiddleware() gin.HandlerFunc {
@@ -16,13 +16,13 @@ func ErrorMiddleware() gin.HandlerFunc {
 				c.JSON(-1, gin.H{
 					"status":  "error",
 					"message": original.Message,
-					"code": original.Code,
+					"code":    original.Code,
 				})
 			} else {
 				c.JSON(-1, gin.H{
 					"status":  "error",
 					"message": errorToPrint.Error(),
-					"code": "unknown",
+					"code":    "unknown",
 				})
 			}
 		}

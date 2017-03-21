@@ -1,9 +1,9 @@
 package services
 
 import (
+	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"github.com/sendgrid/rest"
 	"github.com/spf13/viper"
 	"os"
 )

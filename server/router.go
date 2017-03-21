@@ -1,9 +1,9 @@
 package server
 
 import (
-	"gopkg.in/gin-gonic/gin.v1"
 	"github.com/dernise/base-api/controllers"
 	"github.com/dernise/base-api/middlewares"
+	"gopkg.in/gin-gonic/gin.v1"
 	"net/http"
 )
 
@@ -34,10 +34,14 @@ func (a API) SetupRouter() {
 			authentication.POST("/", authController.Authentication)
 		}
 
-		authorized := v1.Group("/authorized").Use(middlewares.AuthMiddleware())
+		authorized := v1.Group("/authorized")
 		{
-			authorized.GET("/", Index)
+			authorized.Use(middlewares.AuthMiddleware())
+			billing := authorized.Group("/billing")
+			{
+				billingController := controllers.NewBillingController(a.Database, a.EmailSender)
+				billing.POST("/", billingController.CreateTransaction)
+			}
 		}
 	}
 }
-

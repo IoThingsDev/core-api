@@ -1,9 +1,9 @@
 package server
 
 import (
-	"os"
-	"github.com/joho/godotenv"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"os"
 )
 
 func (a API) LoadEnvVariables() error {
@@ -18,7 +18,7 @@ func (a API) LoadEnvVariables() error {
 		filename = ".env"
 		gin.SetMode(gin.ReleaseMode)
 	} else {
-		filename = ".env."+env
+		filename = ".env." + env
 		gin.SetMode(gin.TestMode)
 	}
 
