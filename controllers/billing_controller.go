@@ -53,6 +53,7 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 		user.StripeId, err = bc.CreateCustomer(&user, users, transaction.CardToken)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
+			return
 		}
 	}
 
