@@ -5,14 +5,14 @@ import (
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
 	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/charge"
+	"github.com/stripe/stripe-go/currency"
 	"github.com/stripe/stripe-go/customer"
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"os"
-	"github.com/stripe/stripe-go/charge"
-	"github.com/stripe/stripe-go/currency"
 	"time"
 )
 
@@ -57,7 +57,7 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	}
 
 	chargeParams := &stripe.ChargeParams{
-		Amount: transaction.Amount,
+		Amount:   transaction.Amount,
 		Currency: currency.EUR,
 		Customer: user.StripeId,
 	}
