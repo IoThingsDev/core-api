@@ -131,8 +131,14 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 }
 
 func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response, error) {
-	servername := uc.config.GetString("sendgrid.name")
-	//hostname := uc.config.GetString("host.address")
+	type data struct {
+		User *models.User
+		HostAddress string
+		AppName string
+	}
+	servername := uc.config.GetString("sendgrid.address")
+	appname := uc.config.GetString("sendgrid.name")
+	hostname := uc.config.GetString("host.address")
 
 	subject := "Welcome to " + servername + "! Account confirmation"
 
@@ -140,16 +146,17 @@ func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response,
 
 	buffer := new(bytes.Buffer)
 
-	fil, err := ioutil.ReadFile("./services/mail_confirm_account.html")
+	fil, err := ioutil.ReadFile("./templates/mail_confirm_account.html")
 	str := string(fil)
-	str_length := len(str)
 
-	if err != nil || str_length == 0 {
+	if err != nil || len(str) == 0 {
 		errors.New("Error openning template mail confirm account")
 	}
 	template := template.Must(template.New("emailTemplate").Parse(str))
 
-	template.Execute(buffer, user)
+	datasPass := data{User:user, HostAddress:hostname, AppName:appname}
+
+	template.Execute(buffer, datasPass)
 
 	response, err := uc.emailSender.SendEmail([]*mail.Email{ to }, "text/html", subject, buffer.String())
 	return response, err
