@@ -19,13 +19,11 @@ import (
 	"errors"
 )
 
-
 type UserController struct {
-	mgo    *mgo.Database
+	mgo         *mgo.Database
 	emailSender services.EmailSender
-	config *viper.Viper
+	config      *viper.Viper
 }
-
 
 func NewUserController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper) *UserController {
 	return &UserController{
@@ -43,7 +41,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 	err := users.Find(bson.M{"_id": bson.ObjectIdHex(c.Param("id"))}).One(&user)
 
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found","User not found"))
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User not found"))
 		return
 	}
 
@@ -58,7 +56,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	user := models.User{}
 	err := c.Bind(&user)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input","Failed to bind the body data"))
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
 		return
 	}
 
@@ -70,7 +68,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	count, _ := users.Find(bson.M{"email": user.Email}).Count()
 	if count > 0 {
-		c.AbortWithError(http.StatusConflict, helpers.ErrorWithCode("user_already_exists","User already exists"))
+		c.AbortWithError(http.StatusConflict, helpers.ErrorWithCode("user_already_exists", "User already exists"))
 		return
 	}
 
@@ -78,7 +76,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("encryption_failed","Failed to generate the encrypted password"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("encryption_failed", "Failed to generate the encrypted password"))
 		return
 	}
 
@@ -89,7 +87,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	err = users.Insert(user)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("creation_failed","Failed to insert the user"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("creation_failed", "Failed to insert the user"))
 		return
 	}
 
@@ -106,7 +104,7 @@ func (uc UserController) GetUsers(c *gin.Context) {
 	list := []models.User{}
 	err := users.Find(nil).All(&list)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found","Users not found"))
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "Users not found"))
 		return
 	}
 
@@ -131,34 +129,34 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 }
 
 func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response, error) {
-	type data struct {
-		User *models.User
+	type Data struct {
+		User        *models.User
 		HostAddress string
-		AppName string
+		AppName     string
 	}
-	servername := uc.config.GetString("sendgrid.address")
-	appname := uc.config.GetString("sendgrid.name")
+
+	serverName := uc.config.GetString("sendgrid.address")
+	appName := uc.config.GetString("sendgrid.name")
 	hostname := uc.config.GetString("host.address")
 
-	subject := "Welcome to " + servername + "! Account confirmation"
+	subject := "Welcome to " + serverName + "! Account confirmation"
 
 	to := mail.NewEmail(user.Firstname, user.Email)
 
 	buffer := new(bytes.Buffer)
 
-	fil, err := ioutil.ReadFile("./templates/mail_confirm_account.html")
-	str := string(fil)
+	file, err := ioutil.ReadFile("./templates/mail_confirm_account.html")
 
-	if err != nil || len(str) == 0 {
-		errors.New("Error openning template mail confirm account")
+	if err != nil || len(string(file)) == 0 {
+		return nil, err
 	}
-	template := template.Must(template.New("emailTemplate").Parse(str))
+	
+	htmlTemplate := template.Must(template.New("emailTemplate").Parse(string(file)))
+	data := Data{User: user, HostAddress: hostname, AppName: appName}
+	htmlTemplate.Execute(buffer, data)
 
-	datasPass := data{User:user, HostAddress:hostname, AppName:appname}
+	response, err := uc.emailSender.SendEmail([]*mail.Email{to }, "text/html", subject, buffer.String())
 
-	template.Execute(buffer, datasPass)
-
-	response, err := uc.emailSender.SendEmail([]*mail.Email{ to }, "text/html", subject, buffer.String())
 	return response, err
 }
 
