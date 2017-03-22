@@ -65,18 +65,18 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	charge, err := charge.New(chargeParams)
 	if err != nil {
 		transaction.Error = err.Error()
-		transaction.Status = false
+		transaction.Failed = false
 	} else if charge.Status != "succeeded" {
 		transaction.Error = charge.FailCode
-		transaction.Status = false
+		transaction.Failed = false
 	} else {
-		transaction.Status = true
+		transaction.Failed = true
 	}
 
 	transaction.Date = time.Now()
 	transactions.Insert(transaction)
 
-	if transaction.Status == false {
+	if transaction.Failed == false {
 		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("payment_failed", "The payment failed"))
 		return
 	} else {
