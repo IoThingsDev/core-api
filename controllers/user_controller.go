@@ -147,10 +147,10 @@ func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response,
 
 	file, err := ioutil.ReadFile("./templates/mail_confirm_account.html")
 
-	if err != nil || len(string(file)) == 0 {
+	if err != nil {
 		return nil, err
 	}
-	
+
 	htmlTemplate := template.Must(template.New("emailTemplate").Parse(string(file)))
 	data := Data{User: user, HostAddress: hostname, AppName: appName}
 	htmlTemplate.Execute(buffer, data)
