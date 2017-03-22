@@ -16,7 +16,6 @@ import (
 	"github.com/sendgrid/rest"
 	"io/ioutil"
 	"github.com/spf13/viper"
-	"errors"
 )
 
 type UserController struct {
