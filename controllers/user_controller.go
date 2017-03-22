@@ -134,11 +134,10 @@ func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response,
 		AppName     string
 	}
 
-	serverName := uc.config.GetString("sendgrid.address")
 	appName := uc.config.GetString("sendgrid.name")
 	hostname := uc.config.GetString("host.address")
 
-	subject := "Welcome to " + serverName + "! Account confirmation"
+	subject := "Welcome to " + appName + "! Account confirmation"
 
 	to := mail.NewEmail(user.Firstname, user.Email)
 
