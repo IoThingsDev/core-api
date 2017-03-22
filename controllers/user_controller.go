@@ -14,22 +14,23 @@ import (
 	"html/template"
 	"github.com/dernise/base-api/services"
 	"github.com/sendgrid/rest"
+	"io/ioutil"
+	"github.com/spf13/viper"
 )
 
-
 type UserController struct {
-	mgo    *mgo.Database
+	mgo         *mgo.Database
 	emailSender services.EmailSender
+	config      *viper.Viper
 }
 
-
-func NewUserController(mgo *mgo.Database, emailSender services.EmailSender) *UserController {
+func NewUserController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper) *UserController {
 	return &UserController{
 		mgo,
 		emailSender,
+		config,
 	}
 }
-
 func (uc UserController) GetUser(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
@@ -39,7 +40,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 	err := users.Find(bson.M{"_id": bson.ObjectIdHex(c.Param("id"))}).One(&user)
 
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found","User not found"))
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User not found"))
 		return
 	}
 
@@ -54,7 +55,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	user := models.User{}
 	err := c.Bind(&user)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input","Failed to bind the body data"))
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
 		return
 	}
 
@@ -66,7 +67,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	count, _ := users.Find(bson.M{"email": user.Email}).Count()
 	if count > 0 {
-		c.AbortWithError(http.StatusConflict, helpers.ErrorWithCode("user_already_exists","User already exists"))
+		c.AbortWithError(http.StatusConflict, helpers.ErrorWithCode("user_already_exists", "User already exists"))
 		return
 	}
 
@@ -74,7 +75,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("encryption_failed","Failed to generate the encrypted password"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("encryption_failed", "Failed to generate the encrypted password"))
 		return
 	}
 
@@ -85,7 +86,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	err = users.Insert(user)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("creation_failed","Failed to insert the user"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("creation_failed", "Failed to insert the user"))
 		return
 	}
 
@@ -102,7 +103,7 @@ func (uc UserController) GetUsers(c *gin.Context) {
 	list := []models.User{}
 	err := users.Find(nil).All(&list)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found","Users not found"))
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "Users not found"))
 		return
 	}
 
@@ -127,14 +128,35 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 }
 
 func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response, error) {
-	subject := "Welcome to base! Confirm your email"
+	type Data struct {
+		User        *models.User
+		HostAddress string
+		AppName     string
+	}
+
+	appName := uc.config.GetString("sendgrid.name")
+	hostname := uc.config.GetString("host.address")
+
+	subject := "Welcome to " + appName + "! Account confirmation"
+
 	to := mail.NewEmail(user.Firstname, user.Email)
 
-	url := "Please confirm your email address by clicking on the following link: http://localhost:4000/users/{{.Id.Hex}}/activate/{{.ActivationKey}}"
 	buffer := new(bytes.Buffer)
-	template := template.Must(template.New("emailTemplate").Parse(url))
-	template.Execute(buffer, user)
 
-	response, err := uc.emailSender.SendEmail([]*mail.Email{ to }, "text/plain", subject, buffer.String())
+	file, err := ioutil.ReadFile("./templates/mail_confirm_account.html")
+
+	if err != nil {
+		return nil, err
+	}
+
+	htmlTemplate := template.Must(template.New("emailTemplate").Parse(string(file)))
+	data := Data{User: user, HostAddress: hostname, AppName: appName}
+	htmlTemplate.Execute(buffer, data)
+
+	response, err := uc.emailSender.SendEmail([]*mail.Email{to }, "text/html", subject, buffer.String())
+
 	return response, err
 }
+
+//TODO: func (uc UserController) SendResetPasswordEmail(user *models.User) (*rest.Response, error)
+//TODO: func (uc UserController) ResetPassword(c *gin.Context)
