@@ -1,8 +1,9 @@
 package server
 
 import (
-	"github.com/joho/godotenv"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func (a API) SetupViper() {
@@ -11,6 +12,8 @@ func (a API) SetupViper() {
 
 	if env == "testing" {
 		filename = "../.env.testing"
+	} else if env == "prod" {
+		filename = ".env.prod"
 	} else {
 		filename = ".env"
 	}
