@@ -11,3 +11,7 @@ go_import_path: github.com/dernise/base-api
   
 notifications:
   email: false
+
+before_install:
+  - openssl genrsa -out base.rsa 1024
+  - openssl rsa -in base.rsa -pubout > base.rsa.pub
