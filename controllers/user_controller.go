@@ -92,6 +92,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	user.Active = false
 	user.ActivationKey = helpers.RandomString(20)
+	user.ResetKey = helpers.RandomString(20)
 
 	user.StripeId = ""
 
@@ -113,10 +114,10 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 	defer session.Close()
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
-	key := c.Param("key")
 	userId := c.Param("id")
+	activationKey := c.Param("activationKey")
 
-	err := users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"activationKey": key}}}, bson.M{"$set": bson.M{"active": true}})
+	err := users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"activationKey": activationKey}}}, bson.M{"$set": bson.M{"active": true}})
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("activation_failed", "Couldn't find the user to activate"))
 		return
@@ -125,6 +126,7 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User has been activated"})
 }
 
+//Checks for a user that matches an email, and send a reset mail
 func (uc UserController) ResetPasswordRequest(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
@@ -148,6 +150,28 @@ func (uc UserController) ResetPasswordRequest(c *gin.Context) {
 	uc.SendResetPasswordRequestEmail(&user)
 }
 
+//GET userid & resetKey to be able to change password
+func (uc UserController) ControlResetKey(c *gin.Context) {
+	session := uc.mgo.Session.Copy()
+	defer session.Close()
+	users := uc.mgo.C(models.UsersCollection).With(session)
+
+	userId := c.Param("id")
+	resetKey := c.Param("resetKey")
+
+	err := users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"resetKey": resetKey}}}, bson.M{"$set": bson.M{"active": true}})
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("activation_failed", "Couldn't find the user to reset"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User can change his password"})
+}
+
+//POST userid, resetKey and new password to change them
+func (uc UserController) ResetPassword(c *gin.Context) {
+
+}
 
 func (uc UserController) SendActivationEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
@@ -158,14 +182,14 @@ func (uc UserController) SendActivationEmail(user *models.User) {
 
 func (uc UserController) SendResetPasswordRequestEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
-	subject := "Reset your " + appName + "Account password"
+	subject := "Reset your " + appName + " Account password"
 	templateLink := "./templates/mail_reset_password_request.html"
 	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
 }
 
 func (uc UserController) SendResetPasswordDoneEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
-	subject := "Your " + appName + "has been reset"
+	subject := "Your " + appName + " has been reset"
 	templateLink := "./templates/mail_reset_password_done.html"
 	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
 }
