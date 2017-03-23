@@ -42,6 +42,22 @@ func (uc UserController) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": user})
 }
 
+
+func (uc UserController) GetUsers(c *gin.Context) {
+	session := uc.mgo.Session.Copy()
+	defer session.Close()
+	users := uc.mgo.C(models.UsersCollection).With(session)
+
+	list := []models.User{}
+	err := users.Find(nil).All(&list)
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "Users not found"))
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"status": "success", "data": list})
+}
+
 func (uc UserController) CreateUser(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
@@ -92,21 +108,6 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"status": "success", "message": "User created"})
 }
 
-func (uc UserController) GetUsers(c *gin.Context) {
-	session := uc.mgo.Session.Copy()
-	defer session.Close()
-	users := uc.mgo.C(models.UsersCollection).With(session)
-
-	list := []models.User{}
-	err := users.Find(nil).All(&list)
-	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "Users not found"))
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"status": "success", "data": list})
-}
-
 func (uc UserController) ActivateUser(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
@@ -124,6 +125,30 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User has been activated"})
 }
 
+func (uc UserController) ResetPasswordRequest(c *gin.Context) {
+	session := uc.mgo.Session.Copy()
+	defer session.Close()
+	users := uc.mgo.C(models.UsersCollection).With(session)
+
+
+	user := models.User{}
+	err := c.Bind(&user)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
+		return
+	}
+
+	err = users.Find(bson.M{"email": user.Email}).One(&user)
+
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User not found"))
+		return
+	}
+
+	uc.SendResetPasswordRequestEmail(&user)
+}
+
+
 func (uc UserController) SendActivationEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
 	subject := "Welcome to " + appName + "! Account confirmation"
@@ -135,5 +160,12 @@ func (uc UserController) SendResetPasswordRequestEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
 	subject := "Reset your " + appName + "Account password"
 	templateLink := "./templates/mail_reset_password_request.html"
+	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
+}
+
+func (uc UserController) SendResetPasswordDoneEmail(user *models.User) {
+	appName := uc.config.GetString("sendgrid_name")
+	subject := "Your " + appName + "has been reset"
+	templateLink := "./templates/mail_reset_password_done.html"
 	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
 }
