@@ -5,6 +5,8 @@ go:
 
 services: mongodb
 
+script: BASEAPI_ENV=testing go test ./...
+
 go_import_path: github.com/dernise/base-api
   
 notifications:
