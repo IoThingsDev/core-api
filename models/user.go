@@ -12,6 +12,7 @@ type User struct {
 	Email         string        `json:"email" bson:"email" valid:"email,required"`
 	Active        bool          `json:"active" bson:"active" valid:"-"`
 	ActivationKey string        `json:"activationKey" bson:"activationKey" valid:"-"`
+	ResetKey      string        `json:"resetKey" bson:"resetKey" valid:"-"`
 	StripeId      string        `json:"stripeId" bson:"stripeId" valid:"-"`
 }
 
