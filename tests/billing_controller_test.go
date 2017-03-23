@@ -1,9 +1,10 @@
 package tests
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateTransaction(t *testing.T) {
@@ -15,7 +16,7 @@ func TestCreateTransaction(t *testing.T) {
 	parameters := []byte(`
 	{
 		"userId":"` + user.Id.Hex() + `",
-		"amount":1000
+		"amount":100
 	}`)
 
 	resp := SendRequestWithToken(api, parameters, "POST", "/v1/authorized/billing/", jwtToken)
