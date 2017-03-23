@@ -9,7 +9,7 @@ import (
 )
 
 func TestCreateAccount(t *testing.T) {
-	api := SetupRouterAndDatabase()
+	api := SetupApi()
 	defer api.Database.Session.Close()
 
 	//Missing field

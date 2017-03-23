@@ -30,7 +30,7 @@ func (a API) SetupRouter() {
 
 		authentication := v1.Group("/auth")
 		{
-			authController := controllers.NewAuthController(a.Database)
+			authController := controllers.NewAuthController(a.Database, a.Config)
 			authentication.POST("/", authController.Authentication)
 		}
 
@@ -39,7 +39,7 @@ func (a API) SetupRouter() {
 			authorized.Use(middlewares.AuthMiddleware())
 			billing := authorized.Group("/billing")
 			{
-				billingController := controllers.NewBillingController(a.Database, a.EmailSender)
+				billingController := controllers.NewBillingController(a.Database, a.EmailSender, a.Config)
 				billing.POST("/", billingController.CreateTransaction)
 			}
 		}

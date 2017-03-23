@@ -4,6 +4,7 @@ import (
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
+	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/currency"
@@ -12,19 +13,20 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
-	"os"
 	"time"
 )
 
 type BillingController struct {
 	mgo         *mgo.Database
 	emailSender services.EmailSender
+	config      *viper.Viper
 }
 
-func NewBillingController(mgo *mgo.Database, emailSender services.EmailSender) *BillingController {
+func NewBillingController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper) *BillingController {
 	return &BillingController{
 		mgo,
 		emailSender,
+		config,
 	}
 }
 
@@ -34,7 +36,7 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	transactions := bc.mgo.C(models.TransactionsCollection).With(session)
 	users := bc.mgo.C(models.UsersCollection).With(session)
 
-	stripe.Key = os.Getenv("STRIPE_API_KEY")
+	stripe.Key = bc.config.GetString("stripe_api_key")
 
 	transaction := models.Transaction{}
 	err := c.Bind(&transaction)
@@ -52,7 +54,7 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	if user.StripeId == "" {
 		user.StripeId, err = bc.CreateCustomer(&user, users, transaction.CardToken)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
+			c.AbortWithError(http.StatusInternalServerError, err) //helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
 			return
 		}
 	}

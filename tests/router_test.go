@@ -9,7 +9,7 @@ import (
 )
 
 func TestHomePage(t *testing.T) {
-	api := SetupRouterAndDatabase()
+	api := SetupApi()
 	defer api.Database.Session.Close()
 
 	req, err := http.NewRequest("GET", "/v1/", nil)

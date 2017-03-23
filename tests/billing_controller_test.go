@@ -1,24 +1,23 @@
 package tests
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"testing"
 )
 
-func testCreateTransaction(t *testing.T) {
-	api := SetupRouterAndDatabase()
+func TestCreateTransaction(t *testing.T) {
+	api := SetupApi()
 	defer api.Database.Session.Close()
 
-	TestCreateAccount(t)
+	user, jwtToken := CreateUserAndGenerateToken(api)
 
 	parameters := []byte(`
 	{
-		"userId":"58d12bfe373d36799a0cf187",
-		"amount":1000,
-		"cardToken":"tok_1A05hsAPpGNju8w2s6LHtFYG"
+		"userId":"` + user.Id.Hex() + `",
+		"amount":1000
 	}`)
 
-	resp := SendRequest(api, parameters, "POST", "/v1/authorized/billing")
-	assert.Equal(t, resp.Code, http.StatusBadRequest)
+	resp := SendRequestWithToken(api, parameters, "POST", "/v1/authorized/billing/", jwtToken)
+	assert.Equal(t, http.StatusOK, resp.Code)
 }

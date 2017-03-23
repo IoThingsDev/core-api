@@ -7,33 +7,24 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
-	"os"
 )
 
 func main() {
 	api := server.API{Router: gin.Default(), Config: viper.New()}
 
-	err := api.LoadEnvVariables()
-	if err != nil {
-		panic(err)
-	}
-
-	err = api.SetupViper("prod")
-	if err != nil {
-		panic(err)
-	}
+	api.SetupViper()
 
 	api.EmailSender = services.NewSendGridEmailSender(api.Config)
 
-	session, err := mgo.Dial(os.Getenv("DB_HOST"))
+	session, err := mgo.Dial(api.Config.GetString("db_host"))
 	if err != nil {
 		panic(err)
 	}
 	defer session.Close()
-	api.Database = session.DB(os.Getenv("DB_NAME"))
+	api.Database = session.DB(api.Config.GetString("db_name"))
 
 	govalidator.SetFieldsRequiredByDefault(true)
 
 	api.SetupRouter()
-	api.Router.Run(api.Config.GetString("host.address"))
+	api.Router.Run(api.Config.GetString("host_address"))
 }

@@ -6,6 +6,7 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -19,7 +20,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		publicKeyFile, _ := ioutil.ReadFile("base.rsa.pub")
+		publicKeyFile, _ := ioutil.ReadFile(os.Getenv("BASEAPI_RSA_PUBLIC"))
 		publicKey, _ := jwt.ParseRSAPublicKeyFromPEM(publicKeyFile)
 
 		token, err := jwt.Parse(authHeaderParts[1], func(token *jwt.Token) (interface{}, error) {
