@@ -1,11 +1,10 @@
 package services
 
 import (
+	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"github.com/sendgrid/rest"
 	"github.com/spf13/viper"
-	"os"
 )
 
 type EmailSender interface {
@@ -20,9 +19,9 @@ type SendGridEmailSender struct {
 
 func NewSendGridEmailSender(config *viper.Viper) EmailSender {
 	return &SendGridEmailSender{
-		config.GetString("sendgrid.address"),
-		config.GetString("sendgrid.name"),
-		os.Getenv("SENDGRID_API_KEY"),
+		config.GetString("sendgrid_address"),
+		config.GetString("sendgrid_name"),
+		config.GetString("sendgrid_api_key"),
 	}
 }
 

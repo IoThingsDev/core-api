@@ -5,7 +5,7 @@ import (
 )
 
 type Error struct {
-	Code string `json:"code"`
+	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 
@@ -14,5 +14,5 @@ func (e Error) Error() string {
 }
 
 func ErrorWithCode(code string, message string) error {
-	return Error{ Code: code, Message: message }
+	return Error{Code: code, Message: message}
 }

@@ -1,31 +1,33 @@
 package controllers
 
 import (
-	"gopkg.in/mgo.v2"
-	"gopkg.in/gin-gonic/gin.v1"
+	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
-	"gopkg.in/mgo.v2/bson"
-	"golang.org/x/crypto/bcrypt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/spf13/viper"
+	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/gin-gonic/gin.v1"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"net/http"
 	"time"
-	"github.com/dernise/base-api/helpers"
 )
 
 type AuthController struct {
-	mgo *mgo.Database
+	mgo    *mgo.Database
+	config *viper.Viper
 }
 
-func NewAuthController(mgo *mgo.Database) *AuthController {
+func NewAuthController(mgo *mgo.Database, config *viper.Viper) *AuthController {
 	return &AuthController{
 		mgo,
+		config,
 	}
 }
 
-
 func (ac AuthController) Authentication(c *gin.Context) {
-	privateKeyFile, _ := ioutil.ReadFile("base.rsa")
+	privateKeyFile, _ := ioutil.ReadFile(ac.config.GetString("rsa_private"))
 	privateKey, _ := jwt.ParseRSAPrivateKeyFromPEM(privateKeyFile)
 
 	session := ac.mgo.Session.Copy()
@@ -36,7 +38,7 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	c.Bind(&userInput) // TODO: HANDLE ERROR
 
 	user := models.User{}
-	err := users.Find(bson.M{"$or": []bson.M{{"username":userInput.Username}, {"email": userInput.Email}}}).One(&user)
+	err := users.Find(bson.M{"email": userInput.Email}).One(&user)
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User does not exist"))
 		return
@@ -49,7 +51,7 @@ func (ac AuthController) Authentication(c *gin.Context) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInput.Password))
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, helpers.ErrorWithCode("incorrect_password","Password is not correct"))
+		c.AbortWithError(http.StatusUnauthorized, helpers.ErrorWithCode("incorrect_password", "Password is not correct"))
 		return
 	}
 
@@ -62,5 +64,5 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	token.Claims = claims
 	tokenString, err := token.SignedString(privateKey)
 
-	c.JSON(http.StatusOK, gin.H{"status":"success", "data":gin.H{"token":tokenString}})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"token": tokenString}})
 }

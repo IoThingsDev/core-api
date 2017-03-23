@@ -1,17 +1,15 @@
 package tests
 
 import (
-	"testing"
 	"fmt"
-	"net/http/httptest"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
-
-
 func TestHomePage(t *testing.T) {
-	api := SetupRouterAndDatabase()
+	api := SetupApi()
 	defer api.Database.Session.Close()
 
 	req, err := http.NewRequest("GET", "/v1/", nil)

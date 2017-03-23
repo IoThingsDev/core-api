@@ -1,21 +1,21 @@
 package controllers
 
 import (
-	"gopkg.in/gin-gonic/gin.v1"
-	"net/http"
-	"gopkg.in/mgo.v2"
-	"github.com/dernise/base-api/models"
-	"gopkg.in/mgo.v2/bson"
-	"golang.org/x/crypto/bcrypt"
+	"bytes"
 	"github.com/asaskevich/govalidator"
 	"github.com/dernise/base-api/helpers"
-	"bytes"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"html/template"
+	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
 	"github.com/sendgrid/rest"
-	"io/ioutil"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/spf13/viper"
+	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/gin-gonic/gin.v1"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+	"html/template"
+	"io/ioutil"
+	"net/http"
 )
 
 type UserController struct {
@@ -37,7 +37,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
 	user := models.User{}
-	err := users.Find(bson.M{"_id": bson.ObjectIdHex(c.Param("id"))}).One(&user)
+	err := users.FindId(bson.ObjectIdHex(c.Param("id"))).One(&user)
 
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User not found"))
@@ -82,15 +82,17 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	user.Active = false
 	user.ActivationKey = helpers.RandomString(20)
 
+	user.StripeId = ""
+
 	user.Id = bson.NewObjectId()
+
+	uc.SendActivationEmail(&user)
 
 	err = users.Insert(user)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("creation_failed", "Failed to insert the user"))
 		return
 	}
-
-	uc.SendActivationEmail(&user)
 
 	c.JSON(http.StatusCreated, gin.H{"status": "success", "message": "User created"})
 }
@@ -134,8 +136,8 @@ func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response,
 		AppName     string
 	}
 
-	appName := uc.config.GetString("sendgrid.name")
-	hostname := uc.config.GetString("host.address")
+	appName := uc.config.GetString("sendgrid_name")
+	hostAdress := uc.config.GetString("host_address")
 
 	subject := "Welcome to " + appName + "! Account confirmation"
 
@@ -150,10 +152,13 @@ func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response,
 	}
 
 	htmlTemplate := template.Must(template.New("emailTemplate").Parse(string(file)))
-	data := Data{User: user, HostAddress: hostname, AppName: appName}
-	htmlTemplate.Execute(buffer, data)
+	data := Data{User: user, HostAddress: hostAdress, AppName: appName}
+	err = htmlTemplate.Execute(buffer, data)
+	if err != nil {
+		return nil, err
+	}
 
-	response, err := uc.emailSender.SendEmail([]*mail.Email{to }, "text/html", subject, buffer.String())
+	response, err := uc.emailSender.SendEmail([]*mail.Email{to}, "text/html", subject, buffer.String())
 
 	return response, err
 }

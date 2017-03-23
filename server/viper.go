@@ -1,14 +1,25 @@
 package server
 
-func (a API) SetupViper(env string) error {
-	if env == "prod" {
-		a.Config.SetConfigName("conf")
-		a.Config.AddConfigPath(".")
-	} else if env == "test" {
-		a.Config.SetConfigName("conf.test")
-		a.Config.AddConfigPath("..")  // TODO: REFACTOR THIS
+import (
+	"github.com/joho/godotenv"
+	"os"
+)
+
+func (a API) SetupViper() {
+	var filename string
+	env := os.Getenv("BASEAPI_ENV")
+
+	if env == "testing" {
+		filename = "../.env.testing"
+	} else {
+		filename = ".env"
 	}
-	a.Config.SetConfigType("json")
-	err := a.Config.ReadInConfig()
-	return err
+
+	err := godotenv.Overload(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	a.Config.SetEnvPrefix("baseapi")
+	a.Config.AutomaticEnv()
 }

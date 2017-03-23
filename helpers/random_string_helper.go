@@ -1,8 +1,8 @@
 package helpers
 
 import (
-	"time"
 	"math/rand"
+	"time"
 )
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
