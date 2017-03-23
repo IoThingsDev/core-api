@@ -5,16 +5,22 @@ import (
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/spf13/viper"
+	"io/ioutil"
+	"github.com/dernise/base-api/models"
+	"bytes"
+	"html/template"
 )
 
 type EmailSender interface {
 	SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error)
+	SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error)
 }
 
 type SendGridEmailSender struct {
 	senderEmail string
 	senderName  string
 	apiKey      string
+	baseUrl	    string
 }
 
 func NewSendGridEmailSender(config *viper.Viper) EmailSender {
@@ -22,6 +28,7 @@ func NewSendGridEmailSender(config *viper.Viper) EmailSender {
 		config.GetString("sendgrid_address"),
 		config.GetString("sendgrid_name"),
 		config.GetString("sendgrid_api_key"),
+		config.GetString("base_url"),
 	}
 }
 
@@ -45,5 +52,35 @@ func (s *SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, 
 	request.Method = "POST"
 	request.Body = mail.GetRequestBody(m)
 	response, err := sendgrid.API(request)
+	return response, err
+}
+
+
+func  (s *SendGridEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
+	type Data struct {
+		User        *models.User
+		HostAddress string
+		AppName     string
+	}
+
+	to := mail.NewEmail(user.Firstname, user.Email)
+
+	buffer := new(bytes.Buffer)
+
+	file, err := ioutil.ReadFile(templateLink)
+
+	if err != nil {
+		return nil, err
+	}
+
+	htmlTemplate := template.Must(template.New("emailTemplate").Parse(string(file)))
+	data := Data{User: user, HostAddress: s.baseUrl, AppName: s.senderName}
+	err = htmlTemplate.Execute(buffer, data)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := s.SendEmail([]*mail.Email{to}, "text/html", subject, buffer.String())
+
 	return response, err
 }
