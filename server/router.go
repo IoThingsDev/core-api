@@ -25,8 +25,9 @@ func (a API) SetupRouter() {
 			users.GET("/", userController.GetUsers)
 			users.GET("/:id", userController.GetUser)
 			users.POST("/", userController.CreateUser)
-			users.GET("/:id/activate/:key", userController.ActivateUser)
+			users.GET("/:id/activate/:activationKey", userController.ActivateUser)
 			users.POST("/requestReset", userController.ResetPasswordRequest)
+			users.GET("/:id/reset/:resetKey", userController.ControlResetKey)
 		}
 
 		authentication := v1.Group("/auth")
