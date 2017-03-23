@@ -1,20 +1,15 @@
 package controllers
 
 import (
-	"bytes"
 	"github.com/asaskevich/govalidator"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
-	"github.com/sendgrid/rest"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"html/template"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -129,39 +124,16 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User has been activated"})
 }
 
-func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response, error) {
-	type Data struct {
-		User        *models.User
-		HostAddress string
-		AppName     string
-	}
-
+func (uc UserController) SendActivationEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
-	baseUrl := uc.config.GetString("base_url")
-
 	subject := "Welcome to " + appName + "! Account confirmation"
-
-	to := mail.NewEmail(user.Firstname, user.Email)
-
-	buffer := new(bytes.Buffer)
-
-	file, err := ioutil.ReadFile("./templates/mail_confirm_account.html")
-
-	if err != nil {
-		return nil, err
-	}
-
-	htmlTemplate := template.Must(template.New("emailTemplate").Parse(string(file)))
-	data := Data{User: user, HostAddress: baseUrl, AppName: appName}
-	err = htmlTemplate.Execute(buffer, data)
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := uc.emailSender.SendEmail([]*mail.Email{to}, "text/html", subject, buffer.String())
-
-	return response, err
+	templateLink := "./templates/mail_activate_account.html"
+	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
 }
 
-//TODO: func (uc UserController) SendResetPasswordEmail(user *models.User) (*rest.Response, error)
-//TODO: func (uc UserController) ResetPassword(c *gin.Context)
+func (uc UserController) SendResetPasswordRequestEmail(user *models.User) {
+	appName := uc.config.GetString("sendgrid_name")
+	subject := "Reset your " + appName + "Account password"
+	templateLink := "./templates/mail_reset_password_request.html"
+	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
+}
