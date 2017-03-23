@@ -17,6 +17,7 @@ RUN go get -t -v ./...
 RUN go install github.com/dernise/base-api
 
 ENV GIN_MODE release
+ENV BASEAPI_ENV prod
 
 # Run the outyet command by default when the container starts.
 ENTRYPOINT /go/bin/base-api
