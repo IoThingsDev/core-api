@@ -137,7 +137,7 @@ func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response,
 	}
 
 	appName := uc.config.GetString("sendgrid_name")
-	hostAdress := uc.config.GetString("host_address")
+	baseUrl := uc.config.GetString("base_url")
 
 	subject := "Welcome to " + appName + "! Account confirmation"
 
@@ -152,7 +152,7 @@ func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response,
 	}
 
 	htmlTemplate := template.Must(template.New("emailTemplate").Parse(string(file)))
-	data := Data{User: user, HostAddress: hostAdress, AppName: appName}
+	data := Data{User: user, HostAddress: baseUrl, AppName: appName}
 	err = htmlTemplate.Execute(buffer, data)
 	if err != nil {
 		return nil, err

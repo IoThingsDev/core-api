@@ -1,9 +1,8 @@
 package server
 
 import (
-	"os"
-
 	"github.com/joho/godotenv"
+	"os"
 )
 
 func (a API) SetupViper() {
