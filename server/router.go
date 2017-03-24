@@ -5,6 +5,7 @@ import (
 	"github.com/dernise/base-api/middlewares"
 	"gopkg.in/gin-gonic/gin.v1"
 	"net/http"
+	"time"
 )
 
 func Index(c *gin.Context) {
@@ -15,6 +16,15 @@ func (a API) SetupRouter() {
 	router := a.Router
 
 	router.Use(middlewares.ErrorMiddleware())
+	router.Use(middlewares.CorsMiddleware(middlewares.Config{
+		Origins:         "*",
+		Methods:         "GET, PUT, POST, DELETE",
+		RequestHeaders:  "Origin, Authorization, Content-Type",
+		ExposedHeaders:  "",
+		MaxAge:          50 * time.Second,
+		Credentials:     true,
+		ValidateHeaders: false,
+	}))
 
 	v1 := router.Group("/v1")
 	{
