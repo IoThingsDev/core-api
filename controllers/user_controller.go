@@ -132,7 +132,6 @@ func (uc UserController) ResetPasswordRequest(c *gin.Context) {
 	defer session.Close()
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
-
 	user := models.User{}
 	err := c.Bind(&user)
 	if err != nil {
@@ -150,27 +149,47 @@ func (uc UserController) ResetPasswordRequest(c *gin.Context) {
 	uc.SendResetPasswordRequestEmail(&user)
 }
 
-//GET userid & resetKey to be able to change password
-func (uc UserController) ControlResetKey(c *gin.Context) {
+//TODO: GET idUser, resetToken : FormResetPassword : renderForm to post to ResetPassword
+
+//POST userid, resetKey and new password to change them
+func (uc UserController) ResetPassword(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
 	userId := c.Param("id")
-	resetKey := c.Param("resetKey")
+	resetKey := c.PostForm("resetKey")
+	newPassword := c.PostForm("newPassword")
 
-	err := users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"resetKey": resetKey}}}, bson.M{"$set": bson.M{"active": true}})
+	/*if len(userId)==0 || len(resetKey)==0 || len(newPassword)==0 {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to get the post data"))
+		return
+	}*/
+
+	user := models.User{}
+	
+	password := []byte(newPassword)
+	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	hashedPasswordStore := string(hashedPassword)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("activation_failed", "Couldn't find the user to reset"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("encryption_failed", "Failed to generate the encrypted password"))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User can change his password"})
-}
+	err = users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"resetKey": resetKey}}}, bson.M{"$set": bson.M{"password": hashedPasswordStore}})
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("reset_key_failed", "Couldn't find the user to reset"))
+		return
+	}
 
-//POST userid, resetKey and new password to change them
-func (uc UserController) ResetPassword(c *gin.Context) {
+	err = users.Find(bson.M{"_id": bson.ObjectIdHex(userId)}).One(&user)
 
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User not found"))
+		return
+	}
+
+	uc.SendResetPasswordDoneEmail(&user)
 }
 
 func (uc UserController) SendActivationEmail(user *models.User) {
@@ -189,7 +208,7 @@ func (uc UserController) SendResetPasswordRequestEmail(user *models.User) {
 
 func (uc UserController) SendResetPasswordDoneEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
-	subject := "Your " + appName + " has been reset"
+	subject := "Your " + appName + " password has been reset"
 	templateLink := "./templates/mail_reset_password_done.html"
 	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
 }
