@@ -2,4 +2,3 @@ base-api
 .idea/
 base.rsa
 base.rsa.pub
-.env*
