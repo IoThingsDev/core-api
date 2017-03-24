@@ -1,20 +1,15 @@
 package controllers
 
 import (
-	"bytes"
 	"github.com/asaskevich/govalidator"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
-	"github.com/sendgrid/rest"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"html/template"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -45,6 +40,21 @@ func (uc UserController) GetUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": user})
+}
+
+func (uc UserController) GetUsers(c *gin.Context) {
+	session := uc.mgo.Session.Copy()
+	defer session.Close()
+	users := uc.mgo.C(models.UsersCollection).With(session)
+
+	list := []models.User{}
+	err := users.Find(nil).All(&list)
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "Users not found"))
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"status": "success", "data": list})
 }
 
 func (uc UserController) CreateUser(c *gin.Context) {
@@ -86,7 +96,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	user.Id = bson.NewObjectId()
 
-	uc.SendActivationEmail(&user)
+	uc.sendActivationEmail(&user)
 
 	err = users.Insert(user)
 	if err != nil {
@@ -97,30 +107,15 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"status": "success", "message": "User created"})
 }
 
-func (uc UserController) GetUsers(c *gin.Context) {
-	session := uc.mgo.Session.Copy()
-	defer session.Close()
-	users := uc.mgo.C(models.UsersCollection).With(session)
-
-	list := []models.User{}
-	err := users.Find(nil).All(&list)
-	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "Users not found"))
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"status": "success", "data": list})
-}
-
 func (uc UserController) ActivateUser(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
-	key := c.Param("key")
 	userId := c.Param("id")
+	activationKey := c.Param("activationKey")
 
-	err := users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"activationKey": key}}}, bson.M{"$set": bson.M{"active": true}})
+	err := users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"activationKey": activationKey}}}, bson.M{"$set": bson.M{"active": true}})
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("activation_failed", "Couldn't find the user to activate"))
 		return
@@ -129,39 +124,90 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User has been activated"})
 }
 
-func (uc UserController) SendActivationEmail(user *models.User) (*rest.Response, error) {
-	type Data struct {
-		User        *models.User
-		HostAddress string
-		AppName     string
+// Checks for a user that matches an email, and sends a reset mail
+func (uc UserController) ResetPasswordRequest(c *gin.Context) {
+	session := uc.mgo.Session.Copy()
+	defer session.Close()
+	users := uc.mgo.C(models.UsersCollection).With(session)
+
+	user := models.User{}
+	err := c.Bind(&user)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
+		return
 	}
 
-	appName := uc.config.GetString("sendgrid_name")
-	baseUrl := uc.config.GetString("base_url")
-
-	subject := "Welcome to " + appName + "! Account confirmation"
-
-	to := mail.NewEmail(user.Firstname, user.Email)
-
-	buffer := new(bytes.Buffer)
-
-	file, err := ioutil.ReadFile("./templates/mail_confirm_account.html")
+	err = users.Find(bson.M{"email": user.Email}).One(&user)
 
 	if err != nil {
-		return nil, err
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User not found"))
+		return
 	}
 
-	htmlTemplate := template.Must(template.New("emailTemplate").Parse(string(file)))
-	data := Data{User: user, HostAddress: baseUrl, AppName: appName}
-	err = htmlTemplate.Execute(buffer, data)
+	resetKey := helpers.RandomString(20)
+
+	err = users.UpdateId(user.Id, bson.M{"$set": bson.M{"resetKey": resetKey}})
 	if err != nil {
-		return nil, err
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("update_resetKey_failed", "Failed to update the resetKey"))
+		return
 	}
 
-	response, err := uc.emailSender.SendEmail([]*mail.Email{to}, "text/html", subject, buffer.String())
-
-	return response, err
+	uc.sendResetPasswordRequestEmail(&user)
 }
 
-//TODO: func (uc UserController) SendResetPasswordEmail(user *models.User) (*rest.Response, error)
-//TODO: func (uc UserController) ResetPassword(c *gin.Context)
+// TODO: GET idUser, resetToken : FormResetPassword : renderForm to post to ResetPassword
+
+// POST userid, resetKey and new password to change them
+func (uc UserController) ResetPassword(c *gin.Context) {
+	session := uc.mgo.Session.Copy()
+	defer session.Close()
+	users := uc.mgo.C(models.UsersCollection).With(session)
+
+	userId := c.Param("id")
+	resetKey := c.PostForm("resetKey")
+	newPassword := c.PostForm("newPassword")
+
+	/*if len(userId)==0 || len(resetKey)==0 || len(newPassword)==0 {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to get the post data"))
+		return
+	}*/
+
+	user := models.User{}
+
+	password := []byte(newPassword)
+	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	hashedPasswordStore := string(hashedPassword)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("encryption_failed", "Failed to generate the encrypted password"))
+		return
+	}
+
+	_, err = users.Find(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"resetKey": resetKey}}}).Apply(mgo.Change{Update: bson.M{"$set": bson.M{"password": hashedPasswordStore}}}, &user)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("update_password_failed", "Failed to update the password"))
+		return
+	}
+
+	uc.sendResetPasswordDoneEmail(&user)
+}
+
+func (uc UserController) sendActivationEmail(user *models.User) {
+	appName := uc.config.GetString("sendgrid_name")
+	subject := "Welcome to " + appName + "! Account confirmation"
+	templateLink := "./templates/mail_activate_account.html"
+	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
+}
+
+func (uc UserController) sendResetPasswordRequestEmail(user *models.User) {
+	appName := uc.config.GetString("sendgrid_name")
+	subject := "Reset your " + appName + " Account password"
+	templateLink := "./templates/mail_reset_password_request.html"
+	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
+}
+
+func (uc UserController) sendResetPasswordDoneEmail(user *models.User) {
+	appName := uc.config.GetString("sendgrid_name")
+	subject := "Your " + appName + " password has been reset"
+	templateLink := "./templates/mail_reset_password_done.html"
+	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
+}
