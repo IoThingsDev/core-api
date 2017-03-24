@@ -1,6 +1,10 @@
 package controllers
 
 import (
+	"io/ioutil"
+	"net/http"
+	"time"
+
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
 	"github.com/dgrijalva/jwt-go"
@@ -9,9 +13,6 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"io/ioutil"
-	"net/http"
-	"time"
 )
 
 type AuthController struct {
@@ -64,5 +65,5 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	token.Claims = claims
 	tokenString, err := token.SignedString(privateKey)
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"token": tokenString}})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "token": tokenString, "users": user.Sanitized()})
 }

@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
@@ -10,7 +12,6 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"net/http"
 )
 
 type UserController struct {
@@ -39,7 +40,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": user})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "users": user})
 }
 
 func (uc UserController) GetUsers(c *gin.Context) {
@@ -47,14 +48,14 @@ func (uc UserController) GetUsers(c *gin.Context) {
 	defer session.Close()
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
-	list := []models.User{}
+	list := []models.SanitizedUser{}
 	err := users.Find(nil).All(&list)
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "Users not found"))
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"status": "success", "data": list})
+	c.JSON(http.StatusCreated, gin.H{"status": "success", "users": list})
 }
 
 func (uc UserController) CreateUser(c *gin.Context) {
