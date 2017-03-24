@@ -1,11 +1,12 @@
 package tests
 
 import (
+	"net/http"
+	"testing"
+
 	"github.com/dernise/base-api/models"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/mgo.v2/bson"
-	"net/http"
-	"testing"
 )
 
 func TestCreateAccount(t *testing.T) {
@@ -20,7 +21,7 @@ func TestCreateAccount(t *testing.T) {
 		"firstname":"maxence",
 		"lastname": "henneron"
 	}`)
-	resp := SendRequest(api, parameters, "POST", "/v1/user/")
+	resp := SendRequest(api, parameters, "POST", "/v1/users/")
 	assert.Equal(t, resp.Code, http.StatusBadRequest)
 
 	//Everything is fine
@@ -32,11 +33,11 @@ func TestCreateAccount(t *testing.T) {
 		"firstname":"maxence",
 		"lastname": "henneron"
 	}`)
-	resp = SendRequest(api, parameters, "POST", "/v1/user/")
+	resp = SendRequest(api, parameters, "POST", "/v1/users/")
 	assert.Equal(t, resp.Code, http.StatusCreated)
 
 	// User already exists
-	resp = SendRequest(api, parameters, "POST", "/v1/user/")
+	resp = SendRequest(api, parameters, "POST", "/v1/users/")
 	assert.Equal(t, resp.Code, http.StatusConflict)
 
 	// Test activation
