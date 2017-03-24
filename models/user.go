@@ -16,4 +16,15 @@ type User struct {
 	StripeId      string        `json:"stripeId" bson:"stripeId" valid:"-"`
 }
 
+type SanitizedUser struct {
+	Id        bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	Firstname string        `json:"firstname" bson:"firstname"`
+	Lastname  string        `json:"lastname" bson:"lastname"`
+	Email     string        `json:"email" bson:"email"`
+}
+
+func (uc User) Sanitized() SanitizedUser {
+	return SanitizedUser{uc.Id, uc.Firstname, uc.Lastname, uc.Email}
+}
+
 const UsersCollection = "users"
