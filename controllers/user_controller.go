@@ -42,7 +42,6 @@ func (uc UserController) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": user})
 }
 
-
 func (uc UserController) GetUsers(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
@@ -125,7 +124,7 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User has been activated"})
 }
 
-// Checks for a user that matches an email, and send a reset mail
+// Checks for a user that matches an email, and sends a reset mail
 func (uc UserController) ResetPasswordRequest(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()

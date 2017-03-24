@@ -1,14 +1,14 @@
 package services
 
 import (
+	"bytes"
+	"github.com/dernise/base-api/models"
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/spf13/viper"
-	"io/ioutil"
-	"github.com/dernise/base-api/models"
-	"bytes"
 	"html/template"
+	"io/ioutil"
 )
 
 type EmailSender interface {
@@ -20,7 +20,7 @@ type SendGridEmailSender struct {
 	senderEmail string
 	senderName  string
 	apiKey      string
-	baseUrl	    string
+	baseUrl     string
 }
 
 func NewSendGridEmailSender(config *viper.Viper) EmailSender {
@@ -55,8 +55,7 @@ func (s SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, b
 	return response, err
 }
 
-
-func  (s SendGridEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
+func (s SendGridEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
 	type Data struct {
 		User        *models.User
 		HostAddress string
