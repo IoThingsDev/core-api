@@ -15,22 +15,21 @@ func (a API) SetupRouter() {
 	router := a.Router
 
 	router.Use(middlewares.ErrorMiddleware())
+	userController := controllers.NewUserController(a.Database, a.EmailSender, a.Config)
 
 	v1 := router.Group("/v1")
 	{
 		v1.GET("/", Index)
 		users := v1.Group("/users")
 		{
-			userController := controllers.NewUserController(a.Database, a.EmailSender, a.Config)
 			users.GET("/", userController.GetUsers)
-			users.POST("/requestReset", userController.ResetPasswordRequest)
+			users.POST("/", userController.CreateUser)
+			users.POST("/requestResetPassword", userController.ResetPasswordRequest)
 		}
 
 		user := v1.Group("/user")
 		{
-			userController := controllers.NewUserController(a.Database, a.EmailSender, a.Config)
 			user.GET("/:id", userController.GetUser)
-			user.POST("/", userController.CreateUser)
 			user.GET("/:id/activate/:activationKey", userController.ActivateUser)
 			//users.GET("/:id/reset/:resetKey", userController.FormResetPassword)
 			user.POST("/:id/reset/", userController.ResetPassword)

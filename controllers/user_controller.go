@@ -92,13 +92,12 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	user.Active = false
 	user.ActivationKey = helpers.RandomString(20)
-	user.ResetKey = helpers.RandomString(20)
 
 	user.StripeId = ""
 
 	user.Id = bson.NewObjectId()
 
-	uc.SendActivationEmail(&user)
+	uc.sendActivationEmail(&user)
 
 	err = users.Insert(user)
 	if err != nil {
@@ -126,7 +125,7 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User has been activated"})
 }
 
-//Checks for a user that matches an email, and send a reset mail
+// Checks for a user that matches an email, and send a reset mail
 func (uc UserController) ResetPasswordRequest(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
@@ -146,12 +145,20 @@ func (uc UserController) ResetPasswordRequest(c *gin.Context) {
 		return
 	}
 
-	uc.SendResetPasswordRequestEmail(&user)
+	resetKey := helpers.RandomString(20)
+
+	err = users.UpdateId(user.Id, bson.M{"$set": bson.M{"resetKey": resetKey}})
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("update_resetKey_failed", "Failed to update the resetKey"))
+		return
+	}
+
+	uc.sendResetPasswordRequestEmail(&user)
 }
 
-//TODO: GET idUser, resetToken : FormResetPassword : renderForm to post to ResetPassword
+// TODO: GET idUser, resetToken : FormResetPassword : renderForm to post to ResetPassword
 
-//POST userid, resetKey and new password to change them
+// POST userid, resetKey and new password to change them
 func (uc UserController) ResetPassword(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
@@ -176,37 +183,30 @@ func (uc UserController) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	err = users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"resetKey": resetKey}}}, bson.M{"$set": bson.M{"password": hashedPasswordStore}})
+	_, err = users.Find(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"resetKey": resetKey}}}).Apply(mgo.Change{Update: bson.M{"$set": bson.M{"password": hashedPasswordStore}}}, &user)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("reset_key_failed", "Couldn't find the user to reset"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("update_password_failed", "Failed to update the password"))
 		return
 	}
 
-	err = users.Find(bson.M{"_id": bson.ObjectIdHex(userId)}).One(&user)
-
-	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User not found"))
-		return
-	}
-
-	uc.SendResetPasswordDoneEmail(&user)
+	uc.sendResetPasswordDoneEmail(&user)
 }
 
-func (uc UserController) SendActivationEmail(user *models.User) {
+func (uc UserController) sendActivationEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
 	subject := "Welcome to " + appName + "! Account confirmation"
 	templateLink := "./templates/mail_activate_account.html"
 	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
 }
 
-func (uc UserController) SendResetPasswordRequestEmail(user *models.User) {
+func (uc UserController) sendResetPasswordRequestEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
 	subject := "Reset your " + appName + " Account password"
 	templateLink := "./templates/mail_reset_password_request.html"
 	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
 }
 
-func (uc UserController) SendResetPasswordDoneEmail(user *models.User) {
+func (uc UserController) sendResetPasswordDoneEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
 	subject := "Your " + appName + " password has been reset"
 	templateLink := "./templates/mail_reset_password_done.html"
