@@ -20,7 +20,7 @@ func TestCreateAccount(t *testing.T) {
 		"firstname":"maxence",
 		"lastname": "henneron"
 	}`)
-	resp := SendRequest(api, parameters, "POST", "/v1/users/")
+	resp := SendRequest(api, parameters, "POST", "/v1/user/")
 	assert.Equal(t, resp.Code, http.StatusBadRequest)
 
 	//Everything is fine
@@ -32,11 +32,11 @@ func TestCreateAccount(t *testing.T) {
 		"firstname":"maxence",
 		"lastname": "henneron"
 	}`)
-	resp = SendRequest(api, parameters, "POST", "/v1/users/")
+	resp = SendRequest(api, parameters, "POST", "/v1/user/")
 	assert.Equal(t, resp.Code, http.StatusCreated)
 
 	// User already exists
-	resp = SendRequest(api, parameters, "POST", "/v1/users/")
+	resp = SendRequest(api, parameters, "POST", "/v1/user/")
 	assert.Equal(t, resp.Code, http.StatusConflict)
 
 	// Test activation
@@ -48,7 +48,7 @@ func TestCreateAccount(t *testing.T) {
 	}
 
 	assert.Equal(t, user.Active, false)
-	resp = SendRequest(api, nil, "GET", "/v1/users/"+user.Id.Hex()+"/activate/"+user.ActivationKey)
+	resp = SendRequest(api, nil, "GET", "/v1/user/"+user.Id.Hex()+"/activate/"+user.ActivationKey)
 
 	//Update user informations
 	err = api.Database.C(models.UsersCollection).Find(bson.M{"email": "maxence.henneron@icloud.com"}).One(&user)
@@ -61,10 +61,10 @@ func TestCreateAccount(t *testing.T) {
 	assert.Equal(t, user.Active, true)
 
 	//Activation key isn't right
-	resp = SendRequest(api, nil, "GET", "/v1/users/"+user.Id.Hex()+"/activate/fakeKey")
+	resp = SendRequest(api, nil, "GET", "/v1/user/"+user.Id.Hex()+"/activate/fakeKey")
 	assert.Equal(t, resp.Code, http.StatusNotFound)
 
 	//Unknown user
-	resp = SendRequest(api, nil, "GET", "/v1/users/"+bson.NewObjectId().Hex()+"/activate/fakeKey")
+	resp = SendRequest(api, nil, "GET", "/v1/user/"+bson.NewObjectId().Hex()+"/activate/fakeKey")
 	assert.Equal(t, resp.Code, http.StatusNotFound)
 }
