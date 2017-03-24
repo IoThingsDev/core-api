@@ -167,7 +167,7 @@ func (uc UserController) ResetPassword(c *gin.Context) {
 	}*/
 
 	user := models.User{}
-	
+
 	password := []byte(newPassword)
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	hashedPasswordStore := string(hashedPassword)
