@@ -32,7 +32,7 @@ func NewSendGridEmailSender(config *viper.Viper) EmailSender {
 	}
 }
 
-func (s *SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error) {
+func (s SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error) {
 	from := mail.NewEmail(s.senderName, s.senderEmail)
 	content := mail.NewContent(contentType, body)
 
@@ -56,7 +56,7 @@ func (s *SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, 
 }
 
 
-func  (s *SendGridEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
+func  (s SendGridEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
 	type Data struct {
 		User        *models.User
 		HostAddress string
