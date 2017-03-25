@@ -65,5 +65,5 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	token.Claims = claims
 	tokenString, err := token.SignedString(privateKey)
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "token": tokenString, "users": user.Sanitized()})
+	c.JSON(http.StatusOK, gin.H{"token": tokenString, "users": user.Sanitize()})
 }

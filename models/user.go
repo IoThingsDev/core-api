@@ -23,7 +23,7 @@ type SanitizedUser struct {
 	Email     string        `json:"email" bson:"email"`
 }
 
-func (uc User) Sanitized() SanitizedUser {
+func (uc User) Sanitize() SanitizedUser {
 	return SanitizedUser{uc.Id, uc.Firstname, uc.Lastname, uc.Email}
 }
 
