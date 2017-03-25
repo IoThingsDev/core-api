@@ -105,7 +105,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"users": user})
+	c.JSON(http.StatusCreated, gin.H{"users": user.Sanitize()})
 }
 
 func (uc UserController) ActivateUser(c *gin.Context) {
