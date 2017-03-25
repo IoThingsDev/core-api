@@ -40,7 +40,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "users": user})
+	c.JSON(http.StatusOK, gin.H{"users": user})
 }
 
 func (uc UserController) GetUsers(c *gin.Context) {
@@ -55,7 +55,7 @@ func (uc UserController) GetUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"status": "success", "users": list})
+	c.JSON(http.StatusCreated, gin.H{"users": list})
 }
 
 func (uc UserController) CreateUser(c *gin.Context) {
@@ -105,7 +105,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"status": "success", "message": "User created"})
+	c.JSON(http.StatusCreated, gin.H{"users": user})
 }
 
 func (uc UserController) ActivateUser(c *gin.Context) {
