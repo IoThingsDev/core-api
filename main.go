@@ -22,6 +22,7 @@ func main() {
 	}
 	defer session.Close()
 	api.Database = session.DB(api.Config.GetString("db_name"))
+	api.SetupIndexes()
 
 	govalidator.SetFieldsRequiredByDefault(true)
 
