@@ -31,19 +31,15 @@ func (a API) SetupRouter() {
 	{
 		v1.GET("/", Index)
 		userController := controllers.NewUserController(a.Database, a.EmailSender, a.Config)
+		v1.POST("/reset_password", userController.ResetPasswordRequest)
 		users := v1.Group("/users")
 		{
 			users.GET("/", userController.GetUsers)
 			users.POST("/", userController.CreateUser)
-			users.POST("/requestResetPassword", userController.ResetPasswordRequest)
-		}
-
-		user := v1.Group("/user")
-		{
-			user.GET("/:id", userController.GetUser)
-			user.GET("/:id/activate/:activationKey", userController.ActivateUser)
+			users.GET("/:id", userController.GetUser)
+			users.GET("/:id/activate/:activationKey", userController.ActivateUser)
 			//users.GET("/:id/reset/:resetKey", userController.FormResetPassword)
-			user.POST("/:id/reset/", userController.ResetPassword)
+			users.POST("/:id/reset_password/", userController.ResetPassword)
 		}
 
 		authentication := v1.Group("/auth")
