@@ -40,7 +40,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"users": user})
+	c.JSON(http.StatusOK, gin.H{"users": user.Sanitize()})
 }
 
 func (uc UserController) GetUsers(c *gin.Context) {
