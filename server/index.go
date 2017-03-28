@@ -34,7 +34,6 @@ func (a API) SetupIndexes() {
 
 			if err != nil {
 				panic(err)
-				return
 			}
 		}
 	}
