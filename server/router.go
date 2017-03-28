@@ -1,11 +1,12 @@
 package server
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/dernise/base-api/controllers"
 	"github.com/dernise/base-api/middlewares"
 	"gopkg.in/gin-gonic/gin.v1"
-	"net/http"
-	"time"
 )
 
 func Index(c *gin.Context) {
@@ -39,7 +40,7 @@ func (a API) SetupRouter() {
 			users.GET("/:id", userController.GetUser)
 			users.GET("/:id/activate/:activationKey", userController.ActivateUser)
 			//users.GET("/:id/reset/:resetKey", userController.FormResetPassword)
-			users.POST("/:id/reset_password/", userController.ResetPassword)
+			users.POST("/:id/reset_password", userController.ResetPassword)
 		}
 
 		authentication := v1.Group("/auth")
