@@ -78,13 +78,12 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	count, _ := users.Find(bson.M{"email": strings.ToLower(user.Email)}).Count()
+	user.Email = strings.ToLower(user.Email)
+	count, _ := users.Find(bson.M{"email": user.Email}).Count()
 	if count > 0 {
 		c.AbortWithError(http.StatusConflict, helpers.ErrorWithCode("user_already_exists", "User already exists"))
 		return
 	}
-
-	user.Email = strings.ToLower(user.Email)
 
 	password := []byte(user.Password)
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
