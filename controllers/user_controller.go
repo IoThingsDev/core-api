@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 
+	"strings"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
@@ -76,6 +78,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
+	user.Email = strings.ToLower(user.Email)
 	count, _ := users.Find(bson.M{"email": user.Email}).Count()
 	if count > 0 {
 		c.AbortWithError(http.StatusConflict, helpers.ErrorWithCode("user_already_exists", "User already exists"))

@@ -2,6 +2,10 @@ package tests
 
 import (
 	"bytes"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/server"
 	"github.com/dgrijalva/jwt-go"
@@ -11,9 +15,6 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
 )
 
 type FakeEmailSender struct {
@@ -44,6 +45,8 @@ func SetupApi() *server.API {
 
 	api.Database = session.DB(api.Config.GetString("db_name"))
 	api.Database.DropDatabase()
+
+	api.SetupIndexes()
 
 	api.EmailSender = &FakeEmailSender{}
 	api.SetupRouter()
