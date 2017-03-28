@@ -20,6 +20,14 @@ func (a API) SetupIndexes() {
 		},
 	}
 
+	// Transaction indexes
+	transactions := database.C(models.TransactionsCollection)
+	collectionIndexes[transactions] = []mgo.Index{
+		{
+			Key: []string{"userId"},
+		},
+	}
+
 	for collection, indexes := range collectionIndexes {
 		for _, index := range indexes {
 			err := collection.EnsureIndex(index)
