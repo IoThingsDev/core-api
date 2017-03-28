@@ -33,8 +33,7 @@ func (a API) SetupIndexes() {
 			err := collection.EnsureIndex(index)
 
 			if err != nil {
-				panic("Could not create the indexes")
-				return
+				panic(err)
 			}
 		}
 	}
