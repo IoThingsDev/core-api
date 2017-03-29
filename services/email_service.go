@@ -2,13 +2,14 @@ package services
 
 import (
 	"bytes"
+	"html/template"
+	"io/ioutil"
+
 	"github.com/dernise/base-api/models"
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/spf13/viper"
-	"html/template"
-	"io/ioutil"
 )
 
 type EmailSender interface {
@@ -51,35 +52,32 @@ func (s SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, b
 	request := sendgrid.GetRequest(s.apiKey, "/v3/mail/send", "")
 	request.Method = "POST"
 	request.Body = mail.GetRequestBody(m)
-	response, err := sendgrid.API(request)
-	return response, err
+	return sendgrid.API(request)
+}
+
+type Data struct {
+	User        *models.User
+	HostAddress string
+	AppName     string
 }
 
 func (s SendGridEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
-	type Data struct {
-		User        *models.User
-		HostAddress string
-		AppName     string
-	}
 
 	to := mail.NewEmail(user.Firstname, user.Email)
 
-	buffer := new(bytes.Buffer)
-
 	file, err := ioutil.ReadFile(templateLink)
-
 	if err != nil {
 		return nil, err
 	}
 
 	htmlTemplate := template.Must(template.New("emailTemplate").Parse(string(file)))
+
 	data := Data{User: user, HostAddress: s.baseUrl, AppName: s.senderName}
+	buffer := new(bytes.Buffer)
 	err = htmlTemplate.Execute(buffer, data)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := s.SendEmail([]*mail.Email{to}, "text/html", subject, buffer.String())
-
-	return response, err
+	return s.SendEmail([]*mail.Email{to}, "text/html", subject, buffer.String())
 }

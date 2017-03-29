@@ -7,12 +7,12 @@ import (
 
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"github.com/dgrijalva/jwt-go"
 )
 
 type AuthController struct {

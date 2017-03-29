@@ -5,7 +5,7 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-func (a API) SetupIndexes() {
+func (a API) SetupIndexes() error{
 	database := a.Database
 
 	// Creates a list of indexes to ensure
@@ -33,9 +33,9 @@ func (a API) SetupIndexes() {
 			err := collection.EnsureIndex(index)
 
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 	}
-
+	return nil
 }

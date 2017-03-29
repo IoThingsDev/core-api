@@ -36,7 +36,10 @@ func (f FakeEmailSender) SendEmailFromTemplate(user *models.User, subject string
 func SetupApi() *server.API {
 	api := server.API{Router: gin.Default(), Config: viper.New()}
 
-	api.SetupViper()
+	err := api.SetupViper()
+	if err != nil {
+		panic(err)
+	}
 
 	session, err := mgo.Dial(api.Config.GetString("db_host"))
 	if err != nil {
@@ -46,8 +49,10 @@ func SetupApi() *server.API {
 	api.Database = session.DB(api.Config.GetString("db_name"))
 	api.Database.DropDatabase()
 
-	api.SetupIndexes()
-
+	err = api.SetupIndexes()
+	if err != nil {
+		panic(err)
+	}
 	api.EmailSender = &FakeEmailSender{}
 	api.SetupRouter()
 
