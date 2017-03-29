@@ -23,7 +23,6 @@ func SetStripeKeyAndBackend(config *viper.Viper) {
 	stripe.Key = config.GetString("stripe_api_key")
 
 	if config.GetString("env") == "testing" {
-		backend := FakeStripeBackend{}
-		stripe.SetBackend("api", backend)
+		stripe.SetBackend("api", FakeStripeBackend{})
 	}
 }
