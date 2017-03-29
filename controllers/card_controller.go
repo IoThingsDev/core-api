@@ -37,7 +37,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 	userId, _ := userIdInterface.(string)
 	user := models.User{}
 
-	stripeCard := models.Card{}
+	stripeCard := stripe.Card{}
 	err := c.Bind(&stripeCard)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
@@ -56,7 +56,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 
 	_, err = card.New(&stripe.CardParams{
 		Customer: user.StripeId,
-		Token:    stripeCard.Id,
+		Token:    stripeCard.ID,
 	})
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err) //helpers.ErrorWithCode("add_card_failed", "Failed to add the card to the customer"))
