@@ -5,6 +5,7 @@ import (
 
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
+	"github.com/dernise/base-api/services"
 	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/card"
@@ -31,7 +32,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 	defer session.Close()
 	users := cc.mgo.C(models.UsersCollection)
 
-	stripe.Key = cc.config.GetString("stripe_api_key")
+	services.SetStripeKeyAndBackend(cc.config)
 
 	userIdInterface, _ := c.Get("userId")
 	userId, _ := userIdInterface.(string)
@@ -71,7 +72,7 @@ func (cc CardController) GetCards(c *gin.Context) {
 	defer session.Close()
 	users := cc.mgo.C(models.UsersCollection)
 
-	stripe.Key = cc.config.GetString("stripe_api_key")
+	services.SetStripeKeyAndBackend(cc.config)
 
 	userIdInterface, _ := c.Get("userId")
 	userId, _ := userIdInterface.(string)
