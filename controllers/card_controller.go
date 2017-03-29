@@ -56,17 +56,12 @@ func (cc CardController) AddCard(c *gin.Context) {
 
 	_, err = card.New(&stripe.CardParams{
 		Customer: user.StripeId,
-		Token:    stripeCard.Token,
+		Token:    stripeCard.Id,
 	})
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err) //helpers.ErrorWithCode("add_card_failed", "Failed to add the card to the customer"))
 		return
 	}
-
-	users.UpdateId(
-		bson.ObjectIdHex(userId),
-		bson.M{"$push": bson.M{"cards": stripeCard}},
-	)
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Card successfully added to the user"})
 }
@@ -89,13 +84,11 @@ func (cc CardController) GetCards(c *gin.Context) {
 		return
 	}
 
-	stripeCards := []models.Card{}
+	stripeCards := []*stripe.Card{}
 	params := &stripe.CardListParams{Customer: user.StripeId}
 	i := card.List(params)
 	for i.Next() {
-		stripeCards = append(stripeCards, models.Card{
-			Token: i.Card().ID,
-		})
+		stripeCards = append(stripeCards, i.Card())
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"cards": stripeCards})

@@ -1,5 +1,5 @@
 package models
 
 type Card struct {
-	Token string `json:"token" bson:"token" binding:"required"`
+	Id string `json:"id" bson:"id" binding:"required"`
 }
