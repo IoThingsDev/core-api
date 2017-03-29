@@ -35,7 +35,7 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	transactions := bc.mgo.C(models.TransactionsCollection).With(session)
 	users := bc.mgo.C(models.UsersCollection).With(session)
 
-	stripe.Key = bc.config.GetString("stripe_api_key")
+	services.SetStripeKeyAndBackend(bc.config)
 
 	transaction := models.Transaction{}
 	err := c.Bind(&transaction)
