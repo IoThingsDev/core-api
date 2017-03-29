@@ -19,6 +19,6 @@ func TestCreateTransaction(t *testing.T) {
 		"amount":100
 	}`)
 
-	resp := SendRequestWithToken(api, parameters, "POST", "/v1/authorized/billing/", jwtToken)
+	resp := SendRequestWithToken(api, parameters, "POST", "/v1/billing/", jwtToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }

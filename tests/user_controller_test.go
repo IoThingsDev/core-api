@@ -34,6 +34,10 @@ func TestCreateAccount(t *testing.T) {
 	resp = SendRequest(api, parameters, "POST", "/v1/users/")
 	assert.Equal(t, http.StatusCreated, resp.Code)
 
+	// User already exists
+	resp = SendRequest(api, parameters, "POST", "/v1/users/")
+	assert.Equal(t, http.StatusConflict, resp.Code)
+
 	// Duplicate email
 	parameters = []byte(`
 	{
@@ -42,10 +46,6 @@ func TestCreateAccount(t *testing.T) {
 		"firstname":"maxence",
 		"lastname": "henneron"
 	}`)
-	resp = SendRequest(api, parameters, "POST", "/v1/users/")
-	assert.Equal(t, http.StatusConflict, resp.Code)
-
-	// User already exists
 	resp = SendRequest(api, parameters, "POST", "/v1/users/")
 	assert.Equal(t, http.StatusConflict, resp.Code)
 

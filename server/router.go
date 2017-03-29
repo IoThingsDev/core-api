@@ -35,13 +35,11 @@ func (a API) SetupRouter() {
 		v1.POST("/reset_password", userController.ResetPasswordRequest)
 		users := v1.Group("/users")
 		{
-			//users.GET("/", userController.GetUsers)
 			users.POST("/", userController.CreateUser)
-
-			users.GET("/:id", userController.GetUser).Use(middlewares.AuthMiddleware())
-
 			users.GET("/:id/activate/:activationKey", userController.ActivateUser)
 			users.POST("/:id/reset_password", userController.ResetPassword)
+
+			users.GET("/:id", userController.GetUser).Use(middlewares.AuthMiddleware())
 
 			//users.GET("/:id/cards", userController.GetCards).Use(middlewares.AuthMiddleware())
 		}
