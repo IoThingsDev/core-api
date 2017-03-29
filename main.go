@@ -12,7 +12,10 @@ import (
 func main() {
 	api := server.API{Router: gin.Default(), Config: viper.New()}
 
-	api.SetupViper()
+	err := api.SetupViper()
+	if err != nil {
+		panic(err)
+	}
 
 	api.EmailSender = services.NewSendGridEmailSender(api.Config)
 
@@ -22,8 +25,10 @@ func main() {
 	}
 	defer session.Close()
 	api.Database = session.DB(api.Config.GetString("db_name"))
-	api.SetupIndexes()
-
+	err = api.SetupIndexes()
+	if err != nil {
+		panic(err)
+	}
 	govalidator.SetFieldsRequiredByDefault(true)
 
 	api.SetupRouter()

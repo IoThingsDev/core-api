@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
@@ -12,8 +15,6 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"net/http"
-	"time"
 )
 
 type BillingController struct {

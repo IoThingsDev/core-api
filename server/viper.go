@@ -1,27 +1,28 @@
 package server
 
 import (
-	"github.com/joho/godotenv"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
-func (a API) SetupViper() {
-	var filename string
-	env := os.Getenv("BASEAPI_ENV")
+func (a API) SetupViper() error {
 
-	if env == "testing" {
+	filename := ".env"
+	switch os.Getenv("BASEAPI_ENV") {
+	case "testing":
 		filename = "../.env.testing"
-	} else if env == "prod" {
+	case "prod":
 		filename = ".env.prod"
-	} else {
-		filename = ".env"
 	}
 
 	err := godotenv.Overload(filename)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	a.Config.SetEnvPrefix("baseapi")
 	a.Config.AutomaticEnv()
+
+	return nil
 }
