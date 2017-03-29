@@ -2,12 +2,13 @@ package middlewares
 
 import (
 	"errors"
-	"gopkg.in/gin-gonic/gin.v1"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
+
 	"github.com/dgrijalva/jwt-go"
+	"gopkg.in/gin-gonic/gin.v1"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -41,5 +42,9 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.AbortWithError(http.StatusUnauthorized, errors.New("Token invalid"))
 			return
 		}
+
+		claims, _ := token.Claims.(jwt.MapClaims)
+
+		c.Set("userId", claims["id"])
 	}
 }

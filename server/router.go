@@ -35,12 +35,23 @@ func (a API) SetupRouter() {
 		v1.POST("/reset_password", userController.ResetPasswordRequest)
 		users := v1.Group("/users")
 		{
-			users.GET("/", userController.GetUsers)
+			//users.GET("/", userController.GetUsers)
 			users.POST("/", userController.CreateUser)
-			users.GET("/:id", userController.GetUser)
+
+			users.GET("/:id", userController.GetUser).Use(middlewares.AuthMiddleware())
+
 			users.GET("/:id/activate/:activationKey", userController.ActivateUser)
-			//users.GET("/:id/reset/:resetKey", userController.FormResetPassword)
 			users.POST("/:id/reset_password", userController.ResetPassword)
+
+			//users.GET("/:id/cards", userController.GetCards).Use(middlewares.AuthMiddleware())
+		}
+
+		cards := v1.Group("/cards")
+		{
+			cards.Use(middlewares.AuthMiddleware())
+			cardController := controllers.NewCardController(a.Database, a.Config)
+			cards.POST("/", cardController.AddCard)
+			cards.GET("/", cardController.GetCards)
 		}
 
 		authentication := v1.Group("/auth")
@@ -49,14 +60,11 @@ func (a API) SetupRouter() {
 			authentication.POST("/", authController.Authentication)
 		}
 
-		authorized := v1.Group("/authorized")
+		billing := v1.Group("/billing")
 		{
-			authorized.Use(middlewares.AuthMiddleware())
-			billing := authorized.Group("/billing")
-			{
-				billingController := controllers.NewBillingController(a.Database, a.EmailSender, a.Config)
-				billing.POST("/", billingController.CreateTransaction)
-			}
+			billing.Use(middlewares.AuthMiddleware())
+			billingController := controllers.NewBillingController(a.Database, a.EmailSender, a.Config)
+			billing.POST("/", billingController.CreateTransaction)
 		}
 	}
 }

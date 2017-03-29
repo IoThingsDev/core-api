@@ -14,6 +14,7 @@ type User struct {
 	ActivationKey string        `json:"activationKey" bson:"activationKey" valid:"-"`
 	ResetKey      string        `json:"resetKey" bson:"resetKey" valid:"-"`
 	StripeId      string        `json:"stripeId" bson:"stripeId" valid:"-"`
+	Cards         []Card        `json:"cards" bson:"cards" valid:"-"`
 }
 
 type SanitizedUser struct {
