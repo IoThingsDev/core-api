@@ -50,7 +50,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 	if user.StripeId == "" {
 		user.StripeId, err = cc.CreateCustomer(&user, users)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err) //helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
+			c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
 			return
 		}
 	}
@@ -60,7 +60,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 		Token:    stripeCard.ID,
 	})
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err) //helpers.ErrorWithCode("add_card_failed", "Failed to add the card to the customer"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("add_card_failed", "Failed to add the card to the customer"))
 		return
 	}
 
