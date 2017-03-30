@@ -11,10 +11,8 @@ import (
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/currency"
-	"github.com/stripe/stripe-go/customer"
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type BillingController struct {
@@ -37,7 +35,7 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	transactions := bc.mgo.C(models.TransactionsCollection).With(session)
 	users := bc.mgo.C(models.UsersCollection).With(session)
 
-	stripe.Key = bc.config.GetString("stripe_api_key")
+	services.SetStripeKeyAndBackend(bc.config)
 
 	transaction := models.Transaction{}
 	err := c.Bind(&transaction)
@@ -53,11 +51,8 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	}
 
 	if user.StripeId == "" {
-		user.StripeId, err = bc.CreateCustomer(&user, users, transaction.CardToken)
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err) //helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
-			return
-		}
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("no_card_found", "The customer doesn't have any card to pay"))
+		return
 	}
 
 	chargeParams := &stripe.ChargeParams{
@@ -65,12 +60,12 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 		Currency: currency.EUR,
 		Customer: user.StripeId,
 	}
-	charge, err := charge.New(chargeParams)
+	response, err := charge.New(chargeParams)
 	if err != nil {
 		transaction.Error = err.Error()
 		transaction.Failed = false
-	} else if charge.Status != "succeeded" {
-		transaction.Error = charge.FailCode
+	} else if response.Status != "succeeded" {
+		transaction.Error = response.FailCode
 		transaction.Failed = false
 	} else {
 		transaction.Failed = true
@@ -85,24 +80,4 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Payment successed"})
 	}
-}
-
-func (bc BillingController) CreateCustomer(user *models.User, users *mgo.Collection, token string) (string, error) {
-	customerParams := &stripe.CustomerParams{
-		Email: user.Email,
-	}
-
-	customerParams.SetSource(token)
-
-	newCustomer, err := customer.New(customerParams)
-	if err != nil {
-		return "", err
-	}
-
-	err = users.UpdateId(user.Id, bson.M{"$set": bson.M{"stripeId": newCustomer.ID}})
-	if err != nil {
-		return "", err
-	}
-
-	return newCustomer.ID, nil
 }

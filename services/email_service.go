@@ -24,6 +24,12 @@ type SendGridEmailSender struct {
 	baseUrl     string
 }
 
+type Data struct {
+	User        *models.User
+	HostAddress string
+	AppName     string
+}
+
 func NewSendGridEmailSender(config *viper.Viper) EmailSender {
 	return &SendGridEmailSender{
 		config.GetString("sendgrid_address"),
@@ -53,12 +59,6 @@ func (s SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, b
 	request.Method = "POST"
 	request.Body = mail.GetRequestBody(m)
 	return sendgrid.API(request)
-}
-
-type Data struct {
-	User        *models.User
-	HostAddress string
-	AppName     string
 }
 
 func (s SendGridEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {

@@ -16,41 +16,38 @@ func TestCreateAccount(t *testing.T) {
 	//Missing field
 	parameters := []byte(`
 	{
-		"username":"dernise",
 		"password":"test",
 		"firstname":"maxence",
 		"lastname": "henneron"
 	}`)
 	resp := SendRequest(api, parameters, "POST", "/v1/users/")
-	assert.Equal(t, resp.Code, http.StatusBadRequest)
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
 
 	//Everything is fine
 	parameters = []byte(`
 	{
-		"username":"dernise",
 		"email":"maxence.henneron@icloud.com",
 		"password":"test",
 		"firstname":"maxence",
 		"lastname": "henneron"
 	}`)
 	resp = SendRequest(api, parameters, "POST", "/v1/users/")
-	assert.Equal(t, resp.Code, http.StatusCreated)
+	assert.Equal(t, http.StatusCreated, resp.Code)
+
+	// User already exists
+	resp = SendRequest(api, parameters, "POST", "/v1/users/")
+	assert.Equal(t, http.StatusConflict, resp.Code)
 
 	// Duplicate email
 	parameters = []byte(`
 	{
-		"username":"dernise",
 		"email":"mAxEnce.henneron@icloud.com",
 		"password":"test",
 		"firstname":"maxence",
 		"lastname": "henneron"
 	}`)
 	resp = SendRequest(api, parameters, "POST", "/v1/users/")
-	assert.Equal(t, resp.Code, http.StatusConflict)
-
-	// User already exists
-	resp = SendRequest(api, parameters, "POST", "/v1/users/")
-	assert.Equal(t, resp.Code, http.StatusConflict)
+	assert.Equal(t, http.StatusConflict, resp.Code)
 
 	// Test activation
 	user := models.User{}
@@ -70,14 +67,14 @@ func TestCreateAccount(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, resp.Code, http.StatusOK)
+	assert.Equal(t, http.StatusOK, resp.Code)
 	assert.Equal(t, user.Active, true)
 
 	//Activation key isn't right
 	resp = SendRequest(api, nil, "GET", "/v1/users/"+user.Id.Hex()+"/activate/fakeKey")
-	assert.Equal(t, resp.Code, http.StatusNotFound)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
 
 	//Unknown user
 	resp = SendRequest(api, nil, "GET", "/v1/users/"+bson.NewObjectId().Hex()+"/activate/fakeKey")
-	assert.Equal(t, resp.Code, http.StatusNotFound)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
