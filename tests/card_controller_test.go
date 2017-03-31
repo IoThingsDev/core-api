@@ -46,7 +46,7 @@ func TestDefaultCard(t *testing.T) {
 
 	_, jwtToken := CreateUserAndGenerateToken(api)
 
-	resp := SendRequestWithToken(api, nil, "PUT", "/v1/cards/testId", jwtToken)
+	resp := SendRequestWithToken(api, nil, "PUT", "/v1/cards/testId/set_default", jwtToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
 
