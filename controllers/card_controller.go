@@ -166,15 +166,8 @@ func (cc CardController) DeleteCard(c *gin.Context) {
 	user := models.User{}
 	users.FindId(bson.ObjectIdHex(userId)).One(&user)
 
-	stripeCard := Card{}
-	err := c.Bind(&stripeCard)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
-		return
-	}
-
-	_, err = card.Del(
-		stripeCard.Token,
+	_, err := card.Del(
+		c.Param("id"),
 		&stripe.CardParams{Customer: user.StripeId},
 	)
 
