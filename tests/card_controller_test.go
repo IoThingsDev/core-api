@@ -54,3 +54,18 @@ func TestDefaultCard(t *testing.T) {
 	resp := SendRequestWithToken(api, parameters, "PUT", "/v1/cards/", jwtToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
+
+func TestDeleteCard(t *testing.T) {
+	api := SetupApi()
+	defer api.Database.Session.Close()
+
+	_, jwtToken := CreateUserAndGenerateToken(api)
+
+	parameters := []byte(`
+	{
+		"token":"TestToken"
+	}`)
+
+	resp := SendRequestWithToken(api, parameters, "DELETE", "/v1/cards/", jwtToken)
+	assert.Equal(t, http.StatusOK, resp.Code)
+}

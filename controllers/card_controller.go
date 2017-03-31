@@ -123,11 +123,6 @@ func (cc CardController) SetDefaultCard(c *gin.Context) {
 	user := models.User{}
 	users.FindId(bson.ObjectIdHex(userId)).One(&user)
 
-	if user.StripeId == "" {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("user_not_customer", "The user is not a customer"))
-		return
-	}
-
 	stripeCard := Card{}
 	err := c.Bind(&stripeCard)
 	if err != nil {
@@ -145,4 +140,35 @@ func (cc CardController) SetDefaultCard(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Default source sucessfully updated"})
+}
+
+func (cc CardController) DeleteCard(c *gin.Context) {
+	session := cc.mgo.Session.Copy()
+	defer session.Close()
+	users := cc.mgo.C(models.UsersCollection)
+
+	userIdInterface, _ := c.Get("userId")
+	userId, _ := userIdInterface.(string)
+
+	user := models.User{}
+	users.FindId(bson.ObjectIdHex(userId)).One(&user)
+
+	stripeCard := Card{}
+	err := c.Bind(&stripeCard)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
+		return
+	}
+
+	_, err = card.Del(
+		stripeCard.Token,
+		&stripe.CardParams{Customer: user.StripeId},
+	)
+
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("delete_card_failed", "Failed to delete the customer's card"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Card sucessfully deleted"})
 }

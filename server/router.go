@@ -49,6 +49,7 @@ func (a *API) SetupRouter() {
 			cards.POST("/", cardController.AddCard)
 			cards.GET("/", cardController.GetCards)
 			cards.PUT("/", cardController.SetDefaultCard)
+			cards.DELETE("/", cardController.DeleteCard)
 		}
 
 		authentication := v1.Group("/auth")
