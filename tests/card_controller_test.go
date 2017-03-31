@@ -61,11 +61,6 @@ func TestDeleteCard(t *testing.T) {
 
 	_, jwtToken := CreateUserAndGenerateToken(api)
 
-	parameters := []byte(`
-	{
-		"token":"TestToken"
-	}`)
-
-	resp := SendRequestWithToken(api, parameters, "DELETE", "/v1/cards/", jwtToken)
+	resp := SendRequestWithToken(api, nil, "DELETE", "/v1/cards/testId", jwtToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }

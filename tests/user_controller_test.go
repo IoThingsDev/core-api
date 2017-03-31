@@ -60,7 +60,7 @@ func TestCreateAccount(t *testing.T) {
 	assert.Equal(t, user.Active, false)
 	resp = SendRequest(api, nil, "GET", "/v1/users/"+user.Id.Hex()+"/activate/"+user.ActivationKey)
 
-	//Update user informations
+	//Update user information
 	err = api.Database.C(models.UsersCollection).Find(bson.M{"email": "maxence.henneron@icloud.com"}).One(&user)
 	if err != nil {
 		t.Fail()
