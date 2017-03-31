@@ -7,11 +7,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/dernise/base-api/models"
 	"github.com/dgrijalva/jwt-go"
 	"gopkg.in/gin-gonic/gin.v1"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(database *mgo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenReader := c.Request.Header.Get("Authorization")
 
@@ -45,6 +48,17 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		claims, _ := token.Claims.(jwt.MapClaims)
 
-		c.Set("userId", claims["id"])
+		session := database.Session.Copy()
+		defer session.Close()
+		users := database.C(models.UsersCollection).With(session)
+
+		user := models.User{}
+		err = users.FindId(bson.ObjectIdHex(claims["id"].(string))).One(&user)
+		if err != nil {
+			c.AbortWithError(http.StatusUnauthorized, errors.New("User not found"))
+			return
+		}
+
+		c.Set("currentUser", user)
 	}
 }

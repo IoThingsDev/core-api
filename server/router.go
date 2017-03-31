@@ -39,12 +39,12 @@ func (a *API) SetupRouter() {
 			users.GET("/:id/activate/:activationKey", userController.ActivateUser)
 			users.POST("/:id/reset_password", userController.ResetPassword)
 
-			users.GET("/:id", userController.GetUser).Use(middlewares.AuthMiddleware())
+			users.GET("/:id", userController.GetUser).Use(middlewares.AuthMiddleware(a.Database))
 		}
 
 		cards := v1.Group("/cards")
 		{
-			cards.Use(middlewares.AuthMiddleware())
+			cards.Use(middlewares.AuthMiddleware(a.Database))
 			cardController := controllers.NewCardController(a.Database, a.Config)
 			cards.POST("/", cardController.AddCard)
 			cards.GET("/", cardController.GetCards)
@@ -60,7 +60,7 @@ func (a *API) SetupRouter() {
 
 		billing := v1.Group("/billing")
 		{
-			billing.Use(middlewares.AuthMiddleware())
+			billing.Use(middlewares.AuthMiddleware(a.Database))
 			billingController := controllers.NewBillingController(a.Database, a.EmailSender, a.Config)
 			billing.POST("/", billingController.CreateTransaction)
 		}
