@@ -48,7 +48,7 @@ func (a *API) SetupRouter() {
 			cardController := controllers.NewCardController(a.Database, a.Config)
 			cards.POST("/", cardController.AddCard)
 			cards.GET("/", cardController.GetCards)
-			cards.PUT("/", cardController.SetDefaultCard)
+			cards.PUT("/:id", cardController.SetDefaultCard)
 			cards.DELETE("/:id", cardController.DeleteCard)
 		}
 
