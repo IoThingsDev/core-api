@@ -142,7 +142,7 @@ func (cc CardController) SetDefaultCard(c *gin.Context) {
 		return
 	}
 
-	stripeCustomer, err := customer.Update(
+	_, err = customer.Update(
 		user.StripeId,
 		&stripe.CustomerParams{DefaultSource: stripeCard.Token},
 	)
