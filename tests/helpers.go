@@ -27,7 +27,6 @@ func SetupApi() *server.API {
 	if err != nil {
 		panic(err)
 	}
-	//defer session.Close()
 
 	api.Database.DropDatabase()
 

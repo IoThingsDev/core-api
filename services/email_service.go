@@ -19,18 +19,13 @@ type EmailSender interface {
 	SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error)
 }
 
-type FakeEmailSender struct {
-	to          []*mail.Email
-	contentType string
-	subject     string
-	body        string
-}
+type FakeEmailSender struct{}
 
-func (f FakeEmailSender) SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error) {
+func (f *FakeEmailSender) SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error) {
 	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Jean-Miche", Headers: nil}, nil
 }
 
-func (f FakeEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
+func (f *FakeEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
 	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Jean-Miche", Headers: nil}, nil
 }
 
@@ -56,7 +51,7 @@ func NewSendGridEmailSender(config *viper.Viper) EmailSender {
 	}
 }
 
-func (s SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error) {
+func (s *SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error) {
 	from := mail.NewEmail(s.senderName, s.senderEmail)
 	content := mail.NewContent(contentType, body)
 
@@ -78,7 +73,7 @@ func (s SendGridEmailSender) SendEmail(to []*mail.Email, contentType, subject, b
 	return sendgrid.API(request)
 }
 
-func (s SendGridEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
+func (s *SendGridEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
 
 	to := mail.NewEmail(user.Firstname, user.Email)
 
