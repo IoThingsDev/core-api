@@ -97,6 +97,7 @@ func (cc CardController) GetCards(c *gin.Context) {
 				Default:  paymentSource.Card.ID == stripeCustomer.DefaultSource.ID,
 				ExpMonth: paymentSource.Card.Month,
 				ExpYear:  paymentSource.Card.Year,
+				Brand:    paymentSource.Card.Brand,
 			}
 
 			stripeCards = append(stripeCards, stripeCard)
