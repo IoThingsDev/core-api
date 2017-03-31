@@ -5,7 +5,6 @@ import (
 
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
-	"github.com/dernise/base-api/services"
 	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/card"
@@ -20,8 +19,8 @@ type CardController struct {
 	config *viper.Viper
 }
 
-func NewCardController(mgo *mgo.Database, config *viper.Viper) *CardController {
-	return &CardController{
+func NewCardController(mgo *mgo.Database, config *viper.Viper) CardController {
+	return CardController{
 		mgo,
 		config,
 	}
@@ -31,8 +30,6 @@ func (cc CardController) AddCard(c *gin.Context) {
 	session := cc.mgo.Session.Copy()
 	defer session.Close()
 	users := cc.mgo.C(models.UsersCollection)
-
-	services.SetStripeKeyAndBackend(cc.config)
 
 	userIdInterface, _ := c.Get("userId")
 	userId, _ := userIdInterface.(string)
@@ -71,8 +68,6 @@ func (cc CardController) GetCards(c *gin.Context) {
 	session := cc.mgo.Session.Copy()
 	defer session.Close()
 	users := cc.mgo.C(models.UsersCollection)
-
-	services.SetStripeKeyAndBackend(cc.config)
 
 	userIdInterface, _ := c.Get("userId")
 	userId, _ := userIdInterface.(string)

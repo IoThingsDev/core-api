@@ -6,7 +6,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func (a API) SetupViper() error {
+func (a *API) SetupViper() error {
 
 	filename := ".env"
 	switch os.Getenv("BASEAPI_ENV") {

@@ -13,7 +13,7 @@ func Index(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully reached the base API."})
 }
 
-func (a API) SetupRouter() {
+func (a *API) SetupRouter() {
 	router := a.Router
 
 	router.Use(middlewares.ErrorMiddleware())
