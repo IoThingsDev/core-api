@@ -12,6 +12,16 @@ type FakeStripeBackend struct{}
 func (fsb FakeStripeBackend) Call(method, path, key string, body *stripe.RequestValues, params *stripe.Params, v interface{}) error {
 	if charge, ok := v.(*stripe.Charge); ok {
 		charge.Status = "succeeded"
+	} else if customer, ok := v.(*stripe.Customer); ok {
+		customer.Sources = &stripe.SourceList{}
+
+		customer.Sources.Values = append(customer.Sources.Values, &stripe.PaymentSource{
+			Type: stripe.PaymentSourceCard,
+			ID:   "testId",
+			Card: &stripe.Card{},
+		})
+
+		customer.DefaultSource = &stripe.PaymentSource{ID: "testId"}
 	}
 
 	return nil
