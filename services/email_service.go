@@ -4,17 +4,34 @@ import (
 	"bytes"
 	"html/template"
 	"io/ioutil"
+	"net/http"
 
 	"github.com/dernise/base-api/models"
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+
 	"github.com/spf13/viper"
 )
 
 type EmailSender interface {
 	SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error)
 	SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error)
+}
+
+type FakeEmailSender struct {
+	to          []*mail.Email
+	contentType string
+	subject     string
+	body        string
+}
+
+func (f FakeEmailSender) SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error) {
+	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Jean-Miche", Headers: nil}, nil
+}
+
+func (f FakeEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
+	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Jean-Miche", Headers: nil}, nil
 }
 
 type SendGridEmailSender struct {

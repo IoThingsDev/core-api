@@ -22,8 +22,8 @@ type UserController struct {
 	config      *viper.Viper
 }
 
-func NewUserController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper) *UserController {
-	return &UserController{
+func NewUserController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper) UserController {
+	return UserController{
 		mgo,
 		emailSender,
 		config,

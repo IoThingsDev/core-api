@@ -21,8 +21,8 @@ type BillingController struct {
 	config      *viper.Viper
 }
 
-func NewBillingController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper) *BillingController {
-	return &BillingController{
+func NewBillingController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper) BillingController {
+	return BillingController{
 		mgo,
 		emailSender,
 		config,
@@ -34,8 +34,6 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	defer session.Close()
 	transactions := bc.mgo.C(models.TransactionsCollection).With(session)
 	users := bc.mgo.C(models.UsersCollection).With(session)
-
-	services.SetStripeKeyAndBackend(bc.config)
 
 	transaction := models.Transaction{}
 	err := c.Bind(&transaction)

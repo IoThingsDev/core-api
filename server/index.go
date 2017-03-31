@@ -5,7 +5,7 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-func (a API) SetupIndexes() error {
+func (a *API) SetupIndexes() error {
 	database := a.Database
 
 	// Creates a list of indexes to ensure

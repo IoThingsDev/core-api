@@ -20,8 +20,8 @@ type AuthController struct {
 	config *viper.Viper
 }
 
-func NewAuthController(mgo *mgo.Database, config *viper.Viper) *AuthController {
-	return &AuthController{
+func NewAuthController(mgo *mgo.Database, config *viper.Viper) AuthController {
+	return AuthController{
 		mgo,
 		config,
 	}
