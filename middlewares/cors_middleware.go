@@ -19,9 +19,10 @@ A Default Config for example is below:
 
 import (
 	"fmt"
-	"gopkg.in/gin-gonic/gin.v1"
 	"strings"
 	"time"
+
+	"gopkg.in/gin-gonic/gin.v1"
 )
 
 const (

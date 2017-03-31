@@ -19,6 +19,10 @@ type CardController struct {
 	config *viper.Viper
 }
 
+type Card struct {
+	Token string `json:"token" binding:"required"`
+}
+
 func NewCardController(mgo *mgo.Database, config *viper.Viper) CardController {
 	return CardController{
 		mgo,
@@ -35,8 +39,8 @@ func (cc CardController) AddCard(c *gin.Context) {
 	userId, _ := userIdInterface.(string)
 	user := models.User{}
 
-	stripeCard := &stripe.Card{}
-	err := c.Bind(stripeCard)
+	stripeCard := Card{}
+	err := c.Bind(&stripeCard)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
 		return
@@ -52,16 +56,16 @@ func (cc CardController) AddCard(c *gin.Context) {
 		}
 	}
 
-	stripeCard, err = card.New(&stripe.CardParams{
+	response, err := card.New(&stripe.CardParams{
 		Customer: user.StripeId,
-		Token:    stripeCard.ID,
+		Token:    stripeCard.Token,
 	})
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("add_card_failed", "Failed to add the card to the customer"))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"cards": stripeCard})
+	c.JSON(http.StatusCreated, gin.H{"cards": response})
 }
 
 func (cc CardController) GetCards(c *gin.Context) {
@@ -80,14 +84,26 @@ func (cc CardController) GetCards(c *gin.Context) {
 		return
 	}
 
-	stripeCards := []*stripe.Card{}
-	params := &stripe.CardListParams{Customer: user.StripeId}
-	i := card.List(params)
-	for i.Next() {
-		stripeCards = append(stripeCards, i.Card())
+	stripeCustomer, _ := customer.Get(user.StripeId, nil)
+
+	stripeCards := []models.Card{}
+
+	for _, paymentSource := range stripeCustomer.Sources.Values {
+		if paymentSource.Type == stripe.PaymentSourceCard {
+			stripeCard := models.Card{
+				Id:       paymentSource.Card.ID,
+				Name:     paymentSource.Card.Name,
+				Last4:    paymentSource.Card.LastFour,
+				Default:  paymentSource.Card.ID == stripeCustomer.DefaultSource.ID,
+				ExpMonth: paymentSource.Card.Month,
+				ExpYear:  paymentSource.Card.Year,
+			}
+
+			stripeCards = append(stripeCards, stripeCard)
+		}
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"cards": stripeCards})
+	c.JSON(http.StatusOK, gin.H{"cards": stripeCards})
 }
 
 func (cc CardController) CreateCustomer(user *models.User, users *mgo.Collection) (string, error) {
@@ -106,4 +122,65 @@ func (cc CardController) CreateCustomer(user *models.User, users *mgo.Collection
 	}
 
 	return newCustomer.ID, nil
+}
+
+func (cc CardController) SetDefaultCard(c *gin.Context) {
+	session := cc.mgo.Session.Copy()
+	defer session.Close()
+	users := cc.mgo.C(models.UsersCollection)
+
+	userIdInterface, _ := c.Get("userId")
+	userId, _ := userIdInterface.(string)
+
+	user := models.User{}
+	users.FindId(bson.ObjectIdHex(userId)).One(&user)
+
+	stripeCard := Card{}
+	err := c.Bind(&stripeCard)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
+		return
+	}
+
+	_, err = customer.Update(
+		user.StripeId,
+		&stripe.CustomerParams{DefaultSource: stripeCard.Token},
+	)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("set_default_card_failed", "Failed to update the customer's default source"))
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+func (cc CardController) DeleteCard(c *gin.Context) {
+	session := cc.mgo.Session.Copy()
+	defer session.Close()
+	users := cc.mgo.C(models.UsersCollection)
+
+	userIdInterface, _ := c.Get("userId")
+	userId, _ := userIdInterface.(string)
+
+	user := models.User{}
+	users.FindId(bson.ObjectIdHex(userId)).One(&user)
+
+	stripeCard := Card{}
+	err := c.Bind(&stripeCard)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
+		return
+	}
+
+	_, err = card.Del(
+		stripeCard.Token,
+		&stripe.CardParams{Customer: user.StripeId},
+	)
+
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("delete_card_failed", "Failed to delete the customer's card"))
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
 }
