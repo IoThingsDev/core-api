@@ -20,7 +20,7 @@ type CardController struct {
 }
 
 type Card struct {
-	Token string `json:"token"`
+	Token string `json:"token" binding:"required"`
 }
 
 func NewCardController(mgo *mgo.Database, config *viper.Viper) CardController {
