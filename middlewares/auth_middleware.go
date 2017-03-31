@@ -48,6 +48,7 @@ func AuthMiddleware(database *mgo.Database) gin.HandlerFunc {
 
 		claims, _ := token.Claims.(jwt.MapClaims)
 
+		// TODO: ONCE WE ADD REDIS WE HAVE TO GET THE USER FROM REDIS IF POSSIBLE
 		session := database.Session.Copy()
 		defer session.Close()
 		users := database.C(models.UsersCollection).With(session)
