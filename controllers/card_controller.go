@@ -65,7 +65,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"cards": response})
+	c.JSON(http.StatusCreated, gin.H{"cards": response})
 }
 
 func (cc CardController) GetCards(c *gin.Context) {
@@ -91,7 +91,7 @@ func (cc CardController) GetCards(c *gin.Context) {
 		stripeCards = append(stripeCards, i.Card())
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"cards": stripeCards})
+	c.JSON(http.StatusOK, gin.H{"cards": stripeCards})
 }
 
 func (cc CardController) CreateCustomer(user *models.User, users *mgo.Collection) (string, error) {
@@ -110,4 +110,39 @@ func (cc CardController) CreateCustomer(user *models.User, users *mgo.Collection
 	}
 
 	return newCustomer.ID, nil
+}
+
+func (cc CardController) SetDefaultCard(c *gin.Context) {
+	session := cc.mgo.Session.Copy()
+	defer session.Close()
+	users := cc.mgo.C(models.UsersCollection)
+
+	userIdInterface, _ := c.Get("userId")
+	userId, _ := userIdInterface.(string)
+
+	user := models.User{}
+	users.FindId(bson.ObjectIdHex(userId)).One(&user)
+
+	if user.StripeId == "" {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("user_not_customer", "The user is not a customer"))
+		return
+	}
+
+	stripeCard := Card{}
+	err := c.Bind(&stripeCard)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
+		return
+	}
+
+	_, err = customer.Update(
+		user.StripeId,
+		&stripe.CustomerParams{DefaultSource: stripeCard.Token},
+	)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("set_default_card_failed", "Failed to update the customer's default source"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Default source sucessfully updated"})
 }

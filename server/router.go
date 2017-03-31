@@ -40,8 +40,6 @@ func (a *API) SetupRouter() {
 			users.POST("/:id/reset_password", userController.ResetPassword)
 
 			users.GET("/:id", userController.GetUser).Use(middlewares.AuthMiddleware())
-
-			//users.GET("/:id/cards", userController.GetCards).Use(middlewares.AuthMiddleware())
 		}
 
 		cards := v1.Group("/cards")
@@ -50,6 +48,7 @@ func (a *API) SetupRouter() {
 			cardController := controllers.NewCardController(a.Database, a.Config)
 			cards.POST("/", cardController.AddCard)
 			cards.GET("/", cardController.GetCards)
+			cards.PUT("/", cardController.SetDefaultCard)
 		}
 
 		authentication := v1.Group("/auth")

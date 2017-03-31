@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"time"
+
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/server"
 	"github.com/dernise/base-api/services"
@@ -79,6 +81,14 @@ func CreateUserAndGenerateToken(api *server.API) (*models.User, string) {
 	privateKey, _ := jwt.ParseRSAPrivateKeyFromPEM(privateKeyFile)
 
 	token := jwt.New(jwt.GetSigningMethod(jwt.SigningMethodRS256.Alg()))
+
+	claims := make(jwt.MapClaims)
+	// TODO: ADD EXPIRATION
+	//claims["exp"] = time.Now().Add(time.Hour * time.Duration(settings.Get().JWTExpirationDelta)).Unix()
+	claims["iat"] = time.Now().Unix()
+	claims["id"] = user.Id
+	token.Claims = claims
+
 	tokenString, _ := token.SignedString(privateKey)
 
 	return &user, tokenString
