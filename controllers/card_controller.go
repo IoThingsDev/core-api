@@ -151,7 +151,7 @@ func (cc CardController) SetDefaultCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"customers": stripeCustomer})
+	c.JSON(http.StatusOK, nil)
 }
 
 func (cc CardController) DeleteCard(c *gin.Context) {
@@ -182,5 +182,5 @@ func (cc CardController) DeleteCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Card sucessfully deleted"})
+	c.JSON(http.StatusOK, nil)
 }
