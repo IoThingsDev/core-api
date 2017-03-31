@@ -46,12 +46,7 @@ func TestDefaultCard(t *testing.T) {
 
 	_, jwtToken := CreateUserAndGenerateToken(api)
 
-	parameters := []byte(`
-	{
-		"token":"TestToken"
-	}`)
-
-	resp := SendRequestWithToken(api, parameters, "PUT", "/v1/cards/", jwtToken)
+	resp := SendRequestWithToken(api, nil, "PUT", "/v1/cards/testId/set_default", jwtToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
 

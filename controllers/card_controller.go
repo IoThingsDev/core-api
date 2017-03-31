@@ -136,16 +136,9 @@ func (cc CardController) SetDefaultCard(c *gin.Context) {
 	user := models.User{}
 	users.FindId(bson.ObjectIdHex(userId)).One(&user)
 
-	stripeCard := Card{}
-	err := c.Bind(&stripeCard)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
-		return
-	}
-
-	_, err = customer.Update(
+	_, err := customer.Update(
 		user.StripeId,
-		&stripe.CustomerParams{DefaultSource: stripeCard.Token},
+		&stripe.CustomerParams{DefaultSource: c.Param("id")},
 	)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("set_default_card_failed", "Failed to update the customer's default source"))
