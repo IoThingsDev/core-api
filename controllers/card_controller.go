@@ -84,11 +84,23 @@ func (cc CardController) GetCards(c *gin.Context) {
 		return
 	}
 
-	stripeCards := []*stripe.Card{}
-	params := &stripe.CardListParams{Customer: user.StripeId}
-	i := card.List(params)
-	for i.Next() {
-		stripeCards = append(stripeCards, i.Card())
+	stripeCustomer, _ := customer.Get(user.StripeId, nil)
+
+	stripeCards := []models.Card{}
+
+	for _, paymentSource := range stripeCustomer.Sources.Values {
+		if paymentSource.Type == stripe.PaymentSourceCard {
+			stripeCard := models.Card{
+				Id:       paymentSource.Card.ID,
+				Name:     paymentSource.Card.Name,
+				Last4:    paymentSource.Card.LastFour,
+				Default:  paymentSource.Card.ID == stripeCustomer.DefaultSource.ID,
+				ExpMonth: paymentSource.Card.Month,
+				ExpYear:  paymentSource.Card.Year,
+			}
+
+			stripeCards = append(stripeCards, stripeCard)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"cards": stripeCards})
@@ -130,7 +142,7 @@ func (cc CardController) SetDefaultCard(c *gin.Context) {
 		return
 	}
 
-	_, err = customer.Update(
+	stripeCustomer, err := customer.Update(
 		user.StripeId,
 		&stripe.CustomerParams{DefaultSource: stripeCard.Token},
 	)
@@ -139,7 +151,7 @@ func (cc CardController) SetDefaultCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Default source sucessfully updated"})
+	c.JSON(http.StatusOK, gin.H{"customers": stripeCustomer})
 }
 
 func (cc CardController) DeleteCard(c *gin.Context) {
