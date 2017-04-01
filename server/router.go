@@ -38,7 +38,7 @@ func (a *API) SetupRouter() {
 			users.POST("/", userController.CreateUser)
 			users.GET("/:id/activate/:activationKey", userController.ActivateUser)
 			users.GET("/", userController.GetUsers)
-			users.DELETE("/", userController.DeleteUsers)
+			users.DELETE("/:id", userController.DeleteUser)
 			users.POST("/:id/reset_password", userController.ResetPassword)
 
 			users.GET("/:id", userController.GetUser).Use(middlewares.AuthMiddleware(a.Database, a.Redis))

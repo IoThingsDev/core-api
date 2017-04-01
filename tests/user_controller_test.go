@@ -77,4 +77,8 @@ func TestCreateAccount(t *testing.T) {
 	//Unknown user
 	resp = SendRequest(api, nil, "GET", "/v1/users/"+bson.NewObjectId().Hex()+"/activate/fakeKey")
 	assert.Equal(t, http.StatusNotFound, resp.Code)
+
+	//Delete user
+	resp = SendRequest(api, nil, "DELETE", "/v1/users/"+user.Id.Hex())
+	assert.Equal(t, http.StatusOK, resp.Code)
 }
