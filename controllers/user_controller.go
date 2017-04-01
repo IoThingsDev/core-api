@@ -62,6 +62,21 @@ func (uc UserController) GetUsers(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"users": list})
 }
 
+func (uc UserController) DeleteUsers(c *gin.Context) {
+	session := uc.mgo.Session.Copy()
+	defer session.Close()
+	users := uc.mgo.C(models.UsersCollection).With(session)
+
+	err := users.DropCollection()
+
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("drop_failed", "Dropping the database failed"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Databaase has been dropped"})
+}
+
 func (uc UserController) CreateUser(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
