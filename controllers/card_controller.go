@@ -48,7 +48,6 @@ func (cc CardController) AddCard(c *gin.Context) {
 	if user.StripeId == "" {
 		user.StripeId, err = cc.CreateCustomer(&user)
 		if err != nil {
-			fmt.Println(err)
 			c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
 			return
 		}
