@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"time"
 )
 
 func (a *API) SetupViper() error {
@@ -24,5 +25,14 @@ func (a *API) SetupViper() error {
 	a.Config.SetEnvPrefix("baseapi")
 	a.Config.AutomaticEnv()
 
+	a.SetupViperDefaults()
+
 	return nil
+}
+
+func (a *API) SetupViperDefaults() {
+	a.Config.SetDefault("redis_max_idle", 80)
+	a.Config.SetDefault("redis_max_active", 12000)
+	a.Config.SetDefault("redis_max_timeout", 240*time.Second)
+	a.Config.SetDefault("redis_cache_expiration", 10)
 }

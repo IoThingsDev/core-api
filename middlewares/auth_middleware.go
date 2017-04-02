@@ -8,13 +8,14 @@ import (
 	"strings"
 
 	"github.com/dernise/base-api/models"
+	"github.com/dernise/base-api/services"
 	"github.com/dgrijalva/jwt-go"
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
-func AuthMiddleware(database *mgo.Database) gin.HandlerFunc {
+func AuthMiddleware(database *mgo.Database, redis *services.Redis) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenReader := c.Request.Header.Get("Authorization")
 
@@ -48,16 +49,22 @@ func AuthMiddleware(database *mgo.Database) gin.HandlerFunc {
 
 		claims, _ := token.Claims.(jwt.MapClaims)
 
-		// TODO: ONCE WE ADD REDIS WE HAVE TO GET THE USER FROM REDIS IF POSSIBLE
-		session := database.Session.Copy()
-		defer session.Close()
-		users := database.C(models.UsersCollection).With(session)
-
 		user := models.User{}
-		err = users.FindId(bson.ObjectIdHex(claims["id"].(string))).One(&user)
+
+		// Gets the user from the redis store
+		err = redis.GetValueForKey(bson.ObjectIdHex(claims["id"].(string)).Hex(), &user)
 		if err != nil {
-			c.AbortWithError(http.StatusUnauthorized, errors.New("User not found"))
-			return
+			session := database.Session.Copy()
+			defer session.Close()
+			users := database.C(models.UsersCollection).With(session)
+
+			//Gets the user from the DB
+			err = users.FindId(bson.ObjectIdHex(claims["id"].(string))).One(&user)
+			if err != nil {
+				c.AbortWithError(http.StatusUnauthorized, errors.New("User not found"))
+				return
+			}
+			redis.SetValueForKey(user.Id.Hex(), &user)
 		}
 
 		c.Set("currentUser", user)

@@ -3,8 +3,10 @@ package controllers
 import (
 	"net/http"
 
+	"fmt"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
+	"github.com/dernise/base-api/services"
 	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/card"
@@ -17,16 +19,18 @@ import (
 type CardController struct {
 	mgo    *mgo.Database
 	config *viper.Viper
+	redis  *services.Redis
 }
 
 type Card struct {
 	Token string `json:"token" binding:"required"`
 }
 
-func NewCardController(mgo *mgo.Database, config *viper.Viper) CardController {
+func NewCardController(mgo *mgo.Database, config *viper.Viper, redis *services.Redis) CardController {
 	return CardController{
 		mgo,
 		config,
+		redis,
 	}
 }
 
@@ -44,6 +48,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 	if user.StripeId == "" {
 		user.StripeId, err = cc.CreateCustomer(&user)
 		if err != nil {
+			fmt.Println(err)
 			c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
 			return
 		}
@@ -57,6 +62,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("add_card_failed", "Failed to add the card to the customer"))
 		return
 	}
+	cc.redis.InvalidateObject(user.StripeId)
 
 	c.JSON(http.StatusCreated, gin.H{"cards": response})
 }
@@ -66,11 +72,21 @@ func (cc CardController) GetCards(c *gin.Context) {
 	user := userInterface.(models.User)
 
 	if user.StripeId == "" {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("user_not_customer", "The user is not a customer"))
+		c.JSON(http.StatusOK, gin.H{"cards": []models.Card{}})
 		return
 	}
 
-	stripeCustomer, _ := customer.Get(user.StripeId, nil)
+	stripeCustomer := &stripe.Customer{}
+
+	err := cc.redis.GetValueForKey(user.StripeId, stripeCustomer)
+	if err != nil {
+		stripeCustomer, err = customer.Get(user.StripeId, nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to get the customer from Stripe"))
+			return
+		}
+		cc.redis.SetValueForKey(user.StripeId, stripeCustomer)
+	}
 
 	stripeCards := []models.Card{}
 
@@ -111,6 +127,7 @@ func (cc CardController) CreateCustomer(user *models.User) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	cc.redis.InvalidateObject(user.Id.Hex())
 
 	return newCustomer.ID, nil
 }
@@ -127,6 +144,7 @@ func (cc CardController) SetDefaultCard(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("set_default_card_failed", "Failed to update the customer's default source"))
 		return
 	}
+	cc.redis.InvalidateObject(user.StripeId)
 
 	c.JSON(http.StatusOK, nil)
 }
@@ -144,6 +162,7 @@ func (cc CardController) DeleteCard(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("delete_card_failed", "Failed to delete the customer's card"))
 		return
 	}
+	cc.redis.InvalidateObject(user.StripeId)
 
 	c.JSON(http.StatusOK, nil)
 }

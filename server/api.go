@@ -12,4 +12,5 @@ type API struct {
 	Config      *viper.Viper
 	Database    *mgo.Database
 	EmailSender services.EmailSender
+	Redis       *services.Redis
 }

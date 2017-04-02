@@ -10,13 +10,16 @@ import (
 func main() {
 	api := &server.API{Router: gin.Default(), Config: viper.New()}
 
+	// Configuration setup
 	err := api.SetupViper()
 	if err != nil {
 		panic(err)
 	}
 
+	// Email sender setup
 	api.EmailSender = services.NewSendGridEmailSender(api.Config)
 
+	// Database setup
 	session, err := api.SetupDatabase()
 	if err != nil {
 		panic(err)
@@ -28,8 +31,13 @@ func main() {
 		panic(err)
 	}
 
+	// Stripe setup
 	services.SetStripeKeyAndBackend(api.Config)
 
+	// Redis setup
+	api.SetupRedis()
+
+	// Router setup
 	api.SetupRouter()
 	api.Router.Run(api.Config.GetString("host_address"))
 }

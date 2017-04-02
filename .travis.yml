@@ -3,7 +3,9 @@ language: go
 go:
   - master
 
-services: mongodb
+services:
+  - mongodb
+  - redis
 
 script: BASEAPI_ENV=testing go test ./...
 
