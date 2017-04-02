@@ -31,7 +31,7 @@ func (a *API) SetupRouter() {
 	v1 := router.Group("/v1")
 	{
 		v1.GET("/", Index)
-		userController := controllers.NewUserController(a.Database, a.EmailSender, a.Config)
+		userController := controllers.NewUserController(a.Database, a.EmailSender, a.Config, a.Redis)
 		v1.POST("/reset_password", userController.ResetPasswordRequest)
 		users := v1.Group("/users")
 		{

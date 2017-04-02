@@ -20,13 +20,15 @@ type UserController struct {
 	mgo         *mgo.Database
 	emailSender services.EmailSender
 	config      *viper.Viper
+	redis       *services.Redis
 }
 
-func NewUserController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper) UserController {
+func NewUserController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper, redis *services.Redis) UserController {
 	return UserController{
 		mgo,
 		emailSender,
 		config,
+		redis,
 	}
 }
 func (uc UserController) GetUser(c *gin.Context) {
@@ -134,8 +136,15 @@ func (uc UserController) ResetPasswordRequest(c *gin.Context) {
 	defer session.Close()
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
+	err := uc.redis.UpdateRateLimit(c.ClientIP(), "email")
+	if err != nil {
+		c.AbortWithError(http.StatusTooManyRequests, helpers.ErrorWithCode("too_many_requests", "You sent too many requests on this endpoint."))
+		return
+
+	}
+
 	user := models.User{}
-	err := c.Bind(&user)
+	err = c.Bind(&user)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
 		return

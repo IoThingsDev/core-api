@@ -26,11 +26,6 @@ func (r Redis) GetValueForKey(key string, result interface{}) error {
 		return errors.New("The given key was not found in the redis store")
 	}
 
-	// Resets the expiration
-	if _, err := redisConn.Do("EXPIRE", key, r.Config.GetInt("redis_cache_expiration")*60); err != nil {
-		return err
-	}
-
 	// Unmarshalls the json
 	if err := json.Unmarshal(data.([]byte), &result); err != nil {
 		return err
@@ -71,5 +66,28 @@ func (r Redis) InvalidateObject(id string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (r Redis) UpdateRateLimit(ip string, key string) error {
+	redisConn := r.Pool.Get()
+	defer redisConn.Close()
+
+	fullKeyName := ip + ":" + key
+	count := 1
+
+	err := r.GetValueForKey(fullKeyName, &count)
+	if err != nil {
+		r.SetValueForKey(fullKeyName, &count)
+		return nil
+	}
+
+	if _, err := redisConn.Do("INCR", fullKeyName); err != nil {
+		return err
+	}
+
+	if count > 10 {
+		return errors.New("You reached the maximum rate on this request.")
+	}
 	return nil
 }
