@@ -31,13 +31,8 @@ func NewCardController(mgo *mgo.Database, config *viper.Viper) CardController {
 }
 
 func (cc CardController) AddCard(c *gin.Context) {
-	session := cc.mgo.Session.Copy()
-	defer session.Close()
-	users := cc.mgo.C(models.UsersCollection)
-
-	userIdInterface, _ := c.Get("userId")
-	userId, _ := userIdInterface.(string)
-	user := models.User{}
+	userInterface, _ := c.Get("currentUser")
+	user := userInterface.(models.User)
 
 	stripeCard := Card{}
 	err := c.Bind(&stripeCard)
@@ -46,10 +41,8 @@ func (cc CardController) AddCard(c *gin.Context) {
 		return
 	}
 
-	users.FindId(bson.ObjectIdHex(userId)).One(&user)
-
 	if user.StripeId == "" {
-		user.StripeId, err = cc.CreateCustomer(&user, users)
+		user.StripeId, err = cc.CreateCustomer(&user)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
 			return
@@ -69,15 +62,8 @@ func (cc CardController) AddCard(c *gin.Context) {
 }
 
 func (cc CardController) GetCards(c *gin.Context) {
-	session := cc.mgo.Session.Copy()
-	defer session.Close()
-	users := cc.mgo.C(models.UsersCollection)
-
-	userIdInterface, _ := c.Get("userId")
-	userId, _ := userIdInterface.(string)
-
-	user := models.User{}
-	users.FindId(bson.ObjectIdHex(userId)).One(&user)
+	userInterface, _ := c.Get("currentUser")
+	user := userInterface.(models.User)
 
 	if user.StripeId == "" {
 		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("user_not_customer", "The user is not a customer"))
@@ -107,7 +93,11 @@ func (cc CardController) GetCards(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"cards": stripeCards})
 }
 
-func (cc CardController) CreateCustomer(user *models.User, users *mgo.Collection) (string, error) {
+func (cc CardController) CreateCustomer(user *models.User) (string, error) {
+	session := cc.mgo.Session.Copy()
+	defer session.Close()
+	users := cc.mgo.C(models.UsersCollection)
+
 	customerParams := &stripe.CustomerParams{
 		Email: user.Email,
 	}
@@ -126,15 +116,8 @@ func (cc CardController) CreateCustomer(user *models.User, users *mgo.Collection
 }
 
 func (cc CardController) SetDefaultCard(c *gin.Context) {
-	session := cc.mgo.Session.Copy()
-	defer session.Close()
-	users := cc.mgo.C(models.UsersCollection)
-
-	userIdInterface, _ := c.Get("userId")
-	userId, _ := userIdInterface.(string)
-
-	user := models.User{}
-	users.FindId(bson.ObjectIdHex(userId)).One(&user)
+	userInterface, _ := c.Get("currentUser")
+	user := userInterface.(models.User)
 
 	_, err := customer.Update(
 		user.StripeId,
@@ -149,15 +132,8 @@ func (cc CardController) SetDefaultCard(c *gin.Context) {
 }
 
 func (cc CardController) DeleteCard(c *gin.Context) {
-	session := cc.mgo.Session.Copy()
-	defer session.Close()
-	users := cc.mgo.C(models.UsersCollection)
-
-	userIdInterface, _ := c.Get("userId")
-	userId, _ := userIdInterface.(string)
-
-	user := models.User{}
-	users.FindId(bson.ObjectIdHex(userId)).One(&user)
+	userInterface, _ := c.Get("currentUser")
+	user := userInterface.(models.User)
 
 	_, err := card.Del(
 		c.Param("id"),
