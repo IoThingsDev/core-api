@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 
-	"fmt"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
