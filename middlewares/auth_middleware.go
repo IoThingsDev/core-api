@@ -52,7 +52,7 @@ func AuthMiddleware(database *mgo.Database, redis *services.Redis) gin.HandlerFu
 		user := models.User{}
 
 		// Gets the user from the redis store
-		err = redis.GetValueForKey(bson.ObjectIdHex(claims["id"].(string)).Hex(), &user)
+		err = redis.GetValueForKey(claims["id"].(string), &user)
 		if err != nil {
 			session := database.Session.Copy()
 			defer session.Close()

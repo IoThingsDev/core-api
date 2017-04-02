@@ -5,7 +5,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-func (a *API) SetupRedis() error {
+func (a *API) SetupRedis() {
 	pool := &redis.Pool{
 		MaxIdle:     a.Config.GetInt("redis_max_idle"),
 		MaxActive:   a.Config.GetInt("redis_max_active"), // max number of connections
@@ -19,6 +19,4 @@ func (a *API) SetupRedis() error {
 		pool,
 		a.Config,
 	}
-
-	return nil
 }

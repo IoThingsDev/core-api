@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func TestAddCard(t *testing.T) {
@@ -56,6 +57,6 @@ func TestDeleteCard(t *testing.T) {
 
 	_, jwtToken := CreateUserAndGenerateToken(api)
 
-	resp := SendRequestWithToken(api, nil, "DELETE", "/v1/cards/testId", jwtToken)
+	resp := SendRequestWithToken(api, nil, "DELETE", "/v1/cards/"+bson.NewObjectId().Hex(), jwtToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }

@@ -39,6 +39,8 @@ func SetupApi() *server.API {
 
 	services.SetStripeKeyAndBackend(api.Config)
 
+	api.SetupRedis()
+
 	api.EmailSender = &services.FakeEmailSender{}
 	api.SetupRouter()
 
