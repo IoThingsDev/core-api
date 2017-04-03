@@ -73,7 +73,7 @@ func (uc UserController) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User has been dropped"})
+	c.JSON(http.StatusOK, nil)
 }
 
 func (uc UserController) CreateUser(c *gin.Context) {
