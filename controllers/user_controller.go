@@ -67,9 +67,7 @@ func (uc UserController) DeleteUser(c *gin.Context) {
 	defer session.Close()
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
-	user := models.User{}
-
-	err := users.RemoveId(user.Id)
+	err := users.RemoveId(bson.ObjectIdHex(c.Param("id")))
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("drop_failed", "Dropping the user failed"))
 		return
