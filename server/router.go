@@ -28,6 +28,8 @@ func (a *API) SetupRouter() {
 		ValidateHeaders: false,
 	}))
 
+	router.Use(middlewares.RateMiddleware(a.Redis, a.Config))
+
 	v1 := router.Group("/v1")
 	{
 		v1.GET("/", Index)

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-
 	"strings"
 
 	"github.com/asaskevich/govalidator"
@@ -150,7 +149,7 @@ func (uc UserController) ResetPasswordRequest(c *gin.Context) {
 	defer session.Close()
 	users := uc.mgo.C(models.UsersCollection).With(session)
 
-	err := uc.redis.UpdateRateLimit(c.ClientIP(), "email")
+	err := uc.redis.UpdateEmailRateLimit(c.ClientIP())
 	if err != nil {
 		c.AbortWithError(http.StatusTooManyRequests, helpers.ErrorWithCode("too_many_requests", "You sent too many requests on this endpoint."))
 		return
