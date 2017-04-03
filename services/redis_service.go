@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/garyburd/redigo/redis"
 	"github.com/spf13/viper"
 )
@@ -13,7 +14,7 @@ type Redis struct {
 }
 
 // Gets the object from the redis store, if not found, returns an err
-func (r Redis) GetValueForKey(key string, result interface{}) error {
+func (r *Redis) GetValueForKey(key string, result interface{}) error {
 	redisConn := r.Pool.Get()
 	defer redisConn.Close()
 
@@ -34,7 +35,7 @@ func (r Redis) GetValueForKey(key string, result interface{}) error {
 	return nil
 }
 
-func (r Redis) SetValueForKey(key string, value interface{}) error {
+func (r *Redis) SetValueForKey(key string, value interface{}) error {
 	redisConn := r.Pool.Get()
 	defer redisConn.Close()
 
@@ -58,7 +59,7 @@ func (r Redis) SetValueForKey(key string, value interface{}) error {
 }
 
 // Invalidates an object in the redis store.
-func (r Redis) InvalidateObject(id string) error {
+func (r *Redis) InvalidateObject(id string) error {
 	redisConn := r.Pool.Get()
 	defer redisConn.Close()
 
@@ -69,7 +70,7 @@ func (r Redis) InvalidateObject(id string) error {
 	return nil
 }
 
-func (r Redis) UpdateRateLimit(ip string, key string) error {
+func (r *Redis) UpdateRateLimit(ip string, key string) error {
 	redisConn := r.Pool.Get()
 	defer redisConn.Close()
 
