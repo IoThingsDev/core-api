@@ -8,17 +8,12 @@ import (
 )
 
 func TestCreateTransaction(t *testing.T) {
-	api := SetupApi()
-	defer api.Database.Session.Close()
-
-	user, jwtToken := CreateUserAndGenerateToken(api)
-
 	parameters := []byte(`
 	{
 		"userId":"` + user.Id.Hex() + `",
 		"amount":100
 	}`)
 
-	resp := SendRequestWithToken(api, parameters, "POST", "/v1/billing/", jwtToken)
+	resp := SendRequestWithToken(parameters, "POST", "/v1/billing/", jwtToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }

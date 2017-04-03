@@ -10,9 +10,6 @@ import (
 )
 
 func TestRateMiddleware(t *testing.T) {
-	api := SetupApi()
-	defer api.Database.Session.Close()
-
 	req, err := http.NewRequest("GET", "/v1/", nil)
 	if err != nil {
 		fmt.Println(err)
