@@ -17,36 +17,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func SetupApi() *server.API {
-	api := &server.API{Router: gin.Default(), Config: viper.New()}
-
-	err := api.SetupViper()
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = api.SetupDatabase()
-	if err != nil {
-		panic(err)
-	}
-
-	api.Database.DropDatabase()
-
-	err = api.SetupIndexes()
-	if err != nil {
-		panic(err)
-	}
-
-	services.SetStripeKeyAndBackend(api.Config)
-
-	api.SetupRedis()
-
-	api.EmailSender = &services.FakeEmailSender{}
-	api.SetupRouter()
-
-	return api
-}
-
 func SendRequest(parameters []byte, method string, url string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, url, bytes.NewBuffer(parameters))
 	req.Header.Add("Content-Type", "application/json")
@@ -94,4 +64,34 @@ func CreateUserAndGenerateToken() (*models.User, string) {
 	tokenString, _ := token.SignedString(privateKey)
 
 	return &user, tokenString
+}
+
+func SetupApi() *server.API {
+	api := &server.API{Router: gin.Default(), Config: viper.New()}
+
+	err := api.SetupViper()
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = api.SetupDatabase()
+	if err != nil {
+		panic(err)
+	}
+
+	api.Database.DropDatabase()
+
+	err = api.SetupIndexes()
+	if err != nil {
+		panic(err)
+	}
+
+	services.SetStripeKeyAndBackend(api.Config)
+
+	api.SetupRedis()
+
+	api.EmailSender = &services.FakeEmailSender{}
+	api.SetupRouter()
+
+	return api
 }
