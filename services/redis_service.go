@@ -70,11 +70,11 @@ func (r *Redis) InvalidateObject(id string) error {
 	return nil
 }
 
-func (r *Redis) UpdateRateLimit(ip string, key string) error {
+func (r *Redis) UpdateEmailRateLimit(ip string) error {
 	redisConn := r.Pool.Get()
 	defer redisConn.Close()
 
-	fullKeyName := ip + ":" + key
+	fullKeyName := ip + ":email"
 	count := 1
 
 	err := r.GetValueForKey(fullKeyName, &count)

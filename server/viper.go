@@ -3,8 +3,9 @@ package server
 import (
 	"os"
 
-	"github.com/joho/godotenv"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func (a *API) SetupViper() error {
@@ -35,4 +36,6 @@ func (a *API) SetupViperDefaults() {
 	a.Config.SetDefault("redis_max_active", 12000)
 	a.Config.SetDefault("redis_max_timeout", 240*time.Second)
 	a.Config.SetDefault("redis_cache_expiration", 10)
+	a.Config.SetDefault("rate_limit_requests_per_second", 5)
+	a.Config.SetDefault("rate_limit_activated", true)
 }
