@@ -47,7 +47,7 @@ func SetupApi() *server.API {
 	return api
 }
 
-func SendRequest(api *server.API, parameters []byte, method string, url string) *httptest.ResponseRecorder {
+func SendRequest(parameters []byte, method string, url string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, url, bytes.NewBuffer(parameters))
 	req.Header.Add("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
@@ -55,7 +55,7 @@ func SendRequest(api *server.API, parameters []byte, method string, url string) 
 	return resp
 }
 
-func SendRequestWithToken(api *server.API, parameters []byte, method string, url string, jwtToken string) *httptest.ResponseRecorder {
+func SendRequestWithToken(parameters []byte, method string, url string, jwtToken string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, url, bytes.NewBuffer(parameters))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+jwtToken)
@@ -64,7 +64,7 @@ func SendRequestWithToken(api *server.API, parameters []byte, method string, url
 	return resp
 }
 
-func CreateUserAndGenerateToken(api *server.API) (*models.User, string) {
+func CreateUserAndGenerateToken() (*models.User, string) {
 	users := api.Database.C(models.UsersCollection)
 
 	user := models.User{
