@@ -18,9 +18,9 @@ func TestRateMiddleware(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	api.Config.Set("redis_should_activate_rates", true)
+	api.Config.Set("rate_limit_activated", true)
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < api.Config.GetInt("rate_limit_requests_per_second"); i++ {
 		resp := httptest.NewRecorder()
 		api.Router.ServeHTTP(resp, req)
 		assert.Equal(t, resp.Code, 200)
@@ -30,5 +30,5 @@ func TestRateMiddleware(t *testing.T) {
 	api.Router.ServeHTTP(resp, req)
 	assert.Equal(t, resp.Code, http.StatusTooManyRequests)
 
-	api.Config.Set("redis_should_activate_rates", false)
+	api.Config.Set("rate_limit_activated", false)
 }

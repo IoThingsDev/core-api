@@ -36,6 +36,6 @@ func (a *API) SetupViperDefaults() {
 	a.Config.SetDefault("redis_max_active", 12000)
 	a.Config.SetDefault("redis_max_timeout", 240*time.Second)
 	a.Config.SetDefault("redis_cache_expiration", 10)
-	a.Config.SetDefault("redis_requests_per_seconds", 5)
-	a.Config.SetDefault("redis_should_activate_rates", true)
+	a.Config.SetDefault("rate_limit_requests_per_second", 5)
+	a.Config.SetDefault("rate_limit_activated", true)
 }

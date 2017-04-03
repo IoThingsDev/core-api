@@ -17,7 +17,7 @@ func RateMiddleware(redis *services.Redis, config *viper.Viper) gin.HandlerFunc 
 		conn := redis.Pool.Get()
 		defer conn.Close()
 
-		if !config.GetBool("redis_should_activate_rates") {
+		if !config.GetBool("rate_limit_activated") {
 			return
 		}
 
@@ -36,7 +36,7 @@ func RateMiddleware(redis *services.Redis, config *viper.Viper) gin.HandlerFunc 
 			}
 		}
 
-		if count != -1 && count >= config.GetInt("redis_requests_per_seconds") {
+		if count != -1 && count >= config.GetInt("rate_limit_requests_per_second") {
 			c.AbortWithError(http.StatusTooManyRequests, helpers.ErrorWithCode("too_many_requests", "You sent too many requests over the last second."))
 		} else {
 			conn.Do("INCR", keyName)
