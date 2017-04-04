@@ -22,6 +22,6 @@ ENV BASEAPI_ENV prod
 # Run the outyet command by default when the container starts.
 ENTRYPOINT /go/bin/base-api
 
-# Document that the service listens on port 8080.
+# Document that the service listens on port 4000.
 EXPOSE 4000
 
