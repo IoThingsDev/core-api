@@ -45,6 +45,7 @@ func CreateUserAndGenerateToken() (*models.User, string) {
 		Password:  "strongPassword",
 		Active:    true,
 		StripeId:  "cus_AKlEqL9MjNICJx",
+		Admin:     true,
 	}
 
 	users.Insert(user)

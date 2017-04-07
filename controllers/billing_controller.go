@@ -11,6 +11,7 @@ import (
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/currency"
+	"github.com/stripe/stripe-go/plan"
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2"
 )
@@ -19,13 +20,15 @@ type BillingController struct {
 	mgo         *mgo.Database
 	emailSender services.EmailSender
 	config      *viper.Viper
+	redis       *services.Redis
 }
 
-func NewBillingController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper) BillingController {
+func NewBillingController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper, redis *services.Redis) BillingController {
 	return BillingController{
 		mgo,
 		emailSender,
 		config,
+		redis,
 	}
 }
 
@@ -78,4 +81,61 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Payment successed"})
 	}
+}
+
+func (bc BillingController) GetPlans(c *gin.Context) {
+	stripePlans := []models.Plan{}
+	err := bc.redis.GetValueForKey("billing-plans", &stripePlans)
+	if err != nil {
+		i := plan.List(nil)
+
+		for i.Next() {
+			p := i.Plan()
+			stripePlan := models.Plan{
+				Id:       p.ID,
+				Amount:   p.Amount,
+				Currency: p.Currency,
+				Interval: p.Interval,
+				Name:     p.Name,
+				MetaData: p.Meta,
+			}
+
+			stripePlans = append(stripePlans, stripePlan)
+		}
+
+		bc.redis.SetValueForKey("billing-plans", stripePlans)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"plans": stripePlans})
+}
+
+func (bc BillingController) CreatePlan(c *gin.Context) {
+	stripePlan := models.Plan{}
+	err := c.Bind(&stripePlan)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
+		return
+	}
+
+	params := stripe.Params{
+		Meta: stripePlan.MetaData,
+	}
+
+	_, err = plan.New(&stripe.PlanParams{
+		Amount:   stripePlan.Amount,
+		Interval: stripePlan.Interval,
+		Name:     stripePlan.Name,
+		Currency: stripePlan.Currency,
+		ID:       stripePlan.Id,
+		Params:   params,
+	})
+
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("plan_creation_failed", "The plan has not been created"))
+		return
+	}
+
+	bc.redis.InvalidateObject("billing-plans")
+
+	c.JSON(http.StatusCreated, gin.H{"plans": stripePlan})
 }
