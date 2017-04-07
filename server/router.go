@@ -64,8 +64,16 @@ func (a *API) SetupRouter() {
 
 		billing := v1.Group("/billing")
 		{
+			billingController := controllers.NewBillingController(a.Database, a.EmailSender, a.Config, a.Redis)
 			billing.Use(middlewares.AuthMiddleware(a.Database, a.Redis))
-			billingController := controllers.NewBillingController(a.Database, a.EmailSender, a.Config)
+
+			plans := billing.Group("/plans")
+			{
+				plans.Use(middlewares.AdminMiddleware())
+				plans.GET("/", billingController.GetPlans)
+				plans.POST("/", billingController.CreatePlan)
+			}
+
 			billing.POST("/", billingController.CreateTransaction)
 		}
 	}

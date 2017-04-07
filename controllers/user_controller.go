@@ -110,10 +110,9 @@ func (uc UserController) CreateUser(c *gin.Context) {
 
 	user.Active = false
 	user.ActivationKey = helpers.RandomString(20)
-
 	user.StripeId = ""
-
 	user.Id = bson.NewObjectId()
+	user.Admin = false
 
 	uc.sendActivationEmail(&user)
 
