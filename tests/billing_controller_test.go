@@ -44,3 +44,8 @@ func TestCreatePlan(t *testing.T) {
 	resp = SendRequestWithToken(parameters, "POST", "/v1/billing/plans/", jwtToken)
 	assert.Equal(t, http.StatusBadRequest, resp.Code)
 }
+
+func TestGetPlans(t *testing.T) {
+	resp := SendRequestWithToken(nil, "GET", "/v1/billing/plans/", jwtToken)
+	assert.Equal(t, http.StatusOK, resp.Code)
+}

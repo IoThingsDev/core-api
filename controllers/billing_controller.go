@@ -106,7 +106,7 @@ func (bc BillingController) GetPlans(c *gin.Context) {
 		bc.redis.SetValueForKey("billing-plans", stripePlans)
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"plans": stripePlans})
+	c.JSON(http.StatusOK, gin.H{"plans": stripePlans})
 }
 
 func (bc BillingController) CreatePlan(c *gin.Context) {
