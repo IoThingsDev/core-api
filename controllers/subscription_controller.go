@@ -42,7 +42,7 @@ func (sc StripeSubscriptionController) CreateSubscription(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("subscription_creation_failed", "Failed to subscribe the user to this plan"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("subscription_creation_failed", err.Error()))
 		return
 	}
 
