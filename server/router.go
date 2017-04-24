@@ -69,12 +69,11 @@ func (a *API) SetupRouter() {
 
 			plans := billing.Group("/plans")
 			{
-				plans.Use(middlewares.AdminMiddleware())
 				plans.GET("/", billingController.GetPlans)
-				plans.POST("/", billingController.CreatePlan)
+				plans.POST("/", billingController.CreatePlan).Use(middlewares.AdminMiddleware())
 			}
 
-			subscriptionController := controllers.NewSubscriptionController(a.Database, a.Config, a.Redis)
+			subscriptionController := controllers.NewStripeSubscriptionController(a.Database, a.Config, a.Redis)
 			subscriptions := billing.Group("/subscriptions")
 			{
 				subscriptions.POST("/", subscriptionController.CreateSubscription)

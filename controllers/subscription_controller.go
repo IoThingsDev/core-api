@@ -13,21 +13,21 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-type SubscriptionController struct {
+type StripeSubscriptionController struct {
 	mgo    *mgo.Database
 	config *viper.Viper
 	redis  *services.Redis
 }
 
-func NewSubscriptionController(mgo *mgo.Database, config *viper.Viper, redis *services.Redis) SubscriptionController {
-	return SubscriptionController{
+func NewStripeSubscriptionController(mgo *mgo.Database, config *viper.Viper, redis *services.Redis) StripeSubscriptionController {
+	return StripeSubscriptionController{
 		mgo,
 		config,
 		redis,
 	}
 }
 
-func (sc SubscriptionController) CreateSubscription(c *gin.Context) {
+func (sc StripeSubscriptionController) CreateSubscription(c *gin.Context) {
 	user := models.GetUserFromContext(c)
 
 	plan := models.Plan{}
@@ -47,4 +47,57 @@ func (sc SubscriptionController) CreateSubscription(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, nil)
+}
+
+func (sc StripeSubscriptionController) GetSubscriptions(c *gin.Context) {
+	user := models.GetUserFromContext(c)
+
+	subscriptions := sc.getSubscriptions(user.StripeId)
+
+	c.JSON(http.StatusOK, gin.H{"subscriptions": subscriptions})
+}
+
+func (sc StripeSubscriptionController) DeleteSubscription(c *gin.Context) {
+	user := models.GetUserFromContext(c)
+
+	subscription := stripe.Sub{}
+
+	if err := c.Bind(&subscription); err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
+		return
+	}
+
+	subscriptions := sc.getSubscriptions(user.StripeId)
+
+	found := false
+	for _, s := range subscriptions {
+		if subscription.ID == s.ID {
+			found = true
+			break
+		}
+	}
+
+	if found == false {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "The subscription id is wrong"))
+		return
+	}
+
+	if _, err := sub.Cancel(subscription.ID, nil); err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("delete_subscription_failed", "Failed to delete the subscription"))
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+func (sc StripeSubscriptionController) getSubscriptions(stripeId string) []*stripe.Sub {
+	subscriptions := []*stripe.Sub{}
+	params := &stripe.SubListParams{}
+	params.Customer = stripeId
+	i := sub.List(params)
+	for i.Next() {
+		subscriptions = append(subscriptions, i.Sub())
+	}
+
+	return subscriptions
 }
