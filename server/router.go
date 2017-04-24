@@ -74,6 +74,12 @@ func (a *API) SetupRouter() {
 				plans.POST("/", billingController.CreatePlan)
 			}
 
+			subscriptionController := controllers.NewSubscriptionController(a.Database, a.Config, a.Redis)
+			subscriptions := billing.Group("/subscriptions")
+			{
+				subscriptions.POST("/", subscriptionController.CreateSubscription)
+			}
+
 			billing.POST("/", billingController.CreateTransaction)
 		}
 	}
