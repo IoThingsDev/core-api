@@ -77,6 +77,8 @@ func (a *API) SetupRouter() {
 			subscriptions := billing.Group("/subscriptions")
 			{
 				subscriptions.POST("/", subscriptionController.CreateSubscription)
+				subscriptions.GET("/", subscriptionController.GetSubscriptions)
+				subscriptions.DELETE("/:id", subscriptionController.DeleteSubscription)
 			}
 
 			billing.POST("/", billingController.CreateTransaction)

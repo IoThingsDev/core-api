@@ -60,18 +60,13 @@ func (sc StripeSubscriptionController) GetSubscriptions(c *gin.Context) {
 func (sc StripeSubscriptionController) DeleteSubscription(c *gin.Context) {
 	user := models.GetUserFromContext(c)
 
-	subscription := stripe.Sub{}
-
-	if err := c.Bind(&subscription); err != nil {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
-		return
-	}
+	subscriptionId := c.Param("id")
 
 	subscriptions := sc.getSubscriptions(user.StripeId)
 
 	found := false
 	for _, s := range subscriptions {
-		if subscription.ID == s.ID {
+		if subscriptionId == s.ID {
 			found = true
 			break
 		}
@@ -82,7 +77,7 @@ func (sc StripeSubscriptionController) DeleteSubscription(c *gin.Context) {
 		return
 	}
 
-	if _, err := sub.Cancel(subscription.ID, nil); err != nil {
+	if _, err := sub.Cancel(subscriptionId, nil); err != nil {
 		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("delete_subscription_failed", "Failed to delete the subscription"))
 		return
 	}

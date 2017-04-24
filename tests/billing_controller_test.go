@@ -31,18 +31,6 @@ func TestCreatePlan(t *testing.T) {
 
 	resp := SendRequestWithToken(parameters, "POST", "/v1/billing/plans/", jwtToken)
 	assert.Equal(t, http.StatusCreated, resp.Code)
-
-	parameters = []byte(`
-	{
-		"amount": 1000,
-		"name": "The best plan for you!",
-		"interval": "month",
-		"currency": "eur",
-		"metadata": {"description":"plan that allows you to use one app and one user"}
-	}`)
-
-	resp = SendRequestWithToken(parameters, "POST", "/v1/billing/plans/", jwtToken)
-	assert.Equal(t, http.StatusBadRequest, resp.Code)
 }
 
 func TestGetPlans(t *testing.T) {

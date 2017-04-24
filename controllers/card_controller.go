@@ -56,7 +56,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 		Token:    stripeCard.Token,
 	})
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("add_card_failed", "Failed to add the card to the customer"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("add_card_failed", err.Error()))
 		return
 	}
 	cc.redis.InvalidateObject(user.StripeId)
