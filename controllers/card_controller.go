@@ -34,8 +34,7 @@ func NewCardController(mgo *mgo.Database, config *viper.Viper, redis *services.R
 }
 
 func (cc CardController) AddCard(c *gin.Context) {
-	userInterface, _ := c.Get("currentUser")
-	user := userInterface.(models.User)
+	user := models.GetUserFromContext(c)
 
 	stripeCard := Card{}
 	err := c.Bind(&stripeCard)
@@ -45,7 +44,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 	}
 
 	if user.StripeId == "" {
-		user.StripeId, err = cc.CreateCustomer(&user)
+		user.StripeId, err = cc.createCustomer(&user)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
 			return
@@ -57,7 +56,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 		Token:    stripeCard.Token,
 	})
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("add_card_failed", "Failed to add the card to the customer"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("add_card_failed", err.Error()))
 		return
 	}
 	cc.redis.InvalidateObject(user.StripeId)
@@ -66,8 +65,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 }
 
 func (cc CardController) GetCards(c *gin.Context) {
-	userInterface, _ := c.Get("currentUser")
-	user := userInterface.(models.User)
+	user := models.GetUserFromContext(c)
 
 	if user.StripeId == "" {
 		c.JSON(http.StatusOK, gin.H{"cards": []models.Card{}})
@@ -107,10 +105,10 @@ func (cc CardController) GetCards(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"cards": stripeCards})
 }
 
-func (cc CardController) CreateCustomer(user *models.User) (string, error) {
+func (cc CardController) createCustomer(user *models.User) (string, error) {
 	session := cc.mgo.Session.Copy()
 	defer session.Close()
-	users := cc.mgo.C(models.UsersCollection)
+	users := cc.mgo.C(models.UsersCollection).With(session)
 
 	customerParams := &stripe.CustomerParams{
 		Email: user.Email,
@@ -125,14 +123,14 @@ func (cc CardController) CreateCustomer(user *models.User) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	cc.redis.InvalidateObject(user.Id.Hex())
 
 	return newCustomer.ID, nil
 }
 
 func (cc CardController) SetDefaultCard(c *gin.Context) {
-	userInterface, _ := c.Get("currentUser")
-	user := userInterface.(models.User)
+	user := models.GetUserFromContext(c)
 
 	_, err := customer.Update(
 		user.StripeId,
@@ -148,8 +146,7 @@ func (cc CardController) SetDefaultCard(c *gin.Context) {
 }
 
 func (cc CardController) DeleteCard(c *gin.Context) {
-	userInterface, _ := c.Get("currentUser")
-	user := userInterface.(models.User)
+	user := models.GetUserFromContext(c)
 
 	_, err := card.Del(
 		c.Param("id"),

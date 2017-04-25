@@ -1,6 +1,7 @@
 package models
 
 import (
+	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -24,8 +25,12 @@ type SanitizedUser struct {
 	Email     string        `json:"email" bson:"email"`
 }
 
-func (uc User) Sanitize() SanitizedUser {
-	return SanitizedUser{uc.Id, uc.Firstname, uc.Lastname, uc.Email}
+func GetUserFromContext(c *gin.Context) User {
+	return c.MustGet("currentUser").(User)
+}
+
+func (u *User) Sanitize() SanitizedUser {
+	return SanitizedUser{u.Id, u.Firstname, u.Lastname, u.Email}
 }
 
 const UsersCollection = "users"
