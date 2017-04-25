@@ -38,13 +38,15 @@ func (sc StripeSubscriptionController) CreateSubscription(c *gin.Context) {
 
 	_, err := sub.New(&stripe.SubParams{
 		Customer: user.StripeId,
-		Plan:     plan.Name,
+		Plan:     plan.Id,
 	})
 
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("subscription_creation_failed", err.Error()))
 		return
 	}
+
+	sc.redis.InvalidateObject(user.StripeId + "-subscriptions")
 
 	c.JSON(http.StatusOK, nil)
 }
@@ -82,16 +84,23 @@ func (sc StripeSubscriptionController) DeleteSubscription(c *gin.Context) {
 		return
 	}
 
+	sc.redis.InvalidateObject(user.StripeId + "-subscriptions")
+
 	c.JSON(http.StatusOK, nil)
 }
 
 func (sc StripeSubscriptionController) getSubscriptions(stripeId string) []*stripe.Sub {
 	subscriptions := []*stripe.Sub{}
-	params := &stripe.SubListParams{}
-	params.Customer = stripeId
-	i := sub.List(params)
-	for i.Next() {
-		subscriptions = append(subscriptions, i.Sub())
+	err := sc.redis.GetValueForKey(stripeId+"-subscriptions", subscriptions)
+	if err != nil {
+		params := &stripe.SubListParams{}
+		params.Customer = stripeId
+		i := sub.List(params)
+		for i.Next() {
+			subscriptions = append(subscriptions, i.Sub())
+		}
+
+		sc.redis.SetValueForKey(stripeId+"-subscriptions", subscriptions)
 	}
 
 	return subscriptions
