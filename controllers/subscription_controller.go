@@ -64,22 +64,9 @@ func (sc StripeSubscriptionController) DeleteSubscription(c *gin.Context) {
 
 	subscriptionId := c.Param("id")
 
-	subscriptions := sc.getSubscriptions(user.StripeId)
-
-	found := false
-	for _, s := range subscriptions {
-		if subscriptionId == s.ID {
-			found = true
-			break
-		}
-	}
-
-	if found == false {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "The subscription id is wrong"))
-		return
-	}
-
-	if _, err := sub.Cancel(subscriptionId, nil); err != nil {
+	if _, err := sub.Cancel(subscriptionId, &stripe.SubParams{
+		Customer: user.StripeId,
+	}); err != nil {
 		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("delete_subscription_failed", "Failed to delete the subscription"))
 		return
 	}

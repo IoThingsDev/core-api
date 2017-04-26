@@ -10,11 +10,11 @@ import (
 
 var api *server.API
 var user *models.User
-var jwtToken string
+var authToken string
 
 func TestMain(m *testing.M) {
 	api = SetupApi()
-	user, jwtToken = CreateUserAndGenerateToken()
+	user, authToken = CreateUserAndGenerateToken()
 	retCode := m.Run()
 	api.Database.Session.Close()
 	os.Exit(retCode)
