@@ -43,7 +43,8 @@ func (a *API) SetupRouter() {
 			users.DELETE("/:id", userController.DeleteUser)
 			users.POST("/:id/reset_password", userController.ResetPassword)
 
-			users.GET("/:id", userController.GetUser).Use(middlewares.AuthMiddleware(a.Database, a.Redis))
+			users.Use(middlewares.AuthMiddleware(a.Database, a.Redis))
+			users.GET("/:id", userController.GetUser)
 		}
 
 		cards := v1.Group("/cards")
