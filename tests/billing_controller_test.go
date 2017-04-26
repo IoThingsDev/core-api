@@ -14,7 +14,7 @@ func TestCreateTransaction(t *testing.T) {
 		"amount":100
 	}`)
 
-	resp := SendRequestWithToken(parameters, "POST", "/v1/billing/", jwtToken)
+	resp := SendRequestWithToken(parameters, "POST", "/v1/billing/", authToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
 
@@ -29,11 +29,11 @@ func TestCreatePlan(t *testing.T) {
 		"metadata": {"description":"plan that allows you to use one app and one user"}
 	}`)
 
-	resp := SendRequestWithToken(parameters, "POST", "/v1/billing/plans/", jwtToken)
+	resp := SendRequestWithToken(parameters, "POST", "/v1/billing/plans/", authToken)
 	assert.Equal(t, http.StatusCreated, resp.Code)
 }
 
 func TestGetPlans(t *testing.T) {
-	resp := SendRequestWithToken(nil, "GET", "/v1/billing/plans/", jwtToken)
+	resp := SendRequestWithToken(nil, "GET", "/v1/billing/plans/", authToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }

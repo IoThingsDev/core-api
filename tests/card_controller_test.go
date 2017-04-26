@@ -14,7 +14,7 @@ func TestAddCard(t *testing.T) {
 		"token":"TestToken"
 	}`)
 
-	resp := SendRequestWithToken(parameters, "POST", "/v1/cards/", jwtToken)
+	resp := SendRequestWithToken(parameters, "POST", "/v1/cards/", authToken)
 	assert.Equal(t, http.StatusCreated, resp.Code)
 
 	parameters = []byte(`
@@ -22,21 +22,21 @@ func TestAddCard(t *testing.T) {
 		"oken":"TestToken"
 	}`)
 
-	resp = SendRequestWithToken(parameters, "POST", "/v1/cards/", jwtToken)
+	resp = SendRequestWithToken(parameters, "POST", "/v1/cards/", authToken)
 	assert.Equal(t, http.StatusBadRequest, resp.Code)
 }
 
 func TestGetCards(t *testing.T) {
-	resp := SendRequestWithToken(nil, "GET", "/v1/cards/", jwtToken)
+	resp := SendRequestWithToken(nil, "GET", "/v1/cards/", authToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
 
 func TestDefaultCard(t *testing.T) {
-	resp := SendRequestWithToken(nil, "PUT", "/v1/cards/testId/set_default", jwtToken)
+	resp := SendRequestWithToken(nil, "PUT", "/v1/cards/testId/set_default", authToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
 
 func TestDeleteCard(t *testing.T) {
-	resp := SendRequestWithToken(nil, "DELETE", "/v1/cards/"+bson.NewObjectId().Hex(), jwtToken)
+	resp := SendRequestWithToken(nil, "DELETE", "/v1/cards/"+bson.NewObjectId().Hex(), authToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }

@@ -25,10 +25,10 @@ func SendRequest(parameters []byte, method string, url string) *httptest.Respons
 	return resp
 }
 
-func SendRequestWithToken(parameters []byte, method string, url string, jwtToken string) *httptest.ResponseRecorder {
+func SendRequestWithToken(parameters []byte, method string, url string, authToken string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, url, bytes.NewBuffer(parameters))
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+jwtToken)
+	req.Header.Add("Authorization", "Bearer "+authToken)
 	resp := httptest.NewRecorder()
 	api.Router.ServeHTTP(resp, req)
 	return resp
