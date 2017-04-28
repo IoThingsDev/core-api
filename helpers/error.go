@@ -9,10 +9,10 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-func (e Error) Error() string {
+func (e *Error) Error() string {
 	return fmt.Sprintf("%v: %v", e.Code, e.Message)
 }
 
-func ErrorWithCode(code string, message string) error {
+func ErrorWithCode(code string, message string) Error {
 	return Error{Code: code, Message: message}
 }

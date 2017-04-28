@@ -2,11 +2,10 @@ package controllers
 
 import (
 	"net/http"
-	"strings"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
+	"github.com/dernise/base-api/repositories"
 	"github.com/dernise/base-api/services"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
@@ -31,111 +30,37 @@ func NewUserController(mgo *mgo.Database, emailSender services.EmailSender, conf
 	}
 }
 func (uc UserController) GetUser(c *gin.Context) {
-	session := uc.mgo.Session.Copy()
-	defer session.Close()
-	users := uc.mgo.C(models.UsersCollection).With(session)
-
-	user := models.User{}
-	err := users.FindId(bson.ObjectIdHex(c.Param("id"))).One(&user)
+	user, err := repositories.GetUser(c, c.Param("id"))
 
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "User not found"))
+		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"users": user.Sanitize()})
 }
 
-func (uc UserController) GetUsers(c *gin.Context) {
-	session := uc.mgo.Session.Copy()
-	defer session.Close()
-	users := uc.mgo.C(models.UsersCollection).With(session)
-
-	list := []models.SanitizedUser{}
-	err := users.Find(nil).All(&list)
-	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "Users not found"))
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"users": list})
-}
-
-func (uc UserController) DeleteUser(c *gin.Context) {
-	session := uc.mgo.Session.Copy()
-	defer session.Close()
-	users := uc.mgo.C(models.UsersCollection).With(session)
-
-	err := users.RemoveId(bson.ObjectIdHex(c.Param("id")))
-	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("drop_failed", "Dropping the user failed"))
-		return
-	}
-
-	c.JSON(http.StatusOK, nil)
-}
-
 func (uc UserController) CreateUser(c *gin.Context) {
-	session := uc.mgo.Session.Copy()
-	defer session.Close()
-	users := uc.mgo.C(models.UsersCollection).With(session)
+	user := &models.User{}
 
-	user := models.User{}
-	err := c.Bind(&user)
-	if err != nil {
+	if err := c.BindJSON(user); err != nil {
 		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
 		return
 	}
 
-	_, err = govalidator.ValidateStruct(user)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+	if err := repositories.CreateUser(c, user); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	user.Email = strings.ToLower(user.Email)
-	count, _ := users.Find(bson.M{"email": user.Email}).Count()
-	if count > 0 {
-		c.AbortWithError(http.StatusConflict, helpers.ErrorWithCode("user_already_exists", "User already exists"))
-		return
-	}
-
-	password := []byte(user.Password)
-	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
-	user.Password = string(hashedPassword)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("encryption_failed", "Failed to generate the encrypted password"))
-		return
-	}
-
-	user.Active = false
-	user.ActivationKey = helpers.RandomString(20)
-	user.StripeId = ""
-	user.Id = bson.NewObjectId()
-	user.Admin = false
-
-	uc.sendActivationEmail(&user)
-
-	err = users.Insert(user)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("creation_failed", "Failed to insert the user"))
-		return
-	}
+	uc.sendActivationEmail(user)
 
 	c.JSON(http.StatusCreated, gin.H{"users": user.Sanitize()})
 }
 
 func (uc UserController) ActivateUser(c *gin.Context) {
-	session := uc.mgo.Session.Copy()
-	defer session.Close()
-	users := uc.mgo.C(models.UsersCollection).With(session)
-
-	userId := c.Param("id")
-	activationKey := c.Param("activationKey")
-
-	err := users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(userId)}, {"activationKey": activationKey}}}, bson.M{"$set": bson.M{"active": true}})
-	if err != nil {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("activation_failed", "Couldn't find the user to activate"))
+	if err := repositories.ActivateUser(c, c.Param("activationKey"), c.Param("id")); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 

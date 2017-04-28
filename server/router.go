@@ -28,6 +28,8 @@ func (a *API) SetupRouter() {
 		ValidateHeaders: false,
 	}))
 
+	router.Use(middlewares.StoreMiddleware(a.Database))
+
 	router.Use(middlewares.RateMiddleware(a.Redis, a.Config))
 
 	v1 := router.Group("/v1")
@@ -39,8 +41,6 @@ func (a *API) SetupRouter() {
 		{
 			users.POST("/", userController.CreateUser)
 			users.GET("/:id/activate/:activationKey", userController.ActivateUser)
-			users.GET("/", userController.GetUsers)
-			users.DELETE("/:id", userController.DeleteUser)
 			users.POST("/:id/reset_password", userController.ResetPassword)
 
 			users.Use(middlewares.AuthMiddleware(a.Database, a.Redis))
