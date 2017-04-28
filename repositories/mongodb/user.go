@@ -46,13 +46,25 @@ func (db *mongo) CreateUser(user *models.User) error {
 	return nil
 }
 
-func (db *mongo) GetUser(id string) (*models.User, error) {
+func (db *mongo) FindUserById(id string) (*models.User, error) {
 	session := db.Session.Copy()
 	defer session.Close()
 	users := db.C(models.UsersCollection).With(session)
 
 	user := &models.User{}
 	err := users.FindId(bson.ObjectIdHex(id)).One(user)
+
+	return user, err
+}
+
+func (db *mongo) FindUser(params map[string]interface{}) (*models.User, error) {
+	session := db.Session.Copy()
+	defer session.Close()
+	users := db.C(models.UsersCollection).With(session)
+
+	user := &models.User{}
+
+	err := users.Find(params).One(user)
 
 	return user, err
 }

@@ -10,8 +10,12 @@ func CreateUser(c context.Context, record *models.User) error {
 	return FromContext(c).CreateUser(record)
 }
 
-func GetUser(c context.Context, id string) (*models.User, error) {
-	return FromContext(c).GetUser(id)
+func FindUserById(c context.Context, id string) (*models.User, error) {
+	return FromContext(c).FindUserById(id)
+}
+
+func FindUser(c context.Context, params map[string]interface{}) (*models.User, error) {
+	return FromContext(c).FindUser(params)
 }
 
 func ActivateUser(c context.Context, activationKey string, id string) error {

@@ -21,7 +21,7 @@ func NewUserController(emailSender services.EmailSender) UserController {
 	}
 }
 func (uc UserController) GetUser(c *gin.Context) {
-	user, err := repositories.GetUser(c, c.Param("id"))
+	user, err := repositories.FindUserById(c, c.Param("id"))
 
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
