@@ -3,30 +3,21 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/dernise/base-api/configuration"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/repositories"
 	"github.com/dernise/base-api/services"
-	"github.com/spf13/viper"
-	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gin-gonic/gin.v1"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type UserController struct {
-	mgo         *mgo.Database
 	emailSender services.EmailSender
-	config      *viper.Viper
-	redis       *services.Redis
 }
 
-func NewUserController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper, redis *services.Redis) UserController {
+func NewUserController(emailSender services.EmailSender) UserController {
 	return UserController{
-		mgo,
 		emailSender,
-		config,
-		redis,
 	}
 }
 func (uc UserController) GetUser(c *gin.Context) {
@@ -53,7 +44,8 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	uc.sendActivationEmail(user)
+	appName := configuration.GetString(c, "sendgrid_name")
+	uc.sendActivationEmail(appName, user)
 
 	c.JSON(http.StatusCreated, gin.H{"users": user.Sanitize()})
 }
@@ -64,11 +56,11 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User has been activated"})
+	c.JSON(http.StatusOK, nil)
 }
 
 // Checks for a user that matches an email, and sends a reset mail
-func (uc UserController) ResetPasswordRequest(c *gin.Context) {
+/*func (uc UserController) ResetPasswordRequest(c *gin.Context) {
 	session := uc.mgo.Session.Copy()
 	defer session.Close()
 	users := uc.mgo.C(models.UsersCollection).With(session)
@@ -117,11 +109,6 @@ func (uc UserController) ResetPassword(c *gin.Context) {
 	resetKey := c.PostForm("resetKey")
 	newPassword := c.PostForm("newPassword")
 
-	/*if len(userId)==0 || len(resetKey)==0 || len(newPassword)==0 {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to get the post data"))
-		return
-	}*/
-
 	user := models.User{}
 
 	password := []byte(newPassword)
@@ -139,16 +126,15 @@ func (uc UserController) ResetPassword(c *gin.Context) {
 	}
 
 	uc.sendResetPasswordDoneEmail(&user)
-}
+}*/
 
-func (uc UserController) sendActivationEmail(user *models.User) {
-	appName := uc.config.GetString("sendgrid_name")
+func (uc UserController) sendActivationEmail(appName string, user *models.User) {
 	subject := "Welcome to " + appName + "! Account confirmation"
 	templateLink := "./templates/mail_activate_account.html"
 	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
 }
 
-func (uc UserController) sendResetPasswordRequestEmail(user *models.User) {
+/*func (uc UserController) sendResetPasswordRequestEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
 	subject := "Reset your " + appName + " Account password"
 	templateLink := "./templates/mail_reset_password_request.html"
@@ -160,4 +146,4 @@ func (uc UserController) sendResetPasswordDoneEmail(user *models.User) {
 	subject := "Your " + appName + " password has been reset"
 	templateLink := "./templates/mail_reset_password_done.html"
 	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
-}
+}*/

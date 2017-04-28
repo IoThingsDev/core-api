@@ -29,19 +29,19 @@ func (a *API) SetupRouter() {
 	}))
 
 	router.Use(middlewares.StoreMiddleware(a.Database))
-
+	router.Use(middlewares.ConfigMiddleware(a.Config))
 	router.Use(middlewares.RateMiddleware(a.Redis, a.Config))
 
 	v1 := router.Group("/v1")
 	{
 		v1.GET("/", Index)
-		userController := controllers.NewUserController(a.Database, a.EmailSender, a.Config, a.Redis)
-		v1.POST("/reset_password", userController.ResetPasswordRequest)
+		userController := controllers.NewUserController(a.EmailSender)
+		//v1.POST("/reset_password", userController.ResetPasswordRequest)
 		users := v1.Group("/users")
 		{
 			users.POST("/", userController.CreateUser)
 			users.GET("/:id/activate/:activationKey", userController.ActivateUser)
-			users.POST("/:id/reset_password", userController.ResetPassword)
+			//users.POST("/:id/reset_password", userController.ResetPassword)
 
 			users.Use(middlewares.AuthMiddleware(a.Database, a.Redis))
 			users.GET("/:id", userController.GetUser)

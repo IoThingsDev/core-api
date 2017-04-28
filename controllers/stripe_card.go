@@ -6,7 +6,6 @@ import (
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
-	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/card"
 	"github.com/stripe/stripe-go/customer"
@@ -16,19 +15,17 @@ import (
 )
 
 type CardController struct {
-	mgo    *mgo.Database
-	config *viper.Viper
-	redis  *services.Redis
+	mgo   *mgo.Database
+	redis *services.Redis
 }
 
 type Card struct {
 	Token string `json:"token" binding:"required"`
 }
 
-func NewCardController(mgo *mgo.Database, config *viper.Viper, redis *services.Redis) CardController {
+func NewCardController(mgo *mgo.Database, redis *services.Redis) CardController {
 	return CardController{
 		mgo,
-		config,
 		redis,
 	}
 }

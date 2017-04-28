@@ -6,23 +6,17 @@ import (
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
-	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/sub"
 	"gopkg.in/gin-gonic/gin.v1"
-	"gopkg.in/mgo.v2"
 )
 
 type StripeSubscriptionController struct {
-	mgo    *mgo.Database
-	config *viper.Viper
-	redis  *services.Redis
+	redis *services.Redis
 }
 
-func NewStripeSubscriptionController(mgo *mgo.Database, config *viper.Viper, redis *services.Redis) StripeSubscriptionController {
+func NewStripeSubscriptionController(redis *services.Redis) StripeSubscriptionController {
 	return StripeSubscriptionController{
-		mgo,
-		config,
 		redis,
 	}
 }
