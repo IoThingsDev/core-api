@@ -1,4 +1,4 @@
-package repositories
+package store
 
 import (
 	"github.com/dernise/base-api/models"

@@ -5,27 +5,24 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dernise/base-api/config"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
-	"github.com/dernise/base-api/repositories"
+	"github.com/dernise/base-api/store"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
 type AuthController struct {
-	config *viper.Viper
 }
 
-func NewAuthController(config *viper.Viper) AuthController {
-	return AuthController{
-		config,
-	}
+func NewAuthController() AuthController {
+	return AuthController{}
 }
 
 func (ac AuthController) Authentication(c *gin.Context) {
-	privateKeyFile, _ := ioutil.ReadFile(ac.config.GetString("rsa_private"))
+	privateKeyFile, _ := ioutil.ReadFile(config.GetString(c, "rsa_private"))
 	privateKey, _ := jwt.ParseRSAPrivateKeyFromPEM(privateKeyFile)
 
 	userInput := models.User{}
@@ -34,7 +31,7 @@ func (ac AuthController) Authentication(c *gin.Context) {
 		return
 	}
 
-	user, err := repositories.FindUser(c, map[string]interface{}{"email": userInput.Email})
+	user, err := store.FindUser(c, map[string]interface{}{"email": userInput.Email})
 
 	if !user.Active {
 		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_needs_activation", "User needs to be activated"))

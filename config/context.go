@@ -1,4 +1,4 @@
-package configuration
+package config
 
 import "context"
 
@@ -10,12 +10,12 @@ type Setter interface {
 	Set(string, interface{})
 }
 
-func FromContext(c context.Context) *config {
-	return c.Value(storeKey).(*config)
+func FromContext(c context.Context) *conf {
+	return c.Value(storeKey).(*conf)
 }
 
-func ToContext(c Setter, config *config) {
-	c.Set(storeKey, config)
+func ToContext(c Setter, conf *conf) {
+	c.Set(storeKey, conf)
 }
 
 func GetString(c context.Context, key string) string {

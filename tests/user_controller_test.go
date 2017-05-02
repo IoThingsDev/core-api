@@ -18,7 +18,7 @@ func TestCreateAccount(t *testing.T) {
 		"lastname": "henneron"
 	}`)
 	resp := SendRequest(parameters, "POST", "/v1/users/")
-	assert.Equal(t, http.StatusInternalServerError, resp.Code)
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
 
 	//Everything is fine
 	parameters = []byte(`
@@ -33,7 +33,7 @@ func TestCreateAccount(t *testing.T) {
 
 	// User already exists
 	resp = SendRequest(parameters, "POST", "/v1/users/")
-	assert.Equal(t, http.StatusInternalServerError, resp.Code)
+	assert.Equal(t, http.StatusConflict, resp.Code)
 
 	// Duplicate email
 	parameters = []byte(`
@@ -44,7 +44,7 @@ func TestCreateAccount(t *testing.T) {
 		"lastname": "henneron"
 	}`)
 	resp = SendRequest(parameters, "POST", "/v1/users/")
-	assert.Equal(t, http.StatusInternalServerError, resp.Code)
+	assert.Equal(t, http.StatusConflict, resp.Code)
 
 	// Test activation
 	user := models.User{}

@@ -1,6 +1,7 @@
 package mongodb
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/asaskevich/govalidator"
@@ -17,19 +18,19 @@ func (db *mongo) CreateUser(user *models.User) error {
 
 	user.Email = strings.ToLower(user.Email)
 	if count, _ := users.Find(bson.M{"email": user.Email}).Count(); count > 0 {
-		return helpers.ErrorWithCode("user_already_exists", "User already exists")
+		return helpers.ErrorHttpCode(http.StatusConflict, "user_already_exists", "User already exists")
 	}
 
 	_, err := govalidator.ValidateStruct(user)
 	if err != nil {
-		return err
+		return helpers.ErrorHttpCode(http.StatusBadRequest, "input_not_valid", err.Error())
 	}
 
 	password := []byte(user.Password)
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
 	if err != nil {
-		return helpers.ErrorWithCode("password_encryption_failed", "Failed to generate the encrypted password")
+		return helpers.ErrorHttpCode(http.StatusInternalServerError, "password_encryption_failed", "Failed to generate the encrypted password")
 	}
 
 	user.Active = false
@@ -40,7 +41,7 @@ func (db *mongo) CreateUser(user *models.User) error {
 
 	err = users.Insert(user)
 	if err != nil {
-		return helpers.ErrorWithCode("user_creation_failed", "Failed to insert the user in the mongobase")
+		return helpers.ErrorHttpCode(http.StatusInternalServerError, "user_creation_failed", "Failed to insert the user in the mongobase")
 	}
 
 	return nil
@@ -76,7 +77,7 @@ func (db *mongo) ActivateUser(activationKey string, id string) error {
 
 	err := users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(id)}, {"activationKey": activationKey}}}, bson.M{"$set": bson.M{"active": true}})
 	if err != nil {
-		return helpers.ErrorWithCode("user_activation_failed", "Couldn't find the user to activate")
+		return helpers.ErrorHttpCode(http.StatusInternalServerError, "user_activation_failed", "Couldn't find the user to activate")
 	}
 	return nil
 }

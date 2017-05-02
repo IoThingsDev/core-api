@@ -59,7 +59,7 @@ func (a *API) SetupRouter() {
 
 		authentication := v1.Group("/auth")
 		{
-			authController := controllers.NewAuthController(a.Config)
+			authController := controllers.NewAuthController()
 			authentication.POST("/", authController.Authentication)
 		}
 

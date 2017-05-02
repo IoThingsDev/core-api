@@ -5,8 +5,9 @@ import (
 )
 
 type Error struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
+	Code     string `json:"code"`
+	Message  string `json:"message"`
+	HttpCode int    `json:"-"`
 }
 
 func (e Error) Error() string {
@@ -15,4 +16,8 @@ func (e Error) Error() string {
 
 func ErrorWithCode(code string, message string) Error {
 	return Error{Code: code, Message: message}
+}
+
+func ErrorHttpCode(httpCode int, code string, message string) Error {
+	return Error{Code: code, Message: message, HttpCode: httpCode}
 }

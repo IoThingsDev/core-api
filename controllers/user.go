@@ -3,11 +3,11 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/dernise/base-api/configuration"
+	"github.com/dernise/base-api/config"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
-	"github.com/dernise/base-api/repositories"
 	"github.com/dernise/base-api/services"
+	"github.com/dernise/base-api/store"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -21,10 +21,10 @@ func NewUserController(emailSender services.EmailSender) UserController {
 	}
 }
 func (uc UserController) GetUser(c *gin.Context) {
-	user, err := repositories.FindUserById(c, c.Param("id"))
+	user, err := store.FindUserById(c, c.Param("id"))
 
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_not_found", "The user does not exist"))
 		return
 	}
 
@@ -39,20 +39,22 @@ func (uc UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	if err := repositories.CreateUser(c, user); err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+	if err := store.CreateUser(c, user); err != nil {
+		c.Error(err)
+		c.Abort()
 		return
 	}
 
-	appName := configuration.GetString(c, "sendgrid_name")
+	appName := config.GetString(c, "sendgrid_name")
 	uc.sendActivationEmail(appName, user)
 
 	c.JSON(http.StatusCreated, gin.H{"users": user.Sanitize()})
 }
 
 func (uc UserController) ActivateUser(c *gin.Context) {
-	if err := repositories.ActivateUser(c, c.Param("activationKey"), c.Param("id")); err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+	if err := store.ActivateUser(c, c.Param("activationKey"), c.Param("id")); err != nil {
+		c.Error(err)
+		c.Abort()
 		return
 	}
 
