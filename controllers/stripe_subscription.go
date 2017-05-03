@@ -50,7 +50,7 @@ func (sc StripeSubscriptionController) GetSubscriptions(c *gin.Context) {
 	user := store.Current(c)
 
 	subscriptions := []*stripe.Sub{}
-	err := services.GetRedis(c).GetValueForKey(user.StripeId+"-subscriptions", subscriptions)
+	err := services.GetRedis(c).GetValueForKey(user.StripeId+"-subscriptions", &subscriptions)
 	if err != nil {
 		params := &stripe.SubListParams{}
 		params.Customer = user.StripeId

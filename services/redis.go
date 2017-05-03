@@ -1,10 +1,9 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
-
-	"context"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/spf13/viper"
