@@ -30,6 +30,7 @@ func (a *API) SetupRouter() {
 
 	router.Use(middlewares.StoreMiddleware(a.Database))
 	router.Use(middlewares.ConfigMiddleware(a.Config))
+	router.Use(middlewares.RedisMiddleware(a.Redis))
 	router.Use(middlewares.RateMiddleware(a.Redis, a.Config))
 
 	v1 := router.Group("/v1")
@@ -50,7 +51,7 @@ func (a *API) SetupRouter() {
 		cards := v1.Group("/cards")
 		{
 			cards.Use(middlewares.AuthMiddleware(a.Database, a.Redis))
-			cardController := controllers.NewCardController(a.Database, a.Redis)
+			cardController := controllers.NewCardController()
 			cards.POST("/", cardController.AddCard)
 			cards.GET("/", cardController.GetCards)
 			cards.PUT("/:id/set_default", cardController.SetDefaultCard)
@@ -65,7 +66,7 @@ func (a *API) SetupRouter() {
 
 		billing := v1.Group("/billing")
 		{
-			billingController := controllers.NewBillingController(a.Database, a.EmailSender, a.Config, a.Redis)
+			billingController := controllers.NewBillingController()
 			billing.Use(middlewares.AuthMiddleware(a.Database, a.Redis))
 
 			plans := billing.Group("/plans")
@@ -82,7 +83,7 @@ func (a *API) SetupRouter() {
 				subscriptions.DELETE("/:id", subscriptionController.DeleteSubscription)
 			}
 
-			billing.POST("/", billingController.CreateTransaction)
+			//billing.POST("/", billingController.CreateTransaction)
 		}
 	}
 }

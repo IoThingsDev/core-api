@@ -8,7 +8,6 @@ import (
 const (
 	currentKey = "currentUser"
 	storeKey   = "store"
-	redisKey   = "redis"
 )
 
 type Setter interface {
@@ -17,10 +16,6 @@ type Setter interface {
 
 func Current(c context.Context) *models.User {
 	return c.Value(currentKey).(*models.User)
-}
-
-func FromRedis(c context.Context) Store {
-	return c.Value(redisKey).(Store)
 }
 
 func FromContext(c context.Context) Store {

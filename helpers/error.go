@@ -18,6 +18,6 @@ func ErrorWithCode(code string, message string) Error {
 	return Error{Code: code, Message: message}
 }
 
-func ErrorHttpCode(httpCode int, code string, message string) Error {
+func NewError(httpCode int, code string, message string) Error {
 	return Error{Code: code, Message: message, HttpCode: httpCode}
 }

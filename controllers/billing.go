@@ -2,37 +2,22 @@ package controllers
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/services"
-	"github.com/spf13/viper"
-	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/charge"
-	"github.com/stripe/stripe-go/currency"
+	stripe "github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/plan"
 	"gopkg.in/gin-gonic/gin.v1"
-	"gopkg.in/mgo.v2"
 )
 
-type BillingController struct {
-	mgo         *mgo.Database
-	emailSender services.EmailSender
-	config      *viper.Viper
-	redis       *services.Redis
+type BillingController struct{}
+
+func NewBillingController() BillingController {
+	return BillingController{}
 }
 
-func NewBillingController(mgo *mgo.Database, emailSender services.EmailSender, config *viper.Viper, redis *services.Redis) BillingController {
-	return BillingController{
-		mgo,
-		emailSender,
-		config,
-		redis,
-	}
-}
-
-func (bc BillingController) CreateTransaction(c *gin.Context) {
+/*func (bc BillingController) CreateTransaction(c *gin.Context) {
 	session := bc.mgo.Session.Copy()
 	defer session.Close()
 	transactions := bc.mgo.C(models.TransactionsCollection).With(session)
@@ -81,11 +66,11 @@ func (bc BillingController) CreateTransaction(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Payment successed"})
 	}
-}
+}*/
 
 func (bc BillingController) GetPlans(c *gin.Context) {
 	stripePlans := []models.Plan{}
-	err := bc.redis.GetValueForKey("billing-plans", &stripePlans)
+	err := services.GetRedis(c).GetValueForKey("billing-plans", &stripePlans)
 	if err != nil {
 		i := plan.List(nil)
 
@@ -103,7 +88,7 @@ func (bc BillingController) GetPlans(c *gin.Context) {
 			stripePlans = append(stripePlans, stripePlan)
 		}
 
-		bc.redis.SetValueForKey("billing-plans", stripePlans)
+		services.GetRedis(c).SetValueForKey("billing-plans", stripePlans)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"plans": stripePlans})
@@ -135,7 +120,7 @@ func (bc BillingController) CreatePlan(c *gin.Context) {
 		return
 	}
 
-	bc.redis.InvalidateObject("billing-plans")
+	services.GetRedis(c).InvalidateObject("billing-plans")
 
 	c.JSON(http.StatusCreated, gin.H{"plans": stripePlan})
 }

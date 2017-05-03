@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateTransaction(t *testing.T) {
+/*func TestCreateTransaction(t *testing.T) {
 	parameters := []byte(`
 	{
 		"userId":"` + user.Id.Hex() + `",
@@ -16,7 +16,7 @@ func TestCreateTransaction(t *testing.T) {
 
 	resp := SendRequestWithToken(parameters, "POST", "/v1/billing/", authToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
-}
+}*/
 
 func TestCreatePlan(t *testing.T) {
 	parameters := []byte(`

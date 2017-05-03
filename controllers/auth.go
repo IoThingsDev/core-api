@@ -7,6 +7,7 @@ import (
 
 	"github.com/dernise/base-api/config"
 	"github.com/dernise/base-api/helpers"
+	"github.com/dernise/base-api/helpers/params"
 	"github.com/dernise/base-api/models"
 	"github.com/dernise/base-api/store"
 	"github.com/dgrijalva/jwt-go"
@@ -31,7 +32,7 @@ func (ac AuthController) Authentication(c *gin.Context) {
 		return
 	}
 
-	user, err := store.FindUser(c, map[string]interface{}{"email": userInput.Email})
+	user, err := store.FindUser(c, params.M{"email": userInput.Email})
 
 	if !user.Active {
 		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_needs_activation", "User needs to be activated"))

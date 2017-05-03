@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
+	"context"
+
 	"github.com/garyburd/redigo/redis"
 	"github.com/spf13/viper"
 )
@@ -11,6 +13,10 @@ import (
 type Redis struct {
 	Pool   *redis.Pool
 	Config *viper.Viper
+}
+
+func GetRedis(c context.Context) *Redis {
+	return c.Value("redis").(*Redis)
 }
 
 // Gets the object from the redis store, if not found, returns an err
