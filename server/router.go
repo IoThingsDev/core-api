@@ -31,12 +31,13 @@ func (a *API) SetupRouter() {
 	router.Use(middlewares.StoreMiddleware(a.Database))
 	router.Use(middlewares.ConfigMiddleware(a.Config))
 	router.Use(middlewares.RedisMiddleware(a.Redis))
+	router.Use(middlewares.EmailMiddleware(a.EmailSender))
 	router.Use(middlewares.RateMiddleware(a.Redis, a.Config))
 
 	v1 := router.Group("/v1")
 	{
 		v1.GET("/", Index)
-		userController := controllers.NewUserController(a.EmailSender)
+		userController := controllers.NewUserController()
 		//v1.POST("/reset_password", userController.ResetPasswordRequest)
 		users := v1.Group("/users")
 		{

@@ -11,14 +11,10 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
-type UserController struct {
-	emailSender services.EmailSender
-}
+type UserController struct{}
 
-func NewUserController(emailSender services.EmailSender) UserController {
-	return UserController{
-		emailSender,
-	}
+func NewUserController() UserController {
+	return UserController{}
 }
 func (uc UserController) GetUser(c *gin.Context) {
 	user, err := store.FindUserById(c, c.Param("id"))
@@ -46,7 +42,9 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	}
 
 	appName := config.GetString(c, "sendgrid_name")
-	uc.sendActivationEmail(appName, user)
+	subject := "Welcome to " + appName + "! Account confirmation"
+	templateLink := "./templates/mail_activate_account.html"
+	services.GetEmailSender(c).SendEmailFromTemplate(user, subject, templateLink)
 
 	c.JSON(http.StatusCreated, gin.H{"users": user.Sanitize()})
 }
@@ -129,12 +127,6 @@ func (uc UserController) ResetPassword(c *gin.Context) {
 
 	uc.sendResetPasswordDoneEmail(&user)
 }*/
-
-func (uc UserController) sendActivationEmail(appName string, user *models.User) {
-	subject := "Welcome to " + appName + "! Account confirmation"
-	templateLink := "./templates/mail_activate_account.html"
-	uc.emailSender.SendEmailFromTemplate(user, subject, templateLink)
-}
 
 /*func (uc UserController) sendResetPasswordRequestEmail(user *models.User) {
 	appName := uc.config.GetString("sendgrid_name")
