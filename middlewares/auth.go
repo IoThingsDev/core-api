@@ -49,7 +49,7 @@ func AuthMiddleware(database *mgo.Database, redis *services.Redis) gin.HandlerFu
 
 		claims, _ := token.Claims.(jwt.MapClaims)
 
-		user := models.User{}
+		user := &models.User{}
 
 		// Gets the user from the redis store
 		err = redis.GetValueForKey(claims["id"].(string), &user)

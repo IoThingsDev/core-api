@@ -1,7 +1,12 @@
 package models
 
 import (
-	"gopkg.in/gin-gonic/gin.v1"
+	"net/http"
+	"strings"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/dernise/base-api/helpers"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -25,12 +30,30 @@ type SanitizedUser struct {
 	Email     string        `json:"email" bson:"email"`
 }
 
-func GetUserFromContext(c *gin.Context) User {
-	return c.MustGet("currentUser").(User)
+func (user *User) Sanitize() SanitizedUser {
+	return SanitizedUser{user.Id, user.Firstname, user.Lastname, user.Email}
 }
 
-func (u *User) Sanitize() SanitizedUser {
-	return SanitizedUser{u.Id, u.Firstname, u.Lastname, u.Email}
+func (user *User) BeforeCreate() error {
+	user.Active = false
+	user.ActivationKey = helpers.RandomString(20)
+	user.StripeId = ""
+	user.Id = bson.NewObjectId()
+	user.Admin = false
+	user.Email = strings.ToLower(user.Email)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return helpers.NewError(http.StatusInternalServerError, "encryption_failed", "Failed to generate the crypted password")
+	}
+	user.Password = string(hashedPassword)
+
+	_, err = govalidator.ValidateStruct(user)
+	if err != nil {
+		return helpers.NewError(http.StatusBadRequest, "input_not_valid", err.Error())
+	}
+
+	return nil
 }
 
 const UsersCollection = "users"

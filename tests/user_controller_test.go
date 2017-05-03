@@ -69,13 +69,9 @@ func TestCreateAccount(t *testing.T) {
 
 	//Activation key isn't right
 	resp = SendRequest(nil, "GET", "/v1/users/"+user.Id.Hex()+"/activate/fakeKey")
-	assert.Equal(t, http.StatusNotFound, resp.Code)
+	assert.Equal(t, http.StatusInternalServerError, resp.Code)
 
 	//Unknown user
 	resp = SendRequest(nil, "GET", "/v1/users/"+bson.NewObjectId().Hex()+"/activate/fakeKey")
-	assert.Equal(t, http.StatusNotFound, resp.Code)
-
-	//Delete user
-	resp = SendRequest(nil, "DELETE", "/v1/users/"+user.Id.Hex())
-	assert.Equal(t, http.StatusOK, resp.Code)
+	assert.Equal(t, http.StatusInternalServerError, resp.Code)
 }

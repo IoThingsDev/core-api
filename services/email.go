@@ -12,7 +12,12 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 
 	"github.com/spf13/viper"
+	"golang.org/x/net/context"
 )
+
+func GetEmailSender(c context.Context) EmailSender {
+	return c.Value("emailSender").(EmailSender)
+}
 
 type EmailSender interface {
 	SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error)
@@ -20,14 +25,6 @@ type EmailSender interface {
 }
 
 type FakeEmailSender struct{}
-
-func (f *FakeEmailSender) SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error) {
-	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Jean-Miche", Headers: nil}, nil
-}
-
-func (f *FakeEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
-	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Jean-Miche", Headers: nil}, nil
-}
 
 type SendGridEmailSender struct {
 	senderEmail string
@@ -40,6 +37,14 @@ type Data struct {
 	User        *models.User
 	HostAddress string
 	AppName     string
+}
+
+func (f *FakeEmailSender) SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error) {
+	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Jean-Miche", Headers: nil}, nil
+}
+
+func (f *FakeEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
+	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Jean-Miche", Headers: nil}, nil
 }
 
 func NewSendGridEmailSender(config *viper.Viper) EmailSender {

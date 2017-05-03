@@ -13,7 +13,10 @@ func ErrorMiddleware() gin.HandlerFunc {
 		if errorToPrint != nil {
 			original, ok := errorToPrint.Err.(helpers.Error)
 			if ok {
-				c.JSON(-1, gin.H{"errors": gin.H{"message": original.Message, "code": original.Code}})
+				if original.HttpCode == 0 {
+					original.HttpCode = -1
+				}
+				c.JSON(original.HttpCode, gin.H{"errors": gin.H{"message": original.Message, "code": original.Code}})
 			} else {
 				c.JSON(-1, gin.H{"errors": gin.H{"message": errorToPrint.Error(), "code": "unknown"}})
 			}

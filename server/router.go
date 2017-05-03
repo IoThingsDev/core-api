@@ -28,20 +28,22 @@ func (a *API) SetupRouter() {
 		ValidateHeaders: false,
 	}))
 
+	router.Use(middlewares.StoreMiddleware(a.Database))
+	router.Use(middlewares.ConfigMiddleware(a.Config))
+	router.Use(middlewares.RedisMiddleware(a.Redis))
+	router.Use(middlewares.EmailMiddleware(a.EmailSender))
 	router.Use(middlewares.RateMiddleware(a.Redis, a.Config))
 
 	v1 := router.Group("/v1")
 	{
 		v1.GET("/", Index)
-		userController := controllers.NewUserController(a.Database, a.EmailSender, a.Config, a.Redis)
-		v1.POST("/reset_password", userController.ResetPasswordRequest)
+		userController := controllers.NewUserController()
+		//v1.POST("/reset_password", userController.ResetPasswordRequest)
 		users := v1.Group("/users")
 		{
 			users.POST("/", userController.CreateUser)
 			users.GET("/:id/activate/:activationKey", userController.ActivateUser)
-			users.GET("/", userController.GetUsers)
-			users.DELETE("/:id", userController.DeleteUser)
-			users.POST("/:id/reset_password", userController.ResetPassword)
+			//users.POST("/:id/reset_password", userController.ResetPassword)
 
 			users.Use(middlewares.AuthMiddleware(a.Database, a.Redis))
 			users.GET("/:id", userController.GetUser)
@@ -50,7 +52,7 @@ func (a *API) SetupRouter() {
 		cards := v1.Group("/cards")
 		{
 			cards.Use(middlewares.AuthMiddleware(a.Database, a.Redis))
-			cardController := controllers.NewCardController(a.Database, a.Config, a.Redis)
+			cardController := controllers.NewCardController()
 			cards.POST("/", cardController.AddCard)
 			cards.GET("/", cardController.GetCards)
 			cards.PUT("/:id/set_default", cardController.SetDefaultCard)
@@ -59,13 +61,13 @@ func (a *API) SetupRouter() {
 
 		authentication := v1.Group("/auth")
 		{
-			authController := controllers.NewAuthController(a.Database, a.Config)
+			authController := controllers.NewAuthController()
 			authentication.POST("/", authController.Authentication)
 		}
 
 		billing := v1.Group("/billing")
 		{
-			billingController := controllers.NewBillingController(a.Database, a.EmailSender, a.Config, a.Redis)
+			billingController := controllers.NewBillingController()
 			billing.Use(middlewares.AuthMiddleware(a.Database, a.Redis))
 
 			plans := billing.Group("/plans")
@@ -74,7 +76,7 @@ func (a *API) SetupRouter() {
 				plans.POST("/", billingController.CreatePlan).Use(middlewares.AdminMiddleware())
 			}
 
-			subscriptionController := controllers.NewStripeSubscriptionController(a.Database, a.Config, a.Redis)
+			subscriptionController := controllers.NewStripeSubscriptionController(a.Redis)
 			subscriptions := billing.Group("/subscriptions")
 			{
 				subscriptions.POST("/", subscriptionController.CreateSubscription)
@@ -82,7 +84,7 @@ func (a *API) SetupRouter() {
 				subscriptions.DELETE("/:id", subscriptionController.DeleteSubscription)
 			}
 
-			billing.POST("/", billingController.CreateTransaction)
+			//billing.POST("/", billingController.CreateTransaction)
 		}
 	}
 }
