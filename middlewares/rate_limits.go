@@ -6,18 +6,18 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dernise/base-api/config"
 	"github.com/dernise/base-api/helpers"
 	"github.com/dernise/base-api/services"
-	"github.com/spf13/viper"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
-func RateMiddleware(redis *services.Redis, config *viper.Viper) gin.HandlerFunc {
+func RateMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		conn := redis.Pool.Get()
+		conn := services.GetRedis(c).Pool.Get()
 		defer conn.Close()
 
-		if !config.GetBool("rate_limit_activated") {
+		if !config.GetBool(c, "rate_limit_activated") {
 			return
 		}
 
@@ -36,7 +36,7 @@ func RateMiddleware(redis *services.Redis, config *viper.Viper) gin.HandlerFunc 
 			}
 		}
 
-		if count != -1 && count >= config.GetInt("rate_limit_requests_per_second") {
+		if count != -1 && count >= config.GetInt(c, "rate_limit_requests_per_second") {
 			c.AbortWithError(http.StatusTooManyRequests, helpers.ErrorWithCode("too_many_requests", "You sent too many requests over the last second."))
 		} else {
 			conn.Do("INCR", keyName)

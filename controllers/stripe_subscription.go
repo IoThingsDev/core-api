@@ -13,13 +13,10 @@ import (
 )
 
 type StripeSubscriptionController struct {
-	redis *services.Redis
 }
 
-func NewStripeSubscriptionController(redis *services.Redis) StripeSubscriptionController {
-	return StripeSubscriptionController{
-		redis,
-	}
+func NewStripeSubscriptionController() StripeSubscriptionController {
+	return StripeSubscriptionController{}
 }
 
 func (sc StripeSubscriptionController) CreateSubscription(c *gin.Context) {
