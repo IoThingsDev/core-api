@@ -73,7 +73,7 @@ func (db *mongo) UpdateUser(user *models.User, params params.M) error {
 
 	err := users.UpdateId(user.Id, params)
 	if err != nil {
-		return helpers.NewError(http.StatusInternalServerError, "user_update_faied", "Failed to update the user")
+		return helpers.NewError(http.StatusInternalServerError, "user_update_failed", "Failed to update the user")
 	}
 	return nil
 }

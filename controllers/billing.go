@@ -17,57 +17,6 @@ func NewBillingController() BillingController {
 	return BillingController{}
 }
 
-/*func (bc BillingController) CreateTransaction(c *gin.Context) {
-	session := bc.mgo.Session.Copy()
-	defer session.Close()
-	transactions := bc.mgo.C(models.TransactionsCollection).With(session)
-	users := bc.mgo.C(models.UsersCollection).With(session)
-
-	transaction := models.Transaction{}
-	err := c.Bind(&transaction)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
-		return
-	}
-
-	user := models.User{}
-	if err = users.FindId(transaction.UserId).One(&user); err != nil {
-		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to find the user for the transaction"))
-		return
-	}
-
-	if user.StripeId == "" {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("no_card_found", "The customer doesn't have any card to pay"))
-		return
-	}
-
-	chargeParams := &stripe.ChargeParams{
-		Amount:   transaction.Amount,
-		Currency: currency.EUR,
-		Customer: user.StripeId,
-	}
-	response, err := charge.New(chargeParams)
-	if err != nil {
-		transaction.Error = err.Error()
-		transaction.Failed = false
-	} else if response.Status != "succeeded" {
-		transaction.Error = response.FailCode
-		transaction.Failed = false
-	} else {
-		transaction.Failed = true
-	}
-
-	transaction.Date = time.Now()
-	transactions.Insert(transaction)
-
-	if transaction.Failed == false {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("payment_failed", "The payment failed"))
-		return
-	} else {
-		c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Payment successed"})
-	}
-}*/
-
 func (bc BillingController) GetPlans(c *gin.Context) {
 	stripePlans := []models.Plan{}
 	err := services.GetRedis(c).GetValueForKey("billing-plans", &stripePlans)
