@@ -25,7 +25,7 @@ func (db *mongo) CreateUser(user *models.User) error {
 
 	err = users.Insert(user)
 	if err != nil {
-		return helpers.NewError(http.StatusInternalServerError, "user_creation_failed", "Failed to insert the user in the mongobase")
+		return helpers.NewError(http.StatusInternalServerError, "user_creation_failed", "Failed to insert the user in the database")
 	}
 
 	return nil

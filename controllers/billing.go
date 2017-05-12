@@ -45,7 +45,7 @@ func (bc BillingController) GetPlans(c *gin.Context) {
 
 func (bc BillingController) CreatePlan(c *gin.Context) {
 	stripePlan := models.Plan{}
-	err := c.Bind(&stripePlan)
+	err := c.BindJSON(&stripePlan)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
 		return
