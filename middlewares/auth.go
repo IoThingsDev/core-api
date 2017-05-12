@@ -54,7 +54,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		err = services.GetRedis(c).GetValueForKey(claims["id"].(string), &user)
 		if err != nil {
 			user, _ = store.FindUserById(c, claims["id"].(string))
-			services.GetRedis(c).SetValueForKey(user.Id.Hex(), &user)
+			services.GetRedis(c).SetValueForKey(user.Id, &user)
 		}
 
 		c.Set("currentUser", user)

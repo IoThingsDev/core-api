@@ -55,7 +55,7 @@ func TestCreateAccount(t *testing.T) {
 	}
 
 	assert.Equal(t, user.Active, false)
-	resp = SendRequest(nil, "GET", "/v1/users/"+user.Id.Hex()+"/activate/"+user.ActivationKey)
+	resp = SendRequest(nil, "GET", "/v1/users/"+user.Id+"/activate/"+user.ActivationKey)
 
 	//Update user information
 	err = api.Database.C(models.UsersCollection).Find(bson.M{"email": "maxence.henneron@icloud.com"}).One(&user)
@@ -68,7 +68,7 @@ func TestCreateAccount(t *testing.T) {
 	assert.Equal(t, user.Active, true)
 
 	//Activation key isn't right
-	resp = SendRequest(nil, "GET", "/v1/users/"+user.Id.Hex()+"/activate/fakeKey")
+	resp = SendRequest(nil, "GET", "/v1/users/"+user.Id+"/activate/fakeKey")
 	assert.Equal(t, http.StatusInternalServerError, resp.Code)
 
 	//Unknown user
