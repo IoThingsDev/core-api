@@ -14,6 +14,7 @@ func (db *mongo) CreateUser(user *models.User) error {
 	defer session.Close()
 	users := db.C(models.UsersCollection).With(session)
 
+	user.Id = bson.NewObjectId().Hex()
 	err := user.BeforeCreate()
 	if err != nil {
 		return err
@@ -37,7 +38,7 @@ func (db *mongo) FindUserById(id string) (*models.User, error) {
 	users := db.C(models.UsersCollection).With(session)
 
 	user := &models.User{}
-	err := users.FindId(bson.ObjectIdHex(id)).One(user)
+	err := users.FindId(id).One(user)
 
 	return user, err
 }
@@ -59,7 +60,7 @@ func (db *mongo) ActivateUser(activationKey string, id string) error {
 	defer session.Close()
 	users := db.C(models.UsersCollection).With(session)
 
-	err := users.Update(bson.M{"$and": []bson.M{{"_id": bson.ObjectIdHex(id)}, {"activationKey": activationKey}}}, bson.M{"$set": bson.M{"active": true}})
+	err := users.Update(bson.M{"$and": []bson.M{{"_id": id}, {"activationKey": activationKey}}}, bson.M{"$set": bson.M{"active": true}})
 	if err != nil {
 		return helpers.NewError(http.StatusInternalServerError, "user_activation_failed", "Couldn't find the user to activate")
 	}
@@ -75,5 +76,6 @@ func (db *mongo) UpdateUser(user *models.User, params params.M) error {
 	if err != nil {
 		return helpers.NewError(http.StatusInternalServerError, "user_update_failed", "Failed to update the user")
 	}
+
 	return nil
 }

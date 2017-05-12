@@ -38,7 +38,7 @@ func CreateUserAndGenerateToken() (*models.User, string) {
 	users := api.Database.C(models.UsersCollection)
 
 	user := models.User{
-		Id:        bson.NewObjectId(),
+		Id:        bson.NewObjectId().Hex(),
 		Email:     "jeanmichel.lecul@gmail.com",
 		Firstname: "Jean-Michel",
 		Lastname:  "Lecul",

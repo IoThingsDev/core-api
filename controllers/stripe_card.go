@@ -37,7 +37,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 
 	if user.StripeId == "" {
 		user.StripeId, err = cc.createCustomer(c, user)
-		services.GetRedis(c).InvalidateObject(user.Id.Hex())
+		services.GetRedis(c).InvalidateObject(user.Id)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to create the customer in our billing platform"))
 			return
