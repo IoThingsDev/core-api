@@ -15,8 +15,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+const (
+	emailSenderKey = "emailSender"
+)
+
 func GetEmailSender(c context.Context) EmailSender {
-	return c.Value("emailSender").(EmailSender)
+	return c.Value(emailSenderKey).(EmailSender)
 }
 
 type EmailSender interface {

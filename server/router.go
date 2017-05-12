@@ -76,7 +76,7 @@ func (a *API) SetupRouter() {
 			plans := billing.Group("/plans")
 			{
 				plans.GET("/", billingController.GetPlans)
-				plans.POST("/", billingController.CreatePlan).Use(middlewares.AdminMiddleware())
+				plans.POST("/", middlewares.AdminMiddleware(), billingController.CreatePlan)
 			}
 
 			subscriptionController := controllers.NewStripeSubscriptionController()

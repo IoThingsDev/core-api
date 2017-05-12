@@ -29,7 +29,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 	user := store.Current(c)
 
 	stripeCard := Card{}
-	err := c.Bind(&stripeCard)
+	err := c.BindJSON(&stripeCard)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
 		return
@@ -71,7 +71,7 @@ func (cc CardController) GetCards(c *gin.Context) {
 	if err != nil {
 		stripeCustomer, err = customer.Get(user.StripeId, nil)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to get the customer from Stripe"))
+			c.JSON(http.StatusInternalServerError, helpers.ErrorWithCode("server_error", "Failed to get the customer from our billing platform"))
 			return
 		}
 		services.GetRedis(c).SetValueForKey(user.StripeId, stripeCustomer)
@@ -141,7 +141,7 @@ func (cc CardController) DeleteCard(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("delete_card_failed", "Failed to delete the customer's card"))
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("card_delete_failed", "Failed to delete the customer's card"))
 		return
 	}
 
