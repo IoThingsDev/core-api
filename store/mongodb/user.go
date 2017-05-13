@@ -39,6 +39,9 @@ func (db *mongo) FindUserById(id string) (*models.User, error) {
 
 	user := &models.User{}
 	err := users.FindId(id).One(user)
+	if err != nil {
+		return nil, helpers.NewError(http.StatusNotFound, "user_not_found", "User not found")
+	}
 
 	return user, err
 }
@@ -51,6 +54,9 @@ func (db *mongo) FindUser(params params.M) (*models.User, error) {
 	user := &models.User{}
 
 	err := users.Find(params).One(user)
+	if err != nil {
+		return nil, helpers.NewError(http.StatusNotFound, "user_not_found", "User not found")
+	}
 
 	return user, err
 }

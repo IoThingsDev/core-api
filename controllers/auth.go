@@ -33,6 +33,10 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	}
 
 	user, err := store.FindUser(c, params.M{"email": userInput.Email})
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_does_not_exist", "User does not exist"))
+		return
+	}
 
 	if !user.Active {
 		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_needs_activation", "User needs to be activated"))
