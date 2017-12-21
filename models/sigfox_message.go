@@ -30,13 +30,20 @@ type SigfoxMessage struct {
 	Alerts      int64   `json:"alerts" bson:"alerts" valid:"-"`           //Device : alerts
 }
 
-func decodeSensitFrame(rawData SigfoxMessage) (message SigfoxMessage) {
+/*func decodeSensitFrame(rawData SigfoxMessage) (message SigfoxMessage) {
+	return decodedMessage
+}*/
+
+func (l *SigfoxMessage) BeforeCreate() {
+	//*l = decodeSensitFrame(*l)
+	l.Id = bson.NewObjectId().Hex()
+
 	// TODO : Fix shift when battery MSB=0
 	// TODO : Handle modes 2, 3, 4 & 5
 
-	decodedMessage := rawData //First assignation with sigfox callback data
+	//decodedMessage := l //First assignation with sigfox callback data
 
-	parsed, err := strconv.ParseUint(rawData.Data, 16, 32)
+	parsed, err := strconv.ParseUint(l.Data, 16, 32)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +67,7 @@ func decodeSensitFrame(rawData SigfoxMessage) (message SigfoxMessage) {
 	battery, _ := strconv.ParseInt(strings.Join(battData, ""), 2, 8)
 	batVal := float32(battery) * 0.05 * 2.7
 
-	decodedMessage.Battery = batVal
+	l.Battery = batVal
 
 	//Byte 3
 	temperature := int64(0)
@@ -80,7 +87,7 @@ func decodeSensitFrame(rawData SigfoxMessage) (message SigfoxMessage) {
 		tempVal = (float32(temperature) - 200) / 8
 	}
 
-	decodedMessage.Temperature = tempVal
+	l.Temperature = tempVal
 
 	modeStr := ""
 	swRev := ""
@@ -97,7 +104,7 @@ func decodeSensitFrame(rawData SigfoxMessage) (message SigfoxMessage) {
 		modeStr = "Temperature + Humidity"
 		humi, _ := strconv.ParseInt(data[24:32], 2, 16)
 		humidity = float32(humi) * 0.5
-		decodedMessage.Humidity = humidity
+		l.Humidity = humidity
 	case 2:
 		modeStr = "Light"
 		lightVal, _ := strconv.ParseInt(data[18:24], 2, 8)
@@ -106,7 +113,7 @@ func decodeSensitFrame(rawData SigfoxMessage) (message SigfoxMessage) {
 		if lightMulti == 1 {
 			light = light * 8
 		}
-		decodedMessage.Light = light
+		l.Light = light
 	case 3:
 		modeStr = "Door"
 	case 4:
@@ -153,26 +160,19 @@ func decodeSensitFrame(rawData SigfoxMessage) (message SigfoxMessage) {
 	case 2:
 		//fmt.Println(light, "lux")
 		alerts, _ := strconv.ParseInt(data[24:32], 2, 16)
-		decodedMessage.Alerts = alerts
+		l.Alerts = alerts
 	case 3, 4, 5:
 		alerts, _ := strconv.ParseInt(data[24:32], 2, 16)
-		decodedMessage.Alerts = alerts
+		l.Alerts = alerts
 	}
 	if reedSwitch {
 		//fmt.Println("Reed switch on")
 	}
 
-	decodedMessage.SwRev = "v " + swRev
-	decodedMessage.EventType = typeStr
-	decodedMessage.Mode = modeStr
-	decodedMessage.Timeframe = timeStr
-
-	return decodedMessage
-}
-
-func (l *SigfoxMessage) BeforeCreate() {
-	*l = decodeSensitFrame(*l)
-	l.Id = bson.NewObjectId().Hex()
+	l.SwRev = "v " + swRev
+	l.EventType = typeStr
+	l.Mode = modeStr
+	l.Timeframe = timeStr
 }
 
 const SigfoxMessagesCollection = "sigfox_messages"
