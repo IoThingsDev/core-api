@@ -171,6 +171,7 @@ func decodeSensitFrame(rawData SigfoxMessage) (message SigfoxMessage) {
 }
 
 func (l *SigfoxMessage) BeforeCreate() {
+	*l = decodeSensitFrame(*l)
 	l.Id = bson.NewObjectId().Hex()
 }
 
