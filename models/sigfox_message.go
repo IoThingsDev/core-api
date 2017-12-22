@@ -43,12 +43,16 @@ func (l *SigfoxMessage) BeforeCreate() {
 
 	//decodedMessage := l //First assignation with sigfox callback data
 
-	parsed, err := strconv.ParseUint(l.Data, 16, 32)
-	if err != nil {
-		log.Fatal(err)
+	data := ""
+	if len(l.Data) >= 12 {
+		parsed, err := strconv.ParseUint(l.Data, 16, 32)
+		if err != nil {
+			log.Fatal(err)
+		}
+		data = fmt.Sprintf("%08b", parsed)
+	} else {
+		return
 	}
-	data := fmt.Sprintf("%08b", parsed)
-
 	/*byte1 := data[0:8]
 	byte2 := data[8:16]
 	byte3 := data[16:24]
