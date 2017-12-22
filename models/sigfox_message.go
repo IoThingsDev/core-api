@@ -44,7 +44,7 @@ func (l *SigfoxMessage) BeforeCreate() {
 	//decodedMessage := l //First assignation with sigfox callback data
 
 	data := ""
-	if len(l.Data) >= 12 {
+	if len(l.Data) <= 12 {
 		parsed, err := strconv.ParseUint(l.Data, 16, 32)
 		if err != nil {
 			log.Fatal(err)
