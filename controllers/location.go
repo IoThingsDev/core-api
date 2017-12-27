@@ -14,8 +14,8 @@ func NewLocationController() LocationController {
 	return LocationController{}
 }
 
-func (lc LocationController) GetAllLocations(c *gin.Context) {
-	locations, err := store.GetAllLocations(c)
+func (lc LocationController) GetAllDevicesLocations(c *gin.Context) {
+	locations, err := store.GetAllDevicesLocations(c)
 
 	if err != nil {
 		c.Error(err)

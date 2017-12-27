@@ -22,7 +22,9 @@ type Store interface {
 	GetDevice(*models.User, string) (*models.Device, error)
 	GetLastMessages(string) ([]*models.SigfoxMessage, error)
 	GetLastLocations(string) ([]*models.Location, error)
-	GetAllLocations(*models.User) ([]*models.LastLocation, error)
+	GetAllMessages(string) ([]*models.SigfoxMessage, error)
+	GetAllLocations(string) ([]*models.Location, error)
+	GetAllDevicesLocations(*models.User) ([]*models.LastLocation, error)
 
 	AddLoginToken(*models.User, string) (*models.LoginToken, error)
 	RemoveLoginToken(*models.User, string) error

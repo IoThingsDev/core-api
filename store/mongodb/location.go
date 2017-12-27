@@ -8,7 +8,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func (db *mongo) GetAllLocations(user *models.User) ([]*models.LastLocation, error) {
+func (db *mongo) GetAllDevicesLocations(user *models.User) ([]*models.LastLocation, error) {
 	session := db.Session.Copy()
 	defer session.Close()
 	devices := db.C(models.DevicesCollection).With(session)

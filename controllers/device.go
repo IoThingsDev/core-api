@@ -121,3 +121,27 @@ func (dc DeviceController) GetLastLocations(c *gin.Context) {
 
 	c.JSON(http.StatusOK, locations)
 }
+
+func (dc DeviceController) GetAllMessages(c *gin.Context) {
+	sigfoxMessages, err := store.GetAllMessages(c, c.Param("id"))
+
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, sigfoxMessages)
+}
+
+func (dc DeviceController) GetAllLocations(c *gin.Context) {
+	locations, err := store.GetAllLocations(c, c.Param("id"))
+
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, locations)
+}
