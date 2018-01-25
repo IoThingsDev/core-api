@@ -1,0 +1,18 @@
+version: '2'
+services:
+  api:
+    container_name: iothings-api
+    build: .
+
+    ports:
+      - "4000:4000"
+
+    links:
+      - "mongo-db:mongo"
+      - "redis-db:redis"
+
+  mongo-db:
+      image: mongo:latest
+
+  redis-db:
+      image: redis:latest
