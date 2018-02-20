@@ -1,4 +1,4 @@
-package controllers
+/*package controllers
 
 import (
 	"net/http"
@@ -150,3 +150,4 @@ func (cc CardController) DeleteCard(c *gin.Context) {
 
 	c.JSON(http.StatusOK, nil)
 }
+*/

@@ -1,4 +1,4 @@
-package controllers
+/*package controllers
 
 import (
 	"net/http"
@@ -73,3 +73,4 @@ func (bc BillingController) CreatePlan(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, stripePlan)
 }
+*/

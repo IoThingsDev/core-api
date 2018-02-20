@@ -101,7 +101,7 @@ func (a *API) SetupRouter() {
 			authentication.GET("/logout", authController.LogOut)
 		}
 
-		billing := v1.Group("/billing")
+		/*billing := v1.Group("/billing")
 		{
 			billingController := controllers.NewBillingController()
 			billing.Use(authMiddleware)
@@ -119,6 +119,6 @@ func (a *API) SetupRouter() {
 				subscriptions.GET("/", subscriptionController.GetSubscriptions)
 				subscriptions.DELETE("/:id", subscriptionController.DeleteSubscription)
 			}
-		}
+		}*/
 	}
 }
