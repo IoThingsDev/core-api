@@ -34,3 +34,11 @@ func GetLastMessages(c context.Context, id string) ([]*models.SigfoxMessage, err
 func GetLastLocations(c context.Context, id string) ([]*models.Location, error) {
 	return FromContext(c).GetLastLocations(id)
 }
+
+func GetAllMessages(c context.Context, id string) ([]*models.SigfoxMessage, error) {
+	return FromContext(c).GetAllMessages(id)
+}
+
+func GetAllLocations(c context.Context, id string) ([]*models.Location, error) {
+	return FromContext(c).GetAllLocations(id)
+}

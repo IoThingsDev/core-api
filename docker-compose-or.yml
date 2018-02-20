@@ -1,0 +1,20 @@
+version: '2'
+services:
+  redis:
+    image: "redis"
+  mongo:
+    image: "mongo"
+  api:
+    build: ./api
+    ports: 
+      - "5000:5000"
+    links:
+      - "mongo:mongo"
+    links:
+      - "redis:redis"
+  web:
+    build: ./admin
+    ports:
+     - "0.0.0.0:5200:5200"  
+    links:
+     - "api:api" 

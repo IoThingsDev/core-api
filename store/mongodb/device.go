@@ -146,3 +146,46 @@ func (db *mongo) GetLastLocations(id string) ([]*models.Location, error) {
 
 	return list, nil
 }
+func (db *mongo) GetAllMessages(id string) ([]*models.SigfoxMessage, error) {
+	session := db.Session.Copy()
+	defer session.Close()
+	devices := db.C(models.DevicesCollection).With(session)
+	sigfoxMessages := db.C(models.SigfoxMessagesCollection).With(session)
+
+	device := &models.Device{}
+
+	err := devices.FindId(id).One(device)
+	if err != nil {
+		return nil, helpers.NewError(http.StatusInternalServerError, "query_failed", "Failed to find the device")
+	}
+
+	list := []*models.SigfoxMessage{}
+	err = sigfoxMessages.Find(bson.M{"sigfoxId": device.SigfoxId}).Limit(100).Sort("-$natural").All(&list)
+	if err != nil {
+		return nil, helpers.NewError(http.StatusInternalServerError, "query_failed", "Failed to query the Database")
+	}
+
+	return list, nil
+}
+
+func (db *mongo) GetAllLocations(id string) ([]*models.Location, error) {
+	session := db.Session.Copy()
+	defer session.Close()
+	devices := db.C(models.DevicesCollection).With(session)
+	locations := db.C(models.LocationsCollection).With(session)
+
+	device := &models.Device{}
+
+	err := devices.FindId(id).One(device)
+	if err != nil {
+		return nil, helpers.NewError(http.StatusInternalServerError, "query_failed", "Failed to find the device")
+	}
+
+	list := []*models.Location{}
+	err = locations.Find(bson.M{"sigfoxId": device.SigfoxId}).Limit(100).Sort("-$natural").All(&list)
+	if err != nil {
+		return nil, helpers.NewError(http.StatusInternalServerError, "query_failed", "Failed to query the Database")
+	}
+
+	return list, nil
+}

@@ -79,15 +79,17 @@ func (a *API) SetupRouter() {
 			devices.PUT("/:id", deviceController.UpdateDevice)
 			devices.GET("/:id", deviceController.GetDevice)
 			devices.DELETE("/:id", deviceController.DeleteDevice)
-			devices.GET("/:id/locations", deviceController.GetLastLocations)
-			devices.GET("/:id/messages", deviceController.GetLastMessages)
+			devices.GET("/:id/locations", deviceController.GetAllLocations)
+			devices.GET("/:id/messages", deviceController.GetAllMessages)
+			devices.GET("/:id/lastLocations", deviceController.GetLastLocations)
+			devices.GET("/:id/lastMessages", deviceController.GetLastMessages)
 		}
 
 		locations := v1.Group("/locations")
 		{
 			locations.Use(authMiddleware)
 			locationController := controllers.NewLocationController()
-			locations.GET("/", locationController.GetAllLocations)
+			locations.GET("/", locationController.GetAllDevicesLocations)
 
 		}
 
@@ -99,7 +101,7 @@ func (a *API) SetupRouter() {
 			authentication.GET("/logout", authController.LogOut)
 		}
 
-		billing := v1.Group("/billing")
+		/*billing := v1.Group("/billing")
 		{
 			billingController := controllers.NewBillingController()
 			billing.Use(authMiddleware)
@@ -117,6 +119,6 @@ func (a *API) SetupRouter() {
 				subscriptions.GET("/", subscriptionController.GetSubscriptions)
 				subscriptions.DELETE("/:id", subscriptionController.DeleteSubscription)
 			}
-		}
+		}*/
 	}
 }
