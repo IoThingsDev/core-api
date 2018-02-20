@@ -1,5 +1,5 @@
 package controllers
-
+/*
 import (
 	"net/http"
 
@@ -76,3 +76,4 @@ func (sc StripeSubscriptionController) DeleteSubscription(c *gin.Context) {
 
 	c.JSON(http.StatusOK, nil)
 }
+*/

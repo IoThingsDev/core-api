@@ -1,6 +1,6 @@
-/*package controllers
+package controllers
 
-import (
+/*import (
 	"net/http"
 
 	"github.com/adrien3d/things-api/helpers"

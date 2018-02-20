@@ -1,5 +1,5 @@
-/*package controllers
-
+package controllers
+/*
 import (
 	"net/http"
 
