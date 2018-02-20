@@ -1,6 +1,6 @@
-/*package tests
+package tests
 
-import (
+/*import (
 	"net/http"
 	"testing"
 

@@ -1,5 +1,5 @@
-/*package tests
-
+package tests
+/*
 import (
 	"net/http"
 	"testing"

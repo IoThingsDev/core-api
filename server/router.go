@@ -53,7 +53,7 @@ func (a *API) SetupRouter() {
 			users.GET("/:id", userController.GetUser)
 		}
 
-		cards := v1.Group("/cards")
+/*		cards := v1.Group("/cards")
 		{
 			cards.Use(authMiddleware)
 			cardController := controllers.NewCardController()
@@ -62,7 +62,7 @@ func (a *API) SetupRouter() {
 			cards.PUT("/:id/set_default", cardController.SetDefaultCard)
 			cards.DELETE("/:id", cardController.DeleteCard)
 		}
-
+*/
 		sigfox := v1.Group("/sigfox")
 		{
 			sigfoxController := controllers.NewSigfoxController()
