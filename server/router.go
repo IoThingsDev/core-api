@@ -11,7 +11,8 @@ import (
 )
 
 func Index(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully reached the base API."})
+	//TODO: Implement some Viper config customizing based on BASEAPI_SENDGRID_NAME
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully reached ThingsApi."})
 }
 
 func (a *API) SetupRouter() {

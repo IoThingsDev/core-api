@@ -45,11 +45,11 @@ type Data struct {
 }
 
 func (f *FakeEmailSender) SendEmail(to []*mail.Email, contentType, subject, body string) (*rest.Response, error) {
-	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Jean-Miche", Headers: nil}, nil
+	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Adrien", Headers: nil}, nil
 }
 
 func (f *FakeEmailSender) SendEmailFromTemplate(user *models.User, subject string, templateLink string) (*rest.Response, error) {
-	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Jean-Miche", Headers: nil}, nil
+	return &rest.Response{StatusCode: http.StatusOK, Body: "Everything's fine Adrien", Headers: nil}, nil
 }
 
 func NewSendGridEmailSender(config *viper.Viper) EmailSender {

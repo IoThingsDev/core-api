@@ -58,5 +58,5 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully activated your account."})
 }

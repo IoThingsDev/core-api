@@ -180,17 +180,12 @@ func (mes *SigfoxMessage) BeforeCreate() {
 		/*
 			msg.Seqnbr
 			msg.time
-			msg.bmeTemp=convertoFloatToInt16(tempe, -30, 50);
-			msg.bmeHumi=convertoFloatToUInt16(humi, 0, 100);
-			msg.bmePres=convertoFloatToUInt16(pres/100.0, 900, 1100);
-			msg.bmeGas=convertoFloatToUInt16(gas, 0, 100);
 		*/
-
 		fmt.Println("Arduino Message")
-		mes.Data1 = convertInt16toFloat(mes.Data1) //Temp
-		mes.Data2 = convertUInt16toFloat(mes.Data2) //Humi
-		mes.Data3 = convertUInt16toFloat(mes.Data3) //Pres
-		mes.Data4 = convertUInt16toFloat(mes.Data4) //Gas
+		mes.Data1 = convertInt16toFloat(mes.Data1, -30, 50) //Temp
+		mes.Data2 = convertUInt16toFloat(mes.Data2, 0, 100) //Humi
+		mes.Data3 = convertUInt16toFloat(mes.Data3, 900, 1100) //Pres
+		mes.Data4 = convertUInt16toFloat(mes.Data4, 0, 100) //Gas
 		return
 
 	} else {
@@ -204,12 +199,12 @@ func (mes *SigfoxMessage) BeforeCreate() {
  * 	1FB2, 9BDC, 0C8B, A47E
  */
 
-func convertInt16toFloat (value float32) float32 {
-	return (100*value)/32768
+func convertInt16toFloat (value float32, min float32, max float32) float32 {
+	return (value*(max-min))/32768
 }
 
-func convertUInt16toFloat (value float32) float32 {
-	return (100*value)/65536
+func convertUInt16toFloat (value float32, min float32, max float32) float32 {
+	return (100*value*(max-min))/65536
 }
 
 const SigfoxMessagesCollection = "sigfox_messages"
