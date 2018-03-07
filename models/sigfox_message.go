@@ -200,11 +200,11 @@ func (mes *SigfoxMessage) BeforeCreate() {
  */
 
 func convertInt16toFloat (value float32, min float32, max float32) float32 {
-	return float32(int((value*(max-min))/32768) * 100) / 100
+	return float32(int((value*(max-min))/32768) * 10000) / 100
 }
 
 func convertUInt16toFloat (value float32, min float32, max float32) float32 {
-	return float32(int((value*(max-min))/65536) * 100) / 100
+	return float32(int((value*(max-min))/65536) * 10000) / 100
 }
 
 const SigfoxMessagesCollection = "sigfox_messages"
