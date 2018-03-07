@@ -37,8 +37,9 @@ func (mes *SigfoxMessage) BeforeCreate() {
 	//*l = decodeSensitFrame(*l)
 	mes.Id = bson.NewObjectId().Hex()
 
-	// TODO : Fix shift when battery MSB=0
-	// TODO : Handle modes 2, 3, 4 & 5
+	// TODO: Fix shift when battery MSB=0
+	// TODO: Handle modes 2, 3, 4 & 5
+	// TODO: Nice to have : Round to 2 digits precision
 
 	data := ""
 	if mes.MesType == 1  {
@@ -67,7 +68,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 			battery, _ := strconv.ParseInt(strings.Join(battData, ""), 2, 8)
 			batVal := float32(battery) * 0.05 * 2.7
 
-			mes.Data1 = float32(int(batVal * 100)) / 100
+			mes.Data1 = batVal
 
 			//Byte 3
 			temperature := int64(0)
@@ -87,7 +88,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 				tempVal = (float32(temperature) - 200) / 8
 			}
 
-			mes.Data2 = float32(int(tempVal * 100)) / 100
+			mes.Data2 = tempVal
 
 			modeStr := ""
 			swRev := ""
@@ -104,7 +105,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 				modeStr = "Temperature + Humidity"
 				humi, _ := strconv.ParseInt(data[24:32], 2, 16)
 				humidity = float32(humi) * 0.5
-				mes.Data3 = float32(int(humidity * 100)) / 100
+				mes.Data3 = humidity
 			case 2:
 				modeStr = "Light"
 				lightVal, _ := strconv.ParseInt(data[18:24], 2, 8)
@@ -113,7 +114,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 				if lightMulti == 1 {
 					light = light * 8
 				}
-				mes.Data4 = float32(int(light * 100)) / 100
+				mes.Data4 = light
 			case 3:
 				modeStr = "Door"
 			case 4:
@@ -200,11 +201,11 @@ func (mes *SigfoxMessage) BeforeCreate() {
  */
 
 func convertInt16toFloat (value float32, min float32, max float32) float32 {
-	return float32(int((value*(max-min))/32768) * 10000) / 100
+	return (value*(max-min))/32768
 }
 
 func convertUInt16toFloat (value float32, min float32, max float32) float32 {
-	return float32(int((value*(max-min))/65536) * 10000) / 100
+	return (value*(max-min))/65536
 }
 
 const SigfoxMessagesCollection = "sigfox_messages"
