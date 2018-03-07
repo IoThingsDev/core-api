@@ -204,7 +204,7 @@ func convertInt16toFloat (value float32, min float32, max float32) float32 {
 }
 
 func convertUInt16toFloat (value float32, min float32, max float32) float32 {
-	return (100*value*(max-min))/65536
+	return (value*(max-min))/65536
 }
 
 const SigfoxMessagesCollection = "sigfox_messages"
