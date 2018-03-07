@@ -67,7 +67,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 			battery, _ := strconv.ParseInt(strings.Join(battData, ""), 2, 8)
 			batVal := float32(battery) * 0.05 * 2.7
 
-			mes.Data1 = batVal
+			mes.Data1 = float32(int(batVal * 100)) / 100
 
 			//Byte 3
 			temperature := int64(0)
@@ -87,7 +87,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 				tempVal = (float32(temperature) - 200) / 8
 			}
 
-			mes.Data2 = tempVal
+			mes.Data2 = float32(int(tempVal * 100)) / 100
 
 			modeStr := ""
 			swRev := ""
@@ -104,7 +104,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 				modeStr = "Temperature + Humidity"
 				humi, _ := strconv.ParseInt(data[24:32], 2, 16)
 				humidity = float32(humi) * 0.5
-				mes.Data3 = humidity
+				mes.Data3 = float32(int(humidity * 100)) / 100
 			case 2:
 				modeStr = "Light"
 				lightVal, _ := strconv.ParseInt(data[18:24], 2, 8)
@@ -113,7 +113,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 				if lightMulti == 1 {
 					light = light * 8
 				}
-				mes.Data4 = light
+				mes.Data4 = float32(int(light * 100)) / 100
 			case 3:
 				modeStr = "Door"
 			case 4:
@@ -200,11 +200,11 @@ func (mes *SigfoxMessage) BeforeCreate() {
  */
 
 func convertInt16toFloat (value float32, min float32, max float32) float32 {
-	return (value*(max-min))/32768
+	return float32(int((value*(max-min))/32768) * 100) / 100
 }
 
 func convertUInt16toFloat (value float32, min float32, max float32) float32 {
-	return (value*(max-min))/65536
+	return float32(int((value*(max-min))/65536) * 100) / 100
 }
 
 const SigfoxMessagesCollection = "sigfox_messages"
