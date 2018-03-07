@@ -66,7 +66,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 			batteryLsb := data[12:16]
 			battData := []string{batteryMsb, batteryLsb}
 			battery, _ := strconv.ParseInt(strings.Join(battData, ""), 2, 8)
-			batVal := float32(battery) * 0.05 * 2.7
+			batVal := (float32(battery) * 0.05) + 2.7
 
 			mes.Data1 = batVal
 
