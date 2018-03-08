@@ -186,7 +186,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 		mes.Data1 = convertInt16toFloat(mes.Data1, -30, 50) //Temp
 		mes.Data2 = convertUInt16toFloat(mes.Data2, 0, 100) //Humi
 		mes.Data3 = convertUInt16toFloat(mes.Data3, 900, 1100)+900 //Pres: 900 shift to avoid overflow for numbers above 200
-		mes.Data4 = convertUInt16toFloat(mes.Data4, 0, 100) //Gas
+		mes.Data4 = convertUInt16toFloat(mes.Data4, 0, 200) //Gas
 		return
 
 	} else {
