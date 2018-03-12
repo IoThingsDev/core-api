@@ -43,8 +43,9 @@ func (mes *SigfoxMessage) BeforeCreate() {
 
 	data := ""
 	if mes.MesType == 1  {
-		if len(mes.Data) <= 12 {
+		if len(mes.Data) <= 12 { //8 exactly, 4 bytes
 			fmt.Println("Sensit Uplink Message")
+
 			parsed, err := strconv.ParseUint(mes.Data, 16, 32)
 			if err != nil {
 				log.Fatal(err)
@@ -54,6 +55,11 @@ func (mes *SigfoxMessage) BeforeCreate() {
 			byte2 := data[8:16]
 			byte3 := data[16:24]
 			byte4 := data[24:32]*/
+
+			if (len(data) == 25) {//Low battery MSB
+				fmt.Println("Sensit Low battery")
+				return
+			} 
 
 			//Byte 1
 			mode, _ := strconv.ParseInt(data[5:8], 2, 8)
@@ -174,7 +180,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 			mes.EventType = typeStr
 			mes.Mode = modeStr
 			mes.Timeframe = timeStr
-		} else {
+		} else {//len: 24 exactly, 12 bytes
 			fmt.Println("Sensit Daily Downlink Message")
 		}
 	} else if mes.MesType == 2 {
