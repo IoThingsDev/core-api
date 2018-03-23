@@ -10,8 +10,6 @@ import (
 	"github.com/kr/pretty"
 	"googlemaps.github.io/maps"
 	"gopkg.in/mgo.v2/bson"
-	"os"
-	"github.com/adrien3d/things-api/config"
 )
 
 type SigfoxMessage struct {
