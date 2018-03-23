@@ -50,12 +50,8 @@ func getWifiPosition(ssids string) {
 		ConsiderIP: true,
 		WiFiAccessPoints: []maps.WiFiAccessPoint{maps.WiFiAccessPoint{
 			MACAddress:         ssid1,
-			SignalStrength:     -43,
-			SignalToNoiseRatio: 0,
 		}, maps.WiFiAccessPoint{
 			MACAddress:         ssid2,
-			SignalStrength:     -55,
-			SignalToNoiseRatio: 0,
 		}},
 	}
 	resp, err := c.Geolocate(context.Background(), r)
