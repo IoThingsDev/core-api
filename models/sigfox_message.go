@@ -6,7 +6,12 @@ import (
 	"strconv"
 	"strings"
 
+	"context"
+	"github.com/kr/pretty"
+	"googlemaps.github.io/maps"
 	"gopkg.in/mgo.v2/bson"
+	"os"
+	"github.com/adrien3d/things-api/config"
 )
 
 type SigfoxMessage struct {
@@ -33,16 +38,94 @@ type SigfoxMessage struct {
 	Alerts      int64   `json:"alerts" bson:"alerts" valid:"-"`           //Device : alerts
 }
 
+func getWifiPosition(ssids string) {
+	fmt.Println("WiFi frame")
+	ssid1 := string(ssids[0:12])
+	ssid2 := string(ssids[12:24])
+	fmt.Println("SSID1: ", ssid1, "\t SSID2:", ssid2)
+	// TODO: Put Google API Key in config file, like: config.GetString(c, "google_api_key")
+	c, err := maps.NewClient(maps.WithAPIKey("AIzaSyCN0Z78M1sIT6c2H8PL0KaaFmjkBUE4avQ"))
+	if err != nil {
+		log.Fatalf("API connection fatal error: %s", err)
+	}
+	r := &maps.GeolocationRequest{
+		ConsiderIP: true,
+		WiFiAccessPoints: []maps.WiFiAccessPoint{maps.WiFiAccessPoint{
+			MACAddress:         ssid1,
+			SignalStrength:     -43,
+			SignalToNoiseRatio: 0,
+		}, maps.WiFiAccessPoint{
+			MACAddress:         ssid2,
+			SignalStrength:     -55,
+			SignalToNoiseRatio: 0,
+		}},
+	}
+	resp, err := c.Geolocate(context.Background(), r)
+	if err != nil {
+		log.Fatalf("Fatal Geolocation Request error: %s", err)
+	}
+
+	pretty.Println(resp)
+}
+
+func decodeGPSFrame(frame string) {
+	fmt.Println("GPS frame")
+	var latitude, longitude float64
+	var latDeg, latMin, latSec float64
+	var lngDeg, lngMin, lngSec float64
+
+	isNorth, isEast := false, false
+	if string(frame[0:2]) == "4e" {
+		isNorth = true
+	}
+	if string(frame[10:12]) == "45" {
+		isEast = true
+	}
+
+	if isNorth {
+		fmt.Print("N:")
+	} else {
+		fmt.Print("S:")
+	}
+
+	valLatDeg, _ := strconv.ParseInt(frame[2:4], 16, 8)
+	latDeg = float64(valLatDeg)
+	valLatMin, _ := strconv.ParseInt(frame[4:6], 16, 8)
+	latMin = float64(valLatMin)
+	valLatSec, _ := strconv.ParseInt(frame[6:8], 16, 8)
+	latSec = float64(valLatSec)
+	fmt.Println(latDeg, "°\t", latMin, "m\t", latSec, "s")
+
+	latitude = float64(latDeg) + float64(latMin/60) + float64(latSec/3600)
+
+	if isEast {
+		fmt.Print("E:")
+	} else {
+		fmt.Print("W:")
+	}
+	valLngDeg, _ := strconv.ParseInt(frame[10:12], 16, 8)
+	lngDeg = float64(valLngDeg)
+	valLngMin, _ := strconv.ParseInt(frame[12:14], 16, 8)
+	lngMin = float64(valLngMin)
+	valLngSec, _ := strconv.ParseInt(frame[14:16], 16, 8)
+	lngSec = float64(valLngSec)
+	fmt.Println(lngDeg, "°\t", lngMin, "m\t", lngSec, "s")
+
+	longitude = float64(lngDeg) + float64(lngMin/60) + float64(lngSec/3600)
+
+	fmt.Println("Lat: ", latitude, "\t Lng:", longitude)
+}
+
+//MesType, 1=Sensit, 2=Arduino, 3= Wisol EVK
 func (mes *SigfoxMessage) BeforeCreate() {
 	//*l = decodeSensitFrame(*l)
 	mes.Id = bson.NewObjectId().Hex()
 
-	// TODO: Fix shift when battery MSB=0
 	// TODO: Handle modes 2, 3, 4 & 5
 	// TODO: Nice to have : Round to 2 digits precision
 
 	data := ""
-	if mes.MesType == 1  {
+	if mes.MesType == 1 {
 		if len(mes.Data) <= 12 { //8 exactly, 4 bytes
 			fmt.Println("Sensit Uplink Message")
 
@@ -56,10 +139,10 @@ func (mes *SigfoxMessage) BeforeCreate() {
 			byte3 := data[16:24]
 			byte4 := data[24:32]*/
 
-			if (len(data) == 25) {//Low battery MSB
+			if len(data) == 25 { //Low battery MSB
 				fmt.Println("Sensit Low battery")
 				return
-			} 
+			}
 
 			//Byte 1
 			mode, _ := strconv.ParseInt(data[5:8], 2, 8)
@@ -180,7 +263,7 @@ func (mes *SigfoxMessage) BeforeCreate() {
 			mes.EventType = typeStr
 			mes.Mode = modeStr
 			mes.Timeframe = timeStr
-		} else {//len: 24 exactly, 12 bytes
+		} else { //len: 24 exactly, 12 bytes
 			fmt.Println("Sensit Daily Downlink Message")
 		}
 	} else if mes.MesType == 2 {
@@ -189,12 +272,19 @@ func (mes *SigfoxMessage) BeforeCreate() {
 			msg.time
 		*/
 		fmt.Println("Arduino Message")
-		mes.Data1 = convertInt16toFloat(mes.Data1, -30, 50) //Temp
-		mes.Data2 = convertUInt16toFloat(mes.Data2, 0, 100) //Humi
-		mes.Data3 = convertUInt16toFloat(mes.Data3, 900, 1100)+900 //Pres: 900 shift to avoid overflow for numbers above 200
-		mes.Data4 = convertUInt16toFloat(mes.Data4, 0, 200) //Gas
+		mes.Data1 = convertInt16toFloat(mes.Data1, -30, 50)          //Temp
+		mes.Data2 = convertUInt16toFloat(mes.Data2, 0, 100)          //Humi
+		mes.Data3 = convertUInt16toFloat(mes.Data3, 900, 1100) + 900 //Pres: 900 shift to avoid overflow for numbers above 200
+		mes.Data4 = convertUInt16toFloat(mes.Data4, 0, 200)          //Gas
 		return
 
+	} else if mes.MesType == 3 {
+		fmt.Println("Wisol EVK Message")
+		if (string(mes.Data[0:2]) == "4e") || (string(mes.Data[0:2]) == "53") {
+			decodeGPSFrame(mes.Data)
+		} else {
+			getWifiPosition(mes.Data)
+		}
 	} else {
 		return
 	}
@@ -206,12 +296,12 @@ func (mes *SigfoxMessage) BeforeCreate() {
  * 	1FB2, 9BDC, 0C8B, A47E
  */
 
-func convertInt16toFloat (value float32, min float32, max float32) float32 {
-	return (value*(max-min))/32768
+func convertInt16toFloat(value float32, min float32, max float32) float32 {
+	return (value * (max - min)) / 32768
 }
 
-func convertUInt16toFloat (value float32, min float32, max float32) float32 {
-	return (value*(max-min))/65536
+func convertUInt16toFloat(value float32, min float32, max float32) float32 {
+	return (value * (max - min)) / 65536
 }
 
 const SigfoxMessagesCollection = "sigfox_messages"
