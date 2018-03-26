@@ -15,6 +15,7 @@ type LocationController struct {
 func NewLocationController() LocationController {
 	return LocationController{}
 }
+
 func (lc LocationController) CreateLocation(c *gin.Context) {
 	location := &models.Location{}
 

@@ -1,13 +1,20 @@
 package models
 
 import (
+	"context"
 	"fmt"
+	"googlemaps.github.io/maps"
 	"gopkg.in/mgo.v2/bson"
 	"log"
 	"strconv"
 	"strings"
+	//"github.com/adrien3d/things-api/store"
 )
 
+/*func NewStoreController() UserController {
+	return UserController{}
+}
+*/
 type SigfoxMessage struct {
 	Id          string  `json:"id" bson:"_id,omitempty" valid:"-"`
 	SigfoxId    string  `json:"sigfoxId" bson:"sigfoxId" valid:"-"`
@@ -32,24 +39,38 @@ type SigfoxMessage struct {
 	Alerts      int64   `json:"alerts" bson:"alerts" valid:"-"`           //Device : alerts
 }
 
-/*
 func getWifiPosition(ssids string) Location {
-	fmt.Println("WiFi frame")
+	fmt.Print("WiFi frame: \t\t\t")
 	var wifiLoc Location
-	var latitude, longitude float64
-	ssid1 := string(ssids[0:12])
-	ssid2 := string(ssids[12:24])
-	fmt.Println("SSID1: ", ssid1, "\t SSID2:", ssid2)
+
+	ssid1 := ""
+	for i := 0; i <= 10; i += 2 {
+		if i == 10 {
+			ssid1 += fmt.Sprint(string(ssids[i : i+2]))
+		} else {
+			ssid1 += fmt.Sprint(string(ssids[i:i+2]), ":")
+		}
+	}
+	ssid2 := ""
+	for i := 12; i <= 22; i += 2 {
+		if i == 22 {
+			ssid2 += fmt.Sprint(string(ssids[i : i+2]))
+		} else {
+			ssid2 += fmt.Sprint(string(ssids[i:i+2]), ":")
+		}
+	}
+
+	fmt.Print("SSID1: ", ssid1, "\t SSID2:", ssid2, "\t\t\t")
 	// TODO: Put Google API Key in config file, like: config.GetString(c, "google_api_key")
 	c, err := maps.NewClient(maps.WithAPIKey("AIzaSyCN0Z78M1sIT6c2H8PL0KaaFmjkBUE4avQ"))
 	if err != nil {
 		log.Fatalf("API connection fatal error: %s", err)
 	}
 	r := &maps.GeolocationRequest{
-		ConsiderIP: true,
-		WiFiAccessPoints: []maps.WiFiAccessPoint{maps.WiFiAccessPoint{
+		ConsiderIP: false,
+		WiFiAccessPoints: []maps.WiFiAccessPoint{{
 			MACAddress: ssid1,
-		}, maps.WiFiAccessPoint{
+		}, {
 			MACAddress: ssid2,
 		}},
 	}
@@ -58,18 +79,20 @@ func getWifiPosition(ssids string) Location {
 		log.Fatalf("Fatal Geolocation Request error: %s", err)
 	}
 
-	pretty.Println(resp)
+	//fmt.Println(resp)
 
 	wifiLoc.SpotIt = false
 	wifiLoc.WiFi = true
 	wifiLoc.GPS = false
-	wifiLoc.Latitude = latitude
-	wifiLoc.Longitude = longitude
+	wifiLoc.Latitude = resp.Location.Lat
+	wifiLoc.Longitude = resp.Location.Lng
+	wifiLoc.Radius = resp.Accuracy
+	fmt.Println(wifiLoc)
 	return wifiLoc
 }
 
 func decodeGPSFrame(frame string) Location {
-	fmt.Println("GPS frame")
+	fmt.Print("GPS frame: \t\t\t")
 	var gpsLoc Location
 	var latitude, longitude float64
 	var latDeg, latMin, latSec float64
@@ -95,7 +118,7 @@ func decodeGPSFrame(frame string) Location {
 	latMin = float64(valLatMin)
 	valLatSec, _ := strconv.ParseInt(frame[6:8], 16, 8)
 	latSec = float64(valLatSec)
-	fmt.Println(latDeg, "°\t", latMin, "m\t", latSec, "s")
+	fmt.Print(latDeg, "° ", latMin, "m ", latSec, "s\t")
 
 	latitude = float64(latDeg) + float64(latMin/60) + float64(latSec/3600)
 
@@ -110,19 +133,20 @@ func decodeGPSFrame(frame string) Location {
 	lngMin = float64(valLngMin)
 	valLngSec, _ := strconv.ParseInt(frame[14:16], 16, 8)
 	lngSec = float64(valLngSec)
-	fmt.Println(lngDeg, "°\t", lngMin, "m\t", lngSec, "s")
+	fmt.Print(lngDeg, "° ", lngMin, "m ", lngSec, "s")
 
 	longitude = float64(lngDeg) + float64(lngMin/60) + float64(lngSec/3600)
 
-	fmt.Println("Lat: ", latitude, "\t Lng:", longitude)
+	fmt.Print("\t\t\t Lat: ", latitude, "\t Lng:", longitude)
 	// Populating returned location
 	gpsLoc.SpotIt = false
 	gpsLoc.WiFi = false
 	gpsLoc.GPS = true
 	gpsLoc.Latitude = latitude
 	gpsLoc.Longitude = longitude
+	fmt.Println("\t\t\t", gpsLoc)
 	return gpsLoc
-}*/
+}
 
 //MesType, 1=Sensit, 2=Arduino, 3= Wisol EVK
 func (mes *SigfoxMessage) BeforeCreate() {
@@ -289,9 +313,13 @@ func (mes *SigfoxMessage) BeforeCreate() {
 	} else if mes.MesType == 3 {
 		fmt.Println("Wisol EVK Message")
 		if (string(mes.Data[0:2]) == "4e") || (string(mes.Data[0:2]) == "53") {
-			//decodeGPSFrame(mes.Data)
+			fmt.Println("Wisol GPS Frame")
+			//gpsLoc := decodeGPSFrame(mes.Data)
+			//store.CreateLocation(context.Background(), &gpsLoc)
 		} else {
-			//getWifiPosition(mes.Data)
+			fmt.Println("Wisol WiFi Frame")
+			//wifiLoc := getWifiPosition(mes.Data)
+			//store.CreateLocation(context.Background(), &wifiLoc)
 		}
 	} else {
 		return
