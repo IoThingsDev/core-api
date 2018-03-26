@@ -2,14 +2,10 @@ package models
 
 import (
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
 	"log"
 	"strconv"
 	"strings"
-
-	"context"
-	"github.com/kr/pretty"
-	"googlemaps.github.io/maps"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type SigfoxMessage struct {
@@ -36,8 +32,11 @@ type SigfoxMessage struct {
 	Alerts      int64   `json:"alerts" bson:"alerts" valid:"-"`           //Device : alerts
 }
 
+/*
 func getWifiPosition(ssids string) Location {
 	fmt.Println("WiFi frame")
+	var wifiLoc Location
+	var latitude, longitude float64
 	ssid1 := string(ssids[0:12])
 	ssid2 := string(ssids[12:24])
 	fmt.Println("SSID1: ", ssid1, "\t SSID2:", ssid2)
@@ -60,7 +59,13 @@ func getWifiPosition(ssids string) Location {
 	}
 
 	pretty.Println(resp)
-	return nil
+
+	wifiLoc.SpotIt = false
+	wifiLoc.WiFi = true
+	wifiLoc.GPS = false
+	wifiLoc.Latitude = latitude
+	wifiLoc.Longitude = longitude
+	return wifiLoc
 }
 
 func decodeGPSFrame(frame string) Location {
@@ -117,7 +122,7 @@ func decodeGPSFrame(frame string) Location {
 	gpsLoc.Latitude = latitude
 	gpsLoc.Longitude = longitude
 	return gpsLoc
-}
+}*/
 
 //MesType, 1=Sensit, 2=Arduino, 3= Wisol EVK
 func (mes *SigfoxMessage) BeforeCreate() {
