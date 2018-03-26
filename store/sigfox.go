@@ -8,7 +8,3 @@ import (
 func CreateMessage(c context.Context, message *models.SigfoxMessage) error {
 	return FromContext(c).CreateMessage(message)
 }
-
-func CreateLocation(c context.Context, location *models.Location) error {
-	return FromContext(c).CreateLocation(location)
-}

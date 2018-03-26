@@ -36,7 +36,7 @@ type SigfoxMessage struct {
 	Alerts      int64   `json:"alerts" bson:"alerts" valid:"-"`           //Device : alerts
 }
 
-func getWifiPosition(ssids string) {
+func getWifiPosition(ssids string) Location {
 	fmt.Println("WiFi frame")
 	ssid1 := string(ssids[0:12])
 	ssid2 := string(ssids[12:24])
@@ -49,9 +49,9 @@ func getWifiPosition(ssids string) {
 	r := &maps.GeolocationRequest{
 		ConsiderIP: true,
 		WiFiAccessPoints: []maps.WiFiAccessPoint{maps.WiFiAccessPoint{
-			MACAddress:         ssid1,
+			MACAddress: ssid1,
 		}, maps.WiFiAccessPoint{
-			MACAddress:         ssid2,
+			MACAddress: ssid2,
 		}},
 	}
 	resp, err := c.Geolocate(context.Background(), r)
@@ -60,10 +60,12 @@ func getWifiPosition(ssids string) {
 	}
 
 	pretty.Println(resp)
+	return nil
 }
 
-func decodeGPSFrame(frame string) {
+func decodeGPSFrame(frame string) Location {
 	fmt.Println("GPS frame")
+	var gpsLoc Location
 	var latitude, longitude float64
 	var latDeg, latMin, latSec float64
 	var lngDeg, lngMin, lngSec float64
@@ -108,6 +110,13 @@ func decodeGPSFrame(frame string) {
 	longitude = float64(lngDeg) + float64(lngMin/60) + float64(lngSec/3600)
 
 	fmt.Println("Lat: ", latitude, "\t Lng:", longitude)
+	// Populating returned location
+	gpsLoc.SpotIt = false
+	gpsLoc.WiFi = false
+	gpsLoc.GPS = true
+	gpsLoc.Latitude = latitude
+	gpsLoc.Longitude = longitude
+	return gpsLoc
 }
 
 //MesType, 1=Sensit, 2=Arduino, 3= Wisol EVK
@@ -275,9 +284,9 @@ func (mes *SigfoxMessage) BeforeCreate() {
 	} else if mes.MesType == 3 {
 		fmt.Println("Wisol EVK Message")
 		if (string(mes.Data[0:2]) == "4e") || (string(mes.Data[0:2]) == "53") {
-			decodeGPSFrame(mes.Data)
+			//decodeGPSFrame(mes.Data)
 		} else {
-			getWifiPosition(mes.Data)
+			//getWifiPosition(mes.Data)
 		}
 	} else {
 		return

@@ -29,17 +29,3 @@ func (db *mongo) CreateMessage(message *models.SigfoxMessage) error {
 
 	return nil
 }
-
-func (db *mongo) CreateLocation(location *models.Location) error {
-	session := db.Session.Copy()
-	defer session.Close()
-	locations := db.C(models.LocationsCollection).With(session)
-
-	location.BeforeCreate()
-	err := locations.Insert(location)
-	if err != nil {
-		return helpers.NewError(http.StatusInternalServerError, "location_creation_failed", "Failed to insert the location")
-	}
-
-	return nil
-}
