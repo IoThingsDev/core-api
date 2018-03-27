@@ -63,12 +63,12 @@ func getWifiPosition(ssids string) models.Location {
 
 	//fmt.Println(resp)
 
-	wifiLoc.SpotIt = false
-	wifiLoc.WiFi = true
-	wifiLoc.GPS = false
 	wifiLoc.Latitude = resp.Location.Lat
 	wifiLoc.Longitude = resp.Location.Lng
 	wifiLoc.Radius = resp.Accuracy
+	wifiLoc.SpotIt = false
+	wifiLoc.GPS = false
+	wifiLoc.WiFi = true
 	fmt.Println(wifiLoc)
 	return wifiLoc
 }
@@ -121,11 +121,11 @@ func decodeGPSFrame(frame string) models.Location {
 
 	fmt.Print("\t\t\t Lat: ", latitude, "\t Lng:", longitude)
 	// Populating returned location
-	gpsLoc.SpotIt = false
-	gpsLoc.WiFi = false
-	gpsLoc.GPS = true
 	gpsLoc.Latitude = latitude
 	gpsLoc.Longitude = longitude
+	gpsLoc.SpotIt = false
+	gpsLoc.GPS = true
+	gpsLoc.WiFi = false
 	fmt.Println("\t\t\t", gpsLoc)
 	return gpsLoc
 }
@@ -160,6 +160,8 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 			fmt.Println("Wisol WiFi Frame, contaning: ", computedLocation)
 			//store.CreateLocation(context.Background(), &wifiLoc)
 		}
+
+		computedLocation.SigfoxId = sigfoxMessage.SigfoxId
 
 		err = store.CreateLocationWithMessage(c, computedLocation, sigfoxMessage)
 		fmt.Println("Computed location created")

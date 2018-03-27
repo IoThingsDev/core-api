@@ -5,8 +5,6 @@ import (
 
 	"github.com/adrien3d/things-api/helpers"
 	"github.com/adrien3d/things-api/models"
-	"golang.org/x/text/message"
-	"google.golang.org/genproto/googleapis/cloud/location"
 	"gopkg.in/mgo.v2/bson"
 )
 
