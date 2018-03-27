@@ -68,16 +68,9 @@ func (a *API) SetupRouter() {
 		{
 			sigfoxController := controllers.NewSigfoxController()
 			sigfox.POST("/messages", sigfoxController.CreateMessage)
-			//sigfox.POST("/locations", sigfoxController.CreateLocation)
 
 			locationController := controllers.NewLocationController()
-			sigfox.POST("/", locationController.CreateLocation)
-
-			/*location := v1.Group("/locations")
-			{
-				locationController := controllers.NewLocationController()
-				location.POST("/", locationController.CreateLocation)
-			}*/
+			sigfox.POST("/locations", locationController.CreateLocation)
 		}
 
 		devices := v1.Group("/devices")

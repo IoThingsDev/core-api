@@ -147,19 +147,24 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 	}
 
 	if sigfoxMessage.MesType == 3 {
-		var computedLocation models.Location
+		computedLocation := &models.Location{}
+		//var computedLocation models.Location
 
 		if (string(sigfoxMessage.Data[0:2]) == "4e") || (string(sigfoxMessage.Data[0:2]) == "53") {
-			fmt.Println("Wisol GPS Frame")
-			computedLocation = decodeGPSFrame(sigfoxMessage.Data)
+			decodedGPSFrame := decodeGPSFrame(sigfoxMessage.Data)
+			computedLocation = &decodedGPSFrame
+			fmt.Println("Wisol GPS Frame, contaning: ", computedLocation)
 		} else {
-			fmt.Println("Wisol WiFi Frame")
-			computedLocation = getWifiPosition(sigfoxMessage.Data)
+			decodedWifiFrame := getWifiPosition(sigfoxMessage.Data)
+			computedLocation := &decodedWifiFrame
+			fmt.Println("Wisol WiFi Frame, contaning: ", computedLocation)
 			//store.CreateLocation(context.Background(), &wifiLoc)
 		}
 
-		err = store.CreateLocation(c, &computedLocation)
+		err = store.CreateLocationWithMessage(c, computedLocation, sigfoxMessage)
+		fmt.Println("Computed location created")
 		if err != nil {
+			fmt.Println("Error while creating computed location")
 			c.Error(err)
 			c.Abort()
 			return
