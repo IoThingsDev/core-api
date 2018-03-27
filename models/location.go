@@ -15,7 +15,7 @@ type Location struct {
 	Radius    float64 `json:"radius" bson:"radius" valid:"-"`
 	SpotIt    bool    `json:"spotIt" bson:"spotIt" valid:"-"`
 	GPS       bool    `json:"gps" bson:"gps" valid:"-"`
-	WiFi      bool    `json:"WiFi" bson:"WiFi" valid:"-"`
+	WiFi      bool    `json:"wifi" bson:"wifi" valid:"-"`
 }
 
 type LastLocation struct {

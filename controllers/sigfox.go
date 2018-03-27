@@ -146,7 +146,7 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 		return
 	}
 
-	if (sigfoxMessage.MesType == 3){
+	if sigfoxMessage.MesType == 3 {
 		var computedLocation models.Location
 
 		if (string(sigfoxMessage.Data[0:2]) == "4e") || (string(sigfoxMessage.Data[0:2]) == "53") {
