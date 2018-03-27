@@ -156,7 +156,7 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 			fmt.Println("Wisol GPS Frame, contaning: ", computedLocation)
 		} else {
 			decodedWifiFrame := getWifiPosition(sigfoxMessage.Data)
-			computedLocation := &decodedWifiFrame
+			computedLocation = &decodedWifiFrame
 			fmt.Println("Wisol WiFi Frame, contaning: ", computedLocation)
 			//store.CreateLocation(context.Background(), &wifiLoc)
 		}
