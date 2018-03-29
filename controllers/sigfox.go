@@ -163,7 +163,8 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 
 		computedLocation.SigfoxId = sigfoxMessage.SigfoxId
 
-		err = store.CreateLocationWithMessage(c, computedLocation, sigfoxMessage)
+		//err = store.CreateLocationWithMessage(c, computedLocation, sigfoxMessage)
+		err = store.CreateLocation(c, computedLocation)
 		fmt.Println("Computed location created")
 		if err != nil {
 			fmt.Println("Error while creating computed location")
