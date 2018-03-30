@@ -37,7 +37,7 @@ func (db *mongo) GetAllDevicesLocations(user *models.User) ([]*models.LastLocati
 			"foreignField": "sigfoxId",
 			"as":           "location"}},
 		{"$unwind": "$location"},
-		{"$sort": bson.M{"location.timestamp": -1}},
+		{"$sort": bson.M{"location.radius": 1}},
 		{"$group": bson.M{"_id": "$_id", "name": bson.M{"$first": "$name"}, "location": bson.M{"$push": "$location"}}},
 		{"$project": bson.M{"name": "$name", "location": bson.M{"$arrayElemAt": []interface{}{"$location", 0}}}},
 	}).All(&list)
