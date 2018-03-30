@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/adrien3d/things-api/helpers"
+	"github.com/adrien3d/things-api/helpers/params"
 	"github.com/adrien3d/things-api/models"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -20,11 +21,21 @@ func (db *mongo) CreateMessage(message *models.SigfoxMessage) error {
 	}
 
 	devices := db.C(models.DevicesCollection).With(session)
+	device := &models.Device{}
 
-	devices.Update(bson.M{"sigfoxId": message.SigfoxId}, bson.M{"$set": bson.M{"lastAcc": message.Timestamp}})
-
+	err = devices.Find(params.M{"sigfoxId": message.SigfoxId}).One(device)
 	if err != nil {
-		return helpers.NewError(http.StatusInternalServerError, "device_update_failed", "Failed to update the device")
+		return helpers.NewError(http.StatusConflict, "sigfox_device_id_not_found", "Device Sigfox ID not found")
+	}
+
+	err = devices.Update(bson.M{"sigfoxId": message.SigfoxId}, bson.M{"$set": bson.M{"lastAcc": message.Timestamp}})
+	if err != nil {
+		return helpers.NewError(http.StatusInternalServerError, "device_update_failed", "Failed to update device last activity")
+	}
+
+	err = devices.Update(bson.M{"sigfoxId": message.SigfoxId}, bson.M{"$set": bson.M{"active": true}})
+	if err != nil {
+		return helpers.NewError(http.StatusInternalServerError, "device_update_failed", "Failed to update device status")
 	}
 
 	return nil
