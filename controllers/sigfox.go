@@ -157,7 +157,7 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 		//var computedLocation models.Location
 
 		if (string(sigfoxMessage.Data[0:2]) == "4e") || (string(sigfoxMessage.Data[0:2]) == "53") {
-			decodedGPSFrame, decodedTemperature := decodeGPSFrame(sigfoxMessage)
+			decodedGPSFrame, decodedTemperature := decodeGPSFrame(*sigfoxMessage)
 			sigfoxMessage.Data4 = decodedTemperature
 			computedLocation = &decodedGPSFrame
 			fmt.Println("Wisol GPS Frame, contaning: ", computedLocation)
