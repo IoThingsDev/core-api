@@ -139,13 +139,6 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 		return
 	}
 
-	err = store.CreateMessage(c, sigfoxMessage)
-	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
-	}
-
 	if sigfoxMessage.MesType == 3 {
 		computedLocation := &models.Location{}
 		//var computedLocation models.Location
@@ -168,6 +161,25 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 		fmt.Println("Computed location created")
 		if err != nil {
 			fmt.Println("Error while creating computed location")
+			c.Error(err)
+			c.Abort()
+			return
+		}
+
+		sigfoxMessage.Data1 = computedLocation.Latitude
+		sigfoxMessage.Data2 = computedLocation.Longitude
+		sigfoxMessage.Data3 = computedLocation.Radius
+
+		if computedLocation.SpotIt {
+			sigfoxMessage.Data4 = 1
+		} else if computedLocation.GPS {
+			sigfoxMessage.Data5 = 1
+		} else if computedLocation.WiFi {
+			sigfoxMessage.Data6 = 1
+		}
+
+		err = store.CreateMessage(c, sigfoxMessage)
+		if err != nil {
 			c.Error(err)
 			c.Abort()
 			return

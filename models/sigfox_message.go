@@ -19,21 +19,21 @@ type SigfoxMessage struct {
 	FrameNumber uint    `json:"frameNumber" bson:"frameNumber" valid:"-"` //Device : (daily frames under 140)
 	Timestamp   int64   `json:"timestamp" bson:"timestamp" valid:"-"`     //Sigfox : time
 	Station     string  `json:"station" bson:"station" valid:"-"`         //Sigfox : station
-	Snr         float32 `json:"snr" bson:"snr" valid:"-"`                 //Sigfox : snr
-	AvgSnr      float32 `json:"avgSnr" bson:"avgSnr" valid:"-"`           //Sigfox : avgSnr
-	Rssi        float32 `json:"rssi" bson:"rssi" valid:"-"`               //Sigfox : rssi
+	Snr         float64 `json:"snr" bson:"snr" valid:"-"`                 //Sigfox : snr
+	AvgSnr      float64 `json:"avgSnr" bson:"avgSnr" valid:"-"`           //Sigfox : avgSnr
+	Rssi        float64 `json:"rssi" bson:"rssi" valid:"-"`               //Sigfox : rssi
 	MesType     uint8   `json:"mesType" bson:"mesType" valid:"-"`         //Sigfox : mesType
 	Data        string  `json:"data" bson:"data" valid:"-"`               //Sigfox : data
 	EventType   string  `json:"eventType" bson:"eventType" valid:"-"`     //Device : eventType
 	SwRev       string  `json:"swRev" bson:"swRev" valid:"-"`             //Device : swRev
 	Mode        string  `json:"mode" bson:"mode" valid:"-"`               //Device : mode
 	Timeframe   string  `json:"timeframe" bson:"timeframe" valid:"-"`     //Device : timeframe
-	Data1       float32 `json:"data1" bson:"data1" valid:"-"`             //Device : battery
-	Data2       float32 `json:"data2" bson:"data2" valid:"-"`             //Device : temperature
-	Data3       float32 `json:"data3" bson:"data3" valid:"-"`             //Device : humidity
-	Data4       float32 `json:"data4" bson:"data4" valid:"-"`             //Device : light
-	Data5       float32 `json:"data5" bson:"data5" valid:"-"`             //Device : custom
-	Data6       float32 `json:"data6" bson:"data6" valid:"-"`             //Device : custom
+	Data1       float64 `json:"data1" bson:"data1" valid:"-"`             //Device : battery
+	Data2       float64 `json:"data2" bson:"data2" valid:"-"`             //Device : temperature
+	Data3       float64 `json:"data3" bson:"data3" valid:"-"`             //Device : humidity
+	Data4       float64 `json:"data4" bson:"data4" valid:"-"`             //Device : light
+	Data5       float64 `json:"data5" bson:"data5" valid:"-"`             //Device : custom
+	Data6       float64 `json:"data6" bson:"data6" valid:"-"`             //Device : custom
 	Alerts      int64   `json:"alerts" bson:"alerts" valid:"-"`           //Device : alerts
 }
 
@@ -76,34 +76,34 @@ func (mes *SigfoxMessage) BeforeCreate() {
 			batteryLsb := data[12:16]
 			battData := []string{batteryMsb, batteryLsb}
 			battery, _ := strconv.ParseInt(strings.Join(battData, ""), 2, 8)
-			batVal := (float32(battery) * 0.05) + 2.7
+			batVal := (float64(battery) * 0.05) + 2.7
 
 			mes.Data1 = batVal
 
 			//Byte 3
 			temperature := int64(0)
-			tempVal := float32(0)
+			tempVal := float64(0)
 
 			reedSwitch := false
 			if mode == 0 || mode == 1 {
 				temperatureLsb := data[18:24]
 				tempData := []string{temperatureMsb, temperatureLsb}
 				temperature, _ := strconv.ParseInt(strings.Join(tempData, ""), 2, 16)
-				tempVal = (float32(temperature) - 200) / 8
+				tempVal = (float64(temperature) - 200) / 8
 				if data[17] == 1 {
 					reedSwitch = true
 				}
 			} else {
 				temperature, _ = strconv.ParseInt(temperatureMsb, 2, 16)
-				tempVal = (float32(temperature) - 200) / 8
+				tempVal = (float64(temperature) - 200) / 8
 			}
 
 			mes.Data2 = tempVal
 
 			modeStr := ""
 			swRev := ""
-			humidity := float32(0.0)
-			light := float32(0.0)
+			humidity := float64(0.0)
+			light := float64(0.0)
 
 			switch mode {
 			case 0:
@@ -114,13 +114,13 @@ func (mes *SigfoxMessage) BeforeCreate() {
 			case 1:
 				modeStr = "Temperature + Humidity"
 				humi, _ := strconv.ParseInt(data[24:32], 2, 16)
-				humidity = float32(humi) * 0.5
+				humidity = float64(humi) * 0.5
 				mes.Data3 = humidity
 			case 2:
 				modeStr = "Light"
 				lightVal, _ := strconv.ParseInt(data[18:24], 2, 8)
 				lightMulti, _ := strconv.ParseInt(data[17:18], 2, 8)
-				light = float32(lightVal) * 0.01
+				light = float64(lightVal) * 0.01
 				if lightMulti == 1 {
 					light = light * 8
 				}
@@ -212,11 +212,11 @@ func (mes *SigfoxMessage) BeforeCreate() {
  * 	1FB2, 9BDC, 0C8B, A47E
  */
 
-func convertInt16toFloat(value float32, min float32, max float32) float32 {
+func convertInt16toFloat(value float64, min float64, max float64) float64 {
 	return (value * (max - min)) / 32768
 }
 
-func convertUInt16toFloat(value float32, min float32, max float32) float32 {
+func convertUInt16toFloat(value float64, min float64, max float64) float64 {
 	return (value * (max - min)) / 65536
 }
 
