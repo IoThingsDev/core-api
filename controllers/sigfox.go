@@ -73,18 +73,19 @@ func getWifiPosition(ssids string) models.Location {
 	return wifiLoc
 }
 
-func decodeGPSFrame(frame string) models.Location {
+func decodeGPSFrame(msg models.SigfoxMessage) (models.Location, float64) {
 	fmt.Print("GPS frame: \t\t\t")
 	var gpsLoc models.Location
+	var temperature float64
 	var latitude, longitude float64
 	var latDeg, latMin, latSec float64
 	var lngDeg, lngMin, lngSec float64
 
 	isNorth, isEast := false, false
-	if string(frame[0:2]) == "4e" {
+	if string(msg.Data[0:2]) == "4e" {
 		isNorth = true
 	}
-	if string(frame[10:12]) == "45" {
+	if string(msg.Data[10:12]) == "45" {
 		isEast = true
 	}
 
@@ -94,11 +95,11 @@ func decodeGPSFrame(frame string) models.Location {
 		fmt.Print("S:")
 	}
 
-	valLatDeg, _ := strconv.ParseInt(frame[2:4], 16, 8)
+	valLatDeg, _ := strconv.ParseInt(msg.Data[2:4], 16, 8)
 	latDeg = float64(valLatDeg)
-	valLatMin, _ := strconv.ParseInt(frame[4:6], 16, 8)
+	valLatMin, _ := strconv.ParseInt(msg.Data[4:6], 16, 8)
 	latMin = float64(valLatMin)
-	valLatSec, _ := strconv.ParseInt(frame[6:8], 16, 8)
+	valLatSec, _ := strconv.ParseInt(msg.Data[6:8], 16, 8)
 	latSec = float64(valLatSec)
 	fmt.Print(latDeg, "° ", latMin, "m ", latSec, "s\t")
 
@@ -109,11 +110,11 @@ func decodeGPSFrame(frame string) models.Location {
 	} else {
 		fmt.Print("W:")
 	}
-	valLngDeg, _ := strconv.ParseInt(frame[10:12], 16, 8)
+	valLngDeg, _ := strconv.ParseInt(msg.Data[10:12], 16, 8)
 	lngDeg = float64(valLngDeg)
-	valLngMin, _ := strconv.ParseInt(frame[12:14], 16, 8)
+	valLngMin, _ := strconv.ParseInt(msg.Data[12:14], 16, 8)
 	lngMin = float64(valLngMin)
-	valLngSec, _ := strconv.ParseInt(frame[14:16], 16, 8)
+	valLngSec, _ := strconv.ParseInt(msg.Data[14:16], 16, 8)
 	lngSec = float64(valLngSec)
 	fmt.Print(lngDeg, "° ", lngMin, "m ", lngSec, "s")
 
@@ -126,8 +127,20 @@ func decodeGPSFrame(frame string) models.Location {
 	gpsLoc.SpotIt = false
 	gpsLoc.GPS = true
 	gpsLoc.WiFi = false
-	fmt.Println("\t\t\t", gpsLoc)
-	return gpsLoc
+
+	temperature, err := strconv.ParseFloat(msg.Data[20:22], 64)
+	if err != nil {
+		fmt.Println("Error while converting temperature main")
+	}
+	dec, err := strconv.ParseFloat(msg.Data[22:24], 64)
+	if err != nil {
+		fmt.Println("Error while converting temperature decimal")
+	}
+
+	temperature += dec * 0.01
+
+	fmt.Println("\t\t", gpsLoc, "\t", temperature)
+	return gpsLoc, temperature
 }
 
 func (sc SigfoxController) CreateMessage(c *gin.Context) {
@@ -144,7 +157,8 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 		//var computedLocation models.Location
 
 		if (string(sigfoxMessage.Data[0:2]) == "4e") || (string(sigfoxMessage.Data[0:2]) == "53") {
-			decodedGPSFrame := decodeGPSFrame(sigfoxMessage.Data)
+			decodedGPSFrame, decodedTemperature := decodeGPSFrame(sigfoxMessage)
+			sigfoxMessage.Data4 = decodedTemperature
 			computedLocation = &decodedGPSFrame
 			fmt.Println("Wisol GPS Frame, contaning: ", computedLocation)
 		} else {
