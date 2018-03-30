@@ -58,7 +58,7 @@ func getWifiPosition(ssids string) models.Location {
 	}
 	resp, err := c.Geolocate(context.Background(), r)
 	if err != nil {
-		log.Fatalf("Fatal Geolocation Request error: %s", err)
+		log.Println("Google Maps Geolocation Request error: %s", err)
 	}
 
 	//fmt.Println(resp)
