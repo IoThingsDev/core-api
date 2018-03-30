@@ -61,7 +61,7 @@ func getWifiPosition(ssids string) models.Location {
 		log.Println("Google Maps Geolocation Request error: %s", err)
 	}
 
-	//fmt.Println(resp)
+	fmt.Println(resp)
 
 	wifiLoc.Latitude = resp.Location.Lat
 	wifiLoc.Longitude = resp.Location.Lng
@@ -73,10 +73,11 @@ func getWifiPosition(ssids string) models.Location {
 	return wifiLoc
 }
 
-func decodeGPSFrame(msg models.SigfoxMessage) (models.Location, float64) {
+func decodeGPSFrame(msg models.SigfoxMessage) (models.Location, float64, bool) {
 	fmt.Print("GPS frame: \t\t\t")
 	var gpsLoc models.Location
 	var temperature float64
+	var status bool
 	var latitude, longitude float64
 	var latDeg, latMin, latSec float64
 	var lngDeg, lngMin, lngSec float64
@@ -128,6 +129,12 @@ func decodeGPSFrame(msg models.SigfoxMessage) (models.Location, float64) {
 	gpsLoc.GPS = true
 	gpsLoc.WiFi = false
 
+	if msg.Data[18:20] == "41" {
+		status = true
+	} else if msg.Data[18:20] == "56" {
+		status = false
+	}
+
 	temperature, err := strconv.ParseFloat(msg.Data[20:22], 64)
 	if err != nil {
 		fmt.Println("Error while converting temperature main")
@@ -139,8 +146,8 @@ func decodeGPSFrame(msg models.SigfoxMessage) (models.Location, float64) {
 
 	temperature += dec * 0.01
 
-	fmt.Println("\t\t", gpsLoc, "\t", temperature)
-	return gpsLoc, temperature
+	fmt.Println("\t\t", gpsLoc, "\t", temperature, '\t', status)
+	return gpsLoc, temperature, status
 }
 
 func (sc SigfoxController) CreateMessage(c *gin.Context) {
@@ -157,8 +164,13 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 		//var computedLocation models.Location
 
 		if (string(sigfoxMessage.Data[0:2]) == "4e") || (string(sigfoxMessage.Data[0:2]) == "53") {
-			decodedGPSFrame, decodedTemperature := decodeGPSFrame(*sigfoxMessage)
+			decodedGPSFrame, decodedTemperature, status := decodeGPSFrame(*sigfoxMessage)
 			sigfoxMessage.Data4 = decodedTemperature
+			if status {
+				sigfoxMessage.Data5 = 1
+			} else {
+				sigfoxMessage.Data5 = 0
+			}
 			computedLocation = &decodedGPSFrame
 			fmt.Println("Wisol GPS Frame, contaning: ", computedLocation)
 		} else {
