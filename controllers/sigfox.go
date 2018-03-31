@@ -21,24 +21,24 @@ func NewSigfoxController() SigfoxController {
 	return SigfoxController{}
 }
 
-func getWifiPosition(ssids string) models.Location {
+func getWifiPosition(msg models.SigfoxMessage) models.Location {
 	fmt.Print("WiFi frame: \t\t\t")
 	var wifiLoc models.Location
 
 	ssid1 := ""
 	for i := 0; i <= 10; i += 2 {
 		if i == 10 {
-			ssid1 += fmt.Sprint(string(ssids[i : i+2]))
+			ssid1 += fmt.Sprint(string(msg.Data[i : i+2]))
 		} else {
-			ssid1 += fmt.Sprint(string(ssids[i:i+2]), ":")
+			ssid1 += fmt.Sprint(string(msg.Data[i:i+2]), ":")
 		}
 	}
 	ssid2 := ""
 	for i := 12; i <= 22; i += 2 {
 		if i == 22 {
-			ssid2 += fmt.Sprint(string(ssids[i : i+2]))
+			ssid2 += fmt.Sprint(string(msg.Data[i : i+2]))
 		} else {
-			ssid2 += fmt.Sprint(string(ssids[i:i+2]), ":")
+			ssid2 += fmt.Sprint(string(msg.Data[i:i+2]), ":")
 		}
 	}
 
@@ -66,6 +66,7 @@ func getWifiPosition(ssids string) models.Location {
 	wifiLoc.Latitude = resp.Location.Lat
 	wifiLoc.Longitude = resp.Location.Lng
 	wifiLoc.Radius = resp.Accuracy
+	wifiLoc.FrameNumber = msg.FrameNumber
 	wifiLoc.SpotIt = false
 	wifiLoc.GPS = false
 	wifiLoc.WiFi = true
@@ -125,6 +126,7 @@ func decodeGPSFrame(msg models.SigfoxMessage) (models.Location, float64, bool) {
 	// Populating returned location
 	gpsLoc.Latitude = latitude
 	gpsLoc.Longitude = longitude
+	gpsLoc.FrameNumber = msg.FrameNumber
 	gpsLoc.SpotIt = false
 	gpsLoc.GPS = true
 	gpsLoc.WiFi = false
@@ -174,7 +176,7 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 			computedLocation = &decodedGPSFrame
 			fmt.Println("Wisol GPS Frame, contaning: ", computedLocation)
 		} else {
-			decodedWifiFrame := getWifiPosition(sigfoxMessage.Data)
+			decodedWifiFrame := getWifiPosition(*sigfoxMessage)
 			computedLocation = &decodedWifiFrame
 			fmt.Println("Wisol WiFi Frame, contaning: ", computedLocation)
 			//store.CreateLocation(context.Background(), &wifiLoc)
