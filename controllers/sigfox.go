@@ -203,13 +203,14 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 		} else if computedLocation.WiFi {
 			sigfoxMessage.Data6 = 1
 		}
+	}
 
-		err = store.CreateMessage(c, sigfoxMessage)
-		if err != nil {
-			c.Error(err)
-			c.Abort()
-			return
-		}
+	// Create message in all cases
+	err = store.CreateMessage(c, sigfoxMessage)
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
 	}
 	c.JSON(http.StatusCreated, sigfoxMessage)
 }
