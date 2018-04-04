@@ -166,15 +166,25 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 		//var computedLocation models.Location
 
 		if (string(sigfoxMessage.Data[0:2]) == "4e") || (string(sigfoxMessage.Data[0:2]) == "53") {
-			decodedGPSFrame, decodedTemperature, status := decodeGPSFrame(*sigfoxMessage)
-			sigfoxMessage.Data4 = decodedTemperature
-			if status {
-				sigfoxMessage.Data5 = 1
+			if string(sigfoxMessage.Data[2:4]) != "00" {
+				decodedGPSFrame, decodedTemperature, status := decodeGPSFrame(*sigfoxMessage)
+				sigfoxMessage.Data4 = decodedTemperature
+				if status {
+					sigfoxMessage.Data5 = 1
+				} else {
+					sigfoxMessage.Data5 = 0
+				}
+				computedLocation = &decodedGPSFrame
+				fmt.Println("Wisol GPS Frame, contaning: ", computedLocation)
 			} else {
-				sigfoxMessage.Data5 = 0
+				//sigfoxMessage.
+				sigfoxMessage.Data = "No GPS: " + sigfoxMessage.Data
+				computedLocation.SpotIt = false
+				computedLocation.WiFi = false
+				computedLocation.GPS = false
+
+				fmt.Println("Wisol No GPS Frame, contaning: ", computedLocation)
 			}
-			computedLocation = &decodedGPSFrame
-			fmt.Println("Wisol GPS Frame, contaning: ", computedLocation)
 		} else {
 			decodedWifiFrame := getWifiPosition(*sigfoxMessage)
 			computedLocation = &decodedWifiFrame
