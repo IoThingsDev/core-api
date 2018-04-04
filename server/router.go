@@ -23,7 +23,7 @@ func (a *API) SetupRouter() {
 	router.Use(middlewares.CorsMiddleware(middlewares.Config{
 		Origins:         "*",
 		Methods:         "GET, PUT, POST, DELETE",
-		RequestHeaders:  "Origin, Authorization, Content-Type",
+		RequestHeaders:  "Origin, Authorization, Content-Type, X-Requested-With, Accept, Token"
 		ExposedHeaders:  "",
 		MaxAge:          50 * time.Second,
 		Credentials:     true,
