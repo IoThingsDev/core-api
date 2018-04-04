@@ -88,6 +88,28 @@ func (db *mongo) UpdateUser(user *models.User, params params.M) error {
 	return nil
 }
 
+/*func (db *mongo) GetLatestMessages() (user *models.User) {
+	session := db.Session.Copy()
+	defer session.Close()
+	devices := db.C(models.DevicesCollection).With(session)
+	sigfoxMessages := db.C(models.SigfoxMessagesCollection).With(session)
+
+	devices := []*models.Device{}
+
+	err := devices.Find()
+	if err != nil {
+		return helpers.NewError(http.StatusInternalServerError, "query_failed", "Failed to find the device")
+	}
+
+	list := []*models.SigfoxMessage{}
+	err = sigfoxMessages.Find().Limit(10).Sort("-$natural").All(&list)
+	if err != nil {
+		return helpers.NewError(http.StatusInternalServerError, "query_failed", "Failed to query the Database")
+	}
+
+	return list
+}*/
+
 func (db *mongo) AddLoginToken(user *models.User, ip string) (*models.LoginToken, error) {
 	session := db.Session.Copy()
 	defer session.Close()
