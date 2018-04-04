@@ -47,7 +47,7 @@ func (db *mongo) GetDevices(user *models.User) ([]*models.Device, error) {
 	devices := db.C(models.DevicesCollection).With(session)
 
 	list := []*models.Device{}
-	err := devices.Find(params.M{"userId": user.Id}).All(&list)
+	err := devices.Find(params.M{"userId": user.Id}).Sort("lastAcc").All(&list)
 	if err != nil {
 		return nil, helpers.NewError(http.StatusNotFound, "devices_not_found", "Devices not found")
 	}
