@@ -58,18 +58,19 @@ func getWifiPosition(msg models.SigfoxMessage) models.Location {
 	}
 	resp, err := c.Geolocate(context.Background(), r)
 	if err != nil {
-		log.Println("Google Maps Geolocation Request error: %s", err)
+		fmt.Println("Google Maps Geolocation Request error: %s", err)
+	} else {
+		fmt.Println("Google Maps Geolocation resolved")
+		wifiLoc.Latitude = resp.Location.Lat
+		wifiLoc.Longitude = resp.Location.Lng
+		wifiLoc.Radius = resp.Accuracy
+		wifiLoc.FrameNumber = msg.FrameNumber
+		wifiLoc.SpotIt = false
+		wifiLoc.GPS = false
+		wifiLoc.WiFi = true
 	}
 
 	fmt.Println(resp)
-
-	wifiLoc.Latitude = resp.Location.Lat
-	wifiLoc.Longitude = resp.Location.Lng
-	wifiLoc.Radius = resp.Accuracy
-	wifiLoc.FrameNumber = msg.FrameNumber
-	wifiLoc.SpotIt = false
-	wifiLoc.GPS = false
-	wifiLoc.WiFi = true
 	fmt.Println(wifiLoc)
 	return wifiLoc
 }
