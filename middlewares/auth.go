@@ -59,8 +59,13 @@ func AuthMiddleware() gin.HandlerFunc {
 		err = services.GetRedis(c).GetValueForKey(claims["id"].(string), &user)
 		if err != nil {
 			hasFetchedRedis = false
-			user, _ = store.FindUserById(c, claims["id"].(string))
-			services.GetRedis(c).SetValueForKey(user.Id, &user)
+			user, err = store.FindUserById(c, claims["id"].(string))
+			if err != nil {
+				c.AbortWithError(http.StatusUnauthorized, helpers.ErrorWithCode("token_not_valid", "This token isn't valid"))
+				return
+			}
+			err = services.GetRedis(c).SetValueForKey(user.Id, &user)
+
 		}
 
 		// Check if the token is still valid in the database

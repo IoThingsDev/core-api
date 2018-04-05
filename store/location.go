@@ -9,6 +9,6 @@ import (
 func CreateLocation(c context.Context, location *models.Location) error {
 	return FromContext(c).CreateLocation(location)
 }
-func GetAllDevicesLocations(c context.Context) ([]*models.LastLocation, error) {
-	return FromContext(c).GetAllDevicesLocations(Current(c))
+func GetLastDevicesLocations(c context.Context) ([]*models.LastLocation, error) {
+	return FromContext(c).GetLastDevicesLocations(Current(c))
 }

@@ -70,3 +70,29 @@ func (db *mongo) CreateLocationWithMessage(location *models.Location, message *m
 
 	return nil
 }
+
+func (db *mongo) GetLastDevicesSigfoxMessages(user *models.User) ([]*models.SigfoxMessage, error) {
+	session := db.Session.Copy()
+	defer session.Close()
+	devices := db.C(models.DevicesCollection).With(session)
+
+	list := []*models.SigfoxMessage{}
+
+	err := devices.Pipe([]bson.M{
+		{"$match": bson.M{"userId": user.Id}},
+		{"$lookup": bson.M{
+			"from":         "sigfox_messages",
+			"localField":   "sigfoxId",
+			"foreignField": "sigfoxId",
+			"as":           "message"}},
+		{"$unwind": "message"},
+		//{"$sort": bson.M{"location.radius": 1}},
+		{"$group": bson.M{"_id": "$_id", "name": bson.M{"$first": "$name"}, "message": bson.M{"$push": "message"}}}, //rendered
+		{"$project": bson.M{"name": "$name", "message": bson.M{"$arrayElemAt": []interface{}{"message", 0}}}},
+	}).All(&list)
+	if err != nil {
+		return nil, helpers.NewError(http.StatusInternalServerError, "get_last_messages_failed", "Failed to get the last messages")
+	}
+
+	return list, nil
+}

@@ -35,8 +35,8 @@ func (lc LocationController) CreateLocation(c *gin.Context) {
 	c.JSON(http.StatusCreated, location)
 }
 
-func (lc LocationController) GetAllDevicesLocations(c *gin.Context) {
-	locations, err := store.GetAllDevicesLocations(c)
+func (lc LocationController) GetLastDevicesLocations(c *gin.Context) {
+	locations, err := store.GetLastDevicesLocations(c)
 
 	if err != nil {
 		c.Error(err)

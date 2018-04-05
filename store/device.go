@@ -27,18 +27,18 @@ func GetDevice(c context.Context, id string) (*models.Device, error) {
 	return FromContext(c).GetDevice(Current(c), id)
 }
 
-func GetLastMessages(c context.Context, id string) ([]*models.SigfoxMessage, error) {
-	return FromContext(c).GetLastMessages(id)
+func GetLastDeviceMessages(c context.Context, id string) ([]*models.SigfoxMessage, error) {
+	return FromContext(c).GetLastDeviceMessages(id)
 }
 
-func GetLastLocations(c context.Context, id string) ([]*models.Location, error) {
-	return FromContext(c).GetLastLocations(id)
+func GetLastDeviceLocations(c context.Context, id string) ([]*models.Location, error) {
+	return FromContext(c).GetLastDeviceLocations(id)
 }
 
-func GetAllMessages(c context.Context, id string) ([]*models.SigfoxMessage, error) {
-	return FromContext(c).GetAllMessages(id)
+func GetAllDeviceMessages(c context.Context, id string) ([]*models.SigfoxMessage, error) {
+	return FromContext(c).GetAllDeviceMessages(id)
 }
 
-func GetAllLocations(c context.Context, id string) ([]*models.Location, error) {
-	return FromContext(c).GetAllLocations(id)
+func GetAllDeviceLocations(c context.Context, id string) ([]*models.Location, error) {
+	return FromContext(c).GetAllDeviceLocations(id)
 }

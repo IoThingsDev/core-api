@@ -16,16 +16,19 @@ type Store interface {
 	CreateLocation(*models.Location) error
 	CreateLocationWithMessage(*models.Location, *models.SigfoxMessage) error
 
+	GetLastDevicesSigfoxMessages(*models.User) ([]*models.LastLocation, error)
+
 	CreateDevice(*models.Device, *models.User) error
 	GetDevices(*models.User) ([]*models.Device, error)
 	UpdateDevice(string, params.M) error
 	DeleteDevice(string) error
 	GetDevice(*models.User, string) (*models.Device, error)
-	GetLastMessages(string) ([]*models.SigfoxMessage, error)
-	GetLastLocations(string) ([]*models.Location, error)
-	GetAllMessages(string) ([]*models.SigfoxMessage, error)
-	GetAllLocations(string) ([]*models.Location, error)
-	GetAllDevicesLocations(*models.User) ([]*models.LastLocation, error)
+	GetLastDeviceMessages(string) ([]*models.SigfoxMessage, error)
+	GetLastDeviceLocations(string) ([]*models.Location, error)
+	GetAllDeviceMessages(string) ([]*models.SigfoxMessage, error)
+	GetAllDeviceLocations(string) ([]*models.Location, error)
+
+	GetLastDevicesLocations(*models.User) ([]*models.LastLocation, error)
 
 	AddLoginToken(*models.User, string) (*models.LoginToken, error)
 	RemoveLoginToken(*models.User, string) error

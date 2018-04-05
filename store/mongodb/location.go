@@ -22,7 +22,7 @@ func (db *mongo) CreateLocation(location *models.Location) error {
 	return nil
 }
 
-func (db *mongo) GetAllDevicesLocations(user *models.User) ([]*models.LastLocation, error) {
+func (db *mongo) GetLastDevicesLocations(user *models.User) ([]*models.LastLocation, error) {
 	session := db.Session.Copy()
 	defer session.Close()
 	devices := db.C(models.DevicesCollection).With(session)
@@ -42,7 +42,7 @@ func (db *mongo) GetAllDevicesLocations(user *models.User) ([]*models.LastLocati
 		{"$project": bson.M{"name": "$name", "location": bson.M{"$arrayElemAt": []interface{}{"$location", 0}}}},
 	}).All(&list)
 	if err != nil {
-		return nil, helpers.NewError(http.StatusInternalServerError, "get_all_locations_failed", "Failed to get the last locations")
+		return nil, helpers.NewError(http.StatusInternalServerError, "get_all_devices_locations_failed", "Failed to get the last locations")
 	}
 
 	return list, nil

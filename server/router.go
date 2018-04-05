@@ -83,17 +83,24 @@ func (a *API) SetupRouter() {
 			devices.PUT("/:id", deviceController.UpdateDevice)
 			devices.GET("/:id", deviceController.GetDevice)
 			devices.DELETE("/:id", deviceController.DeleteDevice)
-			devices.GET("/:id/locations", deviceController.GetAllLocations)
-			devices.GET("/:id/messages", deviceController.GetAllMessages)
-			devices.GET("/:id/lastLocations", deviceController.GetLastLocations)
-			devices.GET("/:id/lastMessages", deviceController.GetLastMessages)
+			devices.GET("/:id/locations", deviceController.GetAllDeviceLocations)
+			devices.GET("/:id/messages", deviceController.GetAllDeviceMessages)
+			devices.GET("/:id/lastLocations", deviceController.GetLastDeviceLocations)
+			devices.GET("/:id/lastMessages", deviceController.GetLastDeviceMessages)
+		}
+
+		messages := v1.Group("/messages")
+		{
+			messages.Use(authMiddleware)
+			messagesController := controllers.NewSigfoxController()
+			messages.GET("/", messagesController.GetLastDevicesSigfoxMessages)
 		}
 
 		locations := v1.Group("/locations")
 		{
 			locations.Use(authMiddleware)
 			locationController := controllers.NewLocationController()
-			locations.GET("/", locationController.GetAllDevicesLocations)
+			locations.GET("/", locationController.GetLastDevicesLocations)
 
 		}
 

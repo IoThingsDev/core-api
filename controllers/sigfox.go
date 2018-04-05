@@ -74,7 +74,6 @@ func getWifiPosition(msg models.SigfoxMessage) models.Location {
 	wifiLoc.GPS = false
 	wifiLoc.WiFi = true
 
-
 	fmt.Println(resp)
 	fmt.Println(wifiLoc)
 	return wifiLoc
@@ -224,11 +223,23 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 	}
 
 	// Create message in all cases
-	err = store.CreateMessage(c, sigfoxMessage)
+	err = store.CreateSigfoxMessage(c, sigfoxMessage)
 	if err != nil {
 		c.Error(err)
 		c.Abort()
 		return
 	}
 	c.JSON(http.StatusCreated, sigfoxMessage)
+}
+
+func (sc SigfoxController) GetLastDevicesSigfoxMessages(c *gin.Context) {
+	messages, err := store.GetLastDevicesSigfoxMessages(c)
+
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, messages)
 }
