@@ -58,7 +58,7 @@ func getWifiPosition(msg models.SigfoxMessage) models.Location {
 	}
 	resp, err := c.Geolocate(context.Background(), r)
 	if err != nil {
-		fmt.Println("Google Maps Geolocation Request error: %s", err)
+		fmt.Println("Google Maps Geolocation Request error:", err)
 		fmt.Println("Faking geoloc to SiDo")
 		wifiLoc.Latitude = 45.7853901
 		wifiLoc.Longitude = 4.85622890

@@ -16,7 +16,7 @@ type Store interface {
 	CreateLocation(*models.Location) error
 	CreateLocationWithMessage(*models.Location, *models.SigfoxMessage) error
 
-	GetLastDevicesSigfoxMessages(*models.User) ([]*models.LastLocation, error)
+	GetLastDevicesSigfoxMessages(*models.User) ([]*models.SigfoxMessage, error)
 
 	CreateDevice(*models.Device, *models.User) error
 	GetDevices(*models.User) ([]*models.Device, error)

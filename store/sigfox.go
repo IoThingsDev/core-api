@@ -13,6 +13,6 @@ func CreateSigfoxLocationWithMessage(c context.Context, location *models.Locatio
 	return FromContext(c).CreateLocationWithMessage(location, message)
 }
 
-func GetLastDevicesSigfoxMessages(c context.Context) ([]*models.LastLocation, error) {
+func GetLastDevicesSigfoxMessages(c context.Context) ([]*models.SigfoxMessage, error) {
 	return FromContext(c).GetLastDevicesSigfoxMessages(Current(c))
 }
