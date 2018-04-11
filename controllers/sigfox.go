@@ -181,32 +181,39 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 				}
 				computedLocation = &decodedGPSFrame
 				fmt.Println("Wisol GPS Frame, contaning: ", computedLocation)
-			} else {
-				//sigfoxMessage.
-				sigfoxMessage.Data = "No GPS: " + sigfoxMessage.Data
-				computedLocation.SpotIt = false
-				computedLocation.WiFi = false
-				computedLocation.GPS = false
 
-				fmt.Println("Wisol No GPS Frame, contaning: ", computedLocation)
+				computedLocation.SigfoxId = sigfoxMessage.SigfoxId
+
+				//err = store.CreateLocationWithMessage(c, computedLocation, sigfoxMessage)
+				err = store.CreateLocation(c, computedLocation)
+				fmt.Println("Computed location created")
+				if err != nil {
+					fmt.Println("Error while creating GPS computed location")
+					c.Error(err)
+					c.Abort()
+					return
+				}
+
+			} else { //No GPS, frame is empty
+				sigfoxMessage.Data = "No GPS: " + sigfoxMessage.Data
+				fmt.Println("Wisol No GPS Frame")
 			}
 		} else {
 			decodedWifiFrame := getWifiPosition(*sigfoxMessage)
 			computedLocation = &decodedWifiFrame
 			fmt.Println("Wisol WiFi Frame, contaning: ", computedLocation)
 			//store.CreateLocation(context.Background(), &wifiLoc)
-		}
+			computedLocation.SigfoxId = sigfoxMessage.SigfoxId
 
-		computedLocation.SigfoxId = sigfoxMessage.SigfoxId
-
-		//err = store.CreateLocationWithMessage(c, computedLocation, sigfoxMessage)
-		err = store.CreateLocation(c, computedLocation)
-		fmt.Println("Computed location created")
-		if err != nil {
-			fmt.Println("Error while creating computed location")
-			c.Error(err)
-			c.Abort()
-			return
+			//err = store.CreateLocationWithMessage(c, computedLocation, sigfoxMessage)
+			err = store.CreateLocation(c, computedLocation)
+			fmt.Println("Computed location created")
+			if err != nil {
+				fmt.Println("Error while creating WiFi computed location")
+				c.Error(err)
+				c.Abort()
+				return
+			}
 		}
 
 		sigfoxMessage.Data1 = computedLocation.Latitude

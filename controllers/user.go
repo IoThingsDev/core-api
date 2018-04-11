@@ -60,3 +60,8 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully activated your account."})
 }
+
+// TODO: Reset Password: rate limit: 6h, 10 total
+// Request, sending mail : If your email address exists in our database, you will receive a password recovery link at your email address in a few minutes.
+// Handle mail-click (with token checking), clear current password
+// Modify password (2 repeats), can be merged with modify in User management UI
