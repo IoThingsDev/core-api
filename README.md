@@ -1,5 +1,7 @@
 #Things API
+
 CI Badges
+
 Things API is an open-source, fast and scalable solution that enables you to speed up your IoT project development, by defining standard common features.
 
 Things API rely on GoLang Gin Gonic web framework, MongoDB, Redis (for cache) and Sendgrid for mail management.
