@@ -9,7 +9,7 @@ services:
 
 script: BASEAPI_ENV=testing go test ./...
 
-go_import_path: github.com/dernise/base-api
+go_import_path: github.com/adrien3d/things-api
   
 notifications:
   email: false

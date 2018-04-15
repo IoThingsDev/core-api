@@ -1,11 +1,11 @@
 package tests
 
-import (
+/*import (
 	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-)
+)*/
 
 /*func TestCreateTransaction(t *testing.T) {
 	parameters := []byte(`
@@ -17,7 +17,7 @@ import (
 	resp := SendRequestWithToken(parameters, "POST", "/v1/billing/", authToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }*/
-
+/*
 func TestCreatePlan(t *testing.T) {
 	parameters := []byte(`
 	{
@@ -37,3 +37,4 @@ func TestGetPlans(t *testing.T) {
 	resp := SendRequestWithToken(nil, "GET", "/v1/billing/plans/", authToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
+*/

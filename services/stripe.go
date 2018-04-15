@@ -1,5 +1,6 @@
 package services
 
+/*
 import (
 	"io"
 
@@ -38,3 +39,4 @@ func SetStripeKeyAndBackend(config *viper.Viper) {
 		stripe.SetBackend("api", FakeStripeBackend{})
 	}
 }
+*/

@@ -1,13 +1,15 @@
 package controllers
 
+/*
 import (
 	"net/http"
 
-	"github.com/dernise/base-api/helpers"
-	"github.com/dernise/base-api/helpers/params"
-	"github.com/dernise/base-api/models"
-	"github.com/dernise/base-api/services"
-	"github.com/dernise/base-api/store"
+	"github.com/adrien3d/things-api/helpers"
+	"github.com/adrien3d/things-api/helpers/params"
+	"github.com/adrien3d/things-api/models"
+	"github.com/adrien3d/things-api/services"
+	"github.com/adrien3d/things-api/store"
+
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/card"
 	"github.com/stripe/stripe-go/customer"
@@ -54,7 +56,7 @@ func (cc CardController) AddCard(c *gin.Context) {
 	}
 	services.GetRedis(c).InvalidateObject(user.StripeId)
 
-	c.JSON(http.StatusCreated, gin.H{"cards": response})
+	c.JSON(http.StatusCreated, response)
 }
 
 func (cc CardController) GetCards(c *gin.Context) {
@@ -95,7 +97,7 @@ func (cc CardController) GetCards(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"cards": stripeCards})
+	c.JSON(http.StatusOK, stripeCards)
 }
 
 func (cc CardController) createCustomer(c *gin.Context, user *models.User) (string, error) {
@@ -149,3 +151,4 @@ func (cc CardController) DeleteCard(c *gin.Context) {
 
 	c.JSON(http.StatusOK, nil)
 }
+*/

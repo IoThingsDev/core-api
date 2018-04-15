@@ -1,13 +1,14 @@
 package store
 
 import (
-	"github.com/dernise/base-api/models"
+	"github.com/adrien3d/things-api/models"
 	"golang.org/x/net/context"
 )
 
 const (
-	currentKey = "currentUser"
-	storeKey   = "store"
+	CurrentKey    = "currentUser"
+	LoginTokenKey = "currentLoginToken"
+	StoreKey      = "store"
 )
 
 type Setter interface {
@@ -15,13 +16,13 @@ type Setter interface {
 }
 
 func Current(c context.Context) *models.User {
-	return c.Value(currentKey).(*models.User)
-}
-
-func FromContext(c context.Context) Store {
-	return c.Value(storeKey).(Store)
+	return c.Value(CurrentKey).(*models.User)
 }
 
 func ToContext(c Setter, store Store) {
-	c.Set(storeKey, store)
+	c.Set(StoreKey, store)
+}
+
+func FromContext(c context.Context) Store {
+	return c.Value(StoreKey).(Store)
 }

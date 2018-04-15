@@ -5,13 +5,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dernise/base-api/config"
-	"github.com/dernise/base-api/helpers"
-	"github.com/dernise/base-api/helpers/params"
-	"github.com/dernise/base-api/models"
-	"github.com/dernise/base-api/store"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/adrien3d/things-api/config"
+	"github.com/adrien3d/things-api/helpers"
+	"github.com/adrien3d/things-api/helpers/params"
+	"github.com/adrien3d/things-api/models"
+	"github.com/adrien3d/things-api/services"
+	"github.com/adrien3d/things-api/store"
+	jwt "github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
+
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -39,7 +41,7 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	}
 
 	if !user.Active {
-		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_needs_activation", "User needs to be activated"))
+		c.AbortWithError(http.StatusNotFound, helpers.ErrorWithCode("user_needs_activation", "User needs to be activated via email"))
 		return
 	}
 
@@ -49,12 +51,35 @@ func (ac AuthController) Authentication(c *gin.Context) {
 		return
 	}
 
+	apiToken, err := store.AddLoginToken(c, user, c.ClientIP())
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
 	token := jwt.New(jwt.GetSigningMethod(jwt.SigningMethodRS256.Alg()))
 	claims := make(jwt.MapClaims)
 	claims["iat"] = time.Now().Unix()
 	claims["id"] = user.Id
+	claims["token"] = apiToken.Id
+
 	token.Claims = claims
 	tokenString, err := token.SignedString(privateKey)
 
+	services.GetRedis(c).InvalidateObject(user.Id)
+
 	c.JSON(http.StatusOK, gin.H{"token": tokenString, "users": user.Sanitize()})
+}
+
+func (ac AuthController) LogOut(c *gin.Context) {
+	if err := store.RemoveLoginToken(c); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	services.GetRedis(c).InvalidateObject(store.Current(c).Id)
+
+	c.JSON(200, nil)
 }

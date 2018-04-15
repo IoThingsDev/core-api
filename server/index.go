@@ -1,7 +1,8 @@
 package server
 
 import (
-	"github.com/dernise/base-api/models"
+	"github.com/adrien3d/things-api/models"
+
 	"gopkg.in/mgo.v2"
 )
 
@@ -17,6 +18,23 @@ func (a *API) SetupIndexes() error {
 		{
 			Key:    []string{"email"},
 			Unique: true,
+		},
+	}
+
+	locations := database.C(models.LocationsCollection)
+	collectionIndexes[locations] = []mgo.Index{
+		{
+			Key: []string{"sigfoxId"},
+		},
+	}
+
+	devices := database.C(models.DevicesCollection)
+	collectionIndexes[devices] = []mgo.Index{
+		{
+			Key: []string{"userId"},
+		},
+		{
+			Key: []string{"tokens._id"},
 		},
 	}
 

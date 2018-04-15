@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"github.com/dernise/base-api/helpers"
+	"github.com/adrien3d/things-api/helpers"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 

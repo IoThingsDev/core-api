@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"github.com/dernise/base-api/store"
-	"github.com/dernise/base-api/store/mongodb"
+	"github.com/adrien3d/things-api/store"
+	"github.com/adrien3d/things-api/store/mongodb"
 	"gopkg.in/gin-gonic/gin.v1"
 	mgo "gopkg.in/mgo.v2"
 )

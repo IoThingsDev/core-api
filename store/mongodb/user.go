@@ -3,9 +3,11 @@ package mongodb
 import (
 	"net/http"
 
-	"github.com/dernise/base-api/helpers"
-	"github.com/dernise/base-api/helpers/params"
-	"github.com/dernise/base-api/models"
+	"time"
+
+	"github.com/adrien3d/things-api/helpers"
+	"github.com/adrien3d/things-api/helpers/params"
+	"github.com/adrien3d/things-api/models"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -81,6 +83,59 @@ func (db *mongo) UpdateUser(user *models.User, params params.M) error {
 	err := users.UpdateId(user.Id, params)
 	if err != nil {
 		return helpers.NewError(http.StatusInternalServerError, "user_update_failed", "Failed to update the user")
+	}
+
+	return nil
+}
+
+/*func (db *mongo) GetLatestMessages() (user *models.User) {
+	session := db.Session.Copy()
+	defer session.Close()
+	devices := db.C(models.DevicesCollection).With(session)
+	sigfoxMessages := db.C(models.SigfoxMessagesCollection).With(session)
+
+	devices := []*models.Device{}
+
+	err := devices.Find()
+	if err != nil {
+		return helpers.NewError(http.StatusInternalServerError, "query_failed", "Failed to find the device")
+	}
+
+	list := []*models.SigfoxMessage{}
+	err = sigfoxMessages.Find().Limit(10).Sort("-$natural").All(&list)
+	if err != nil {
+		return helpers.NewError(http.StatusInternalServerError, "query_failed", "Failed to query the Database")
+	}
+
+	return list
+}*/
+
+func (db *mongo) AddLoginToken(user *models.User, ip string) (*models.LoginToken, error) {
+	session := db.Session.Copy()
+	defer session.Close()
+	users := db.C(models.UsersCollection).With(session)
+
+	token := &models.LoginToken{
+		Id:         bson.NewObjectId().Hex(),
+		Ip:         ip,
+		CreatedAt:  time.Now().Unix(),
+		LastAccess: time.Now().Unix(),
+	}
+
+	if err := users.UpdateId(user.Id, bson.M{"$push": bson.M{"tokens": token}}); err != nil {
+		return nil, helpers.NewError(http.StatusInternalServerError, "user_token_creation_failed", "Failed to create the token.")
+	}
+
+	return token, nil
+}
+
+func (db *mongo) RemoveLoginToken(user *models.User, tokenId string) error {
+	session := db.Session.Copy()
+	defer session.Close()
+	users := db.C(models.UsersCollection).With(session)
+
+	if err := users.UpdateId(user.Id, bson.M{"$pull": bson.M{"tokens": bson.M{"_id": tokenId}}}); err != nil {
+		return helpers.NewError(http.StatusInternalServerError, "user_token_deletion_failed", "Failed to delete the token.")
 	}
 
 	return nil

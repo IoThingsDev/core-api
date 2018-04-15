@@ -1,6 +1,6 @@
-# base-API  [![Build Status](https://travis-ci.com/dernise/base-api.svg?token=AbEANjysKDJ24sgJwcmH&branch=master)](https://travis-ci.com/dernise/base-api) 
+# things-API
 
-This is the main repo of the base API
+Things API
 
 ## How to install
 

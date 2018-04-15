@@ -3,11 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/dernise/base-api/config"
-	"github.com/dernise/base-api/helpers"
-	"github.com/dernise/base-api/models"
-	"github.com/dernise/base-api/services"
-	"github.com/dernise/base-api/store"
+	"github.com/adrien3d/things-api/config"
+	"github.com/adrien3d/things-api/helpers"
+	"github.com/adrien3d/things-api/models"
+	"github.com/adrien3d/things-api/services"
+	"github.com/adrien3d/things-api/store"
+
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -16,6 +17,7 @@ type UserController struct{}
 func NewUserController() UserController {
 	return UserController{}
 }
+
 func (uc UserController) GetUser(c *gin.Context) {
 	user, err := store.FindUserById(c, c.Param("id"))
 
@@ -24,7 +26,7 @@ func (uc UserController) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"users": user.Sanitize()})
+	c.JSON(http.StatusOK, user.Sanitize())
 }
 
 func (uc UserController) CreateUser(c *gin.Context) {
@@ -46,7 +48,7 @@ func (uc UserController) CreateUser(c *gin.Context) {
 	templateLink := "./templates/mail_activate_account.html"
 	services.GetEmailSender(c).SendEmailFromTemplate(user, subject, templateLink)
 
-	c.JSON(http.StatusCreated, gin.H{"users": user.Sanitize()})
+	c.JSON(http.StatusCreated, user.Sanitize())
 }
 
 func (uc UserController) ActivateUser(c *gin.Context) {
@@ -56,5 +58,10 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully activated your account."})
 }
+
+// TODO: Reset Password: rate limit: 6h, 10 total
+// Request, sending mail : If your email address exists in our database, you will receive a password recovery link at your email address in a few minutes.
+// Handle mail-click (with token checking), clear current password
+// Modify password (2 repeats), can be merged with modify in User management UI

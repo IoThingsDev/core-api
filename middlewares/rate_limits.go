@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dernise/base-api/config"
-	"github.com/dernise/base-api/helpers"
-	"github.com/dernise/base-api/services"
+	"github.com/adrien3d/things-api/config"
+	"github.com/adrien3d/things-api/helpers"
+	"github.com/adrien3d/things-api/services"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -42,5 +42,7 @@ func RateMiddleware() gin.HandlerFunc {
 			conn.Do("INCR", keyName)
 			conn.Do("EXPIRE", keyName, 10)
 		}
+
+		c.Next()
 	}
 }

@@ -1,11 +1,11 @@
 package controllers
 
-import (
+/*import (
 	"net/http"
 
-	"github.com/dernise/base-api/helpers"
-	"github.com/dernise/base-api/models"
-	"github.com/dernise/base-api/services"
+	"github.com/adrien3d/things-api/helpers"
+	"github.com/adrien3d/things-api/models"
+	"github.com/adrien3d/things-api/services"
 	stripe "github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/plan"
 	"gopkg.in/gin-gonic/gin.v1"
@@ -40,7 +40,7 @@ func (bc BillingController) GetPlans(c *gin.Context) {
 		services.GetRedis(c).SetValueForKey("billing-plans", stripePlans)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"plans": stripePlans})
+	c.JSON(http.StatusOK, stripePlans)
 }
 
 func (bc BillingController) CreatePlan(c *gin.Context) {
@@ -71,5 +71,6 @@ func (bc BillingController) CreatePlan(c *gin.Context) {
 
 	services.GetRedis(c).InvalidateObject("billing-plans")
 
-	c.JSON(http.StatusCreated, gin.H{"plans": stripePlan})
+	c.JSON(http.StatusCreated, stripePlan)
 }
+*/

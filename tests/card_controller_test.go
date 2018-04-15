@@ -1,5 +1,6 @@
 package tests
 
+/*
 import (
 	"net/http"
 	"testing"
@@ -40,3 +41,4 @@ func TestDeleteCard(t *testing.T) {
 	resp := SendRequestWithToken(nil, "DELETE", "/v1/cards/"+bson.NewObjectId().Hex(), authToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
+*/

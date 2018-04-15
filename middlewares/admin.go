@@ -3,8 +3,8 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/dernise/base-api/helpers"
-	"github.com/dernise/base-api/store"
+	"github.com/adrien3d/things-api/helpers"
+	"github.com/adrien3d/things-api/store"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -16,5 +16,7 @@ func AdminMiddleware() gin.HandlerFunc {
 			c.AbortWithError(http.StatusUnauthorized, helpers.ErrorWithCode("admin_required", "The user is not administrator"))
 			return
 		}
+
+		c.Next()
 	}
 }
