@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/adrien3d/things-api/models"
-	"github.com/adrien3d/things-api/server"
+	"github.com/IoThingsDev/api/models"
+	"github.com/IoThingsDev/api/server"
 )
 
 var api *server.API

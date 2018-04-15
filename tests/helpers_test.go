@@ -8,9 +8,9 @@ import (
 
 	"time"
 
-	"github.com/adrien3d/things-api/models"
-	"github.com/adrien3d/things-api/server"
-	"github.com/adrien3d/things-api/services"
+	"github.com/IoThingsDev/api/models"
+	"github.com/IoThingsDev/api/server"
+	"github.com/IoThingsDev/api/services"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"

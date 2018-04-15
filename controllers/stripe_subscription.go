@@ -4,10 +4,10 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/adrien3d/things-api/helpers"
-	"github.com/adrien3d/things-api/models"
-	"github.com/adrien3d/things-api/services"
-	"github.com/adrien3d/things-api/store"
+	"github.com/IoThingsDev/api/helpers"
+	"github.com/IoThingsDev/api/models"
+	"github.com/IoThingsDev/api/services"
+	"github.com/IoThingsDev/api/store"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/sub"
 	"gopkg.in/gin-gonic/gin.v1"

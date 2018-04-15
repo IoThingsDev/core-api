@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 
-	"github.com/adrien3d/things-api/models"
+	"github.com/IoThingsDev/api/models"
 )
 
 func CreateLocation(c context.Context, location *models.Location) error {

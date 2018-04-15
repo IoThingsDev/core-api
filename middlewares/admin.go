@@ -3,8 +3,8 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/adrien3d/things-api/helpers"
-	"github.com/adrien3d/things-api/store"
+	"github.com/IoThingsDev/api/helpers"
+	"github.com/IoThingsDev/api/store"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 

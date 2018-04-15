@@ -3,8 +3,8 @@ package store
 import (
 	"context"
 
-	"github.com/adrien3d/things-api/helpers/params"
-	"github.com/adrien3d/things-api/models"
+	"github.com/IoThingsDev/api/helpers/params"
+	"github.com/IoThingsDev/api/models"
 )
 
 func CreateUser(c context.Context, record *models.User) error {

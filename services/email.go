@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/adrien3d/things-api/models"
+	"github.com/IoThingsDev/api/models"
 
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"

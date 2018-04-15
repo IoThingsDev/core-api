@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/adrien3d/things-api/controllers"
-	"github.com/adrien3d/things-api/middlewares"
+	"github.com/IoThingsDev/api/controllers"
+	"github.com/IoThingsDev/api/middlewares"
 
 	"gopkg.in/gin-gonic/gin.v1"
 )

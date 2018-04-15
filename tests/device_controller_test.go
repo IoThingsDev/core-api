@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/adrien3d/things-api/models"
+	"github.com/IoThingsDev/api/models"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/mgo.v2/bson"
 )

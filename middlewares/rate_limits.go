@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/adrien3d/things-api/config"
-	"github.com/adrien3d/things-api/helpers"
-	"github.com/adrien3d/things-api/services"
+	"github.com/IoThingsDev/api/config"
+	"github.com/IoThingsDev/api/helpers"
+	"github.com/IoThingsDev/api/services"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 

@@ -3,10 +3,14 @@
 FROM golang
 
 # Copy the local package files to the container's workspace.
-ADD . /go/src/github.com/adrien3d/things-api
+ADD . /go/src/github.com/IoThingsDev/api
 
 # Change workdir
-WORKDIR /go/src/github.com/adrien3d/things-api
+WORKDIR /go/src/github.com/IoThingsDev/api
+
+#Generate keys
+RUN openssl genrsa -out base.rsa 2048
+RUN openssl rsa -in base.rsa -pubout > base.rsa.pub
 
 # Install the dependencies
 RUN go get -t -v ./...
@@ -14,7 +18,7 @@ RUN go get -t -v ./...
 # Build the outyet command inside the container.
 # (You may fetch or manage dependencies here,
 # either manually or with a tool like "godep".)
-RUN go install github.com/adrien3d/things-api
+RUN go install github.com/IoThingsDev/api
 
 ENV GIN_MODE release
 ENV BASEAPI_ENV prod

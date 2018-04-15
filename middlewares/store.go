@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"github.com/adrien3d/things-api/store"
-	"github.com/adrien3d/things-api/store/mongodb"
+	"github.com/IoThingsDev/api/store"
+	"github.com/IoThingsDev/api/store/mongodb"
 	"gopkg.in/gin-gonic/gin.v1"
 	mgo "gopkg.in/mgo.v2"
 )

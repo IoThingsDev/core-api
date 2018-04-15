@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	//"github.com/adrien3d/things-api/store"
+	//"github.com/IoThingsDev/api/store"
 )
 
 /*func NewStoreController() UserController {

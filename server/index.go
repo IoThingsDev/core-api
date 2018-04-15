@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/adrien3d/things-api/models"
+	"github.com/IoThingsDev/api/models"
 
 	"gopkg.in/mgo.v2"
 )

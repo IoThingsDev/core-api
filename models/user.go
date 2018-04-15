@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/adrien3d/things-api/helpers"
+	"github.com/IoThingsDev/api/helpers"
 	"github.com/asaskevich/govalidator"
 	"golang.org/x/crypto/bcrypt"
 )

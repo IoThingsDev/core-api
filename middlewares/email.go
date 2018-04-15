@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"github.com/adrien3d/things-api/services"
+	"github.com/IoThingsDev/api/services"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 

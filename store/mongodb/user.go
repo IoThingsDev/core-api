@@ -5,9 +5,9 @@ import (
 
 	"time"
 
-	"github.com/adrien3d/things-api/helpers"
-	"github.com/adrien3d/things-api/helpers/params"
-	"github.com/adrien3d/things-api/models"
+	"github.com/IoThingsDev/api/helpers"
+	"github.com/IoThingsDev/api/helpers/params"
+	"github.com/IoThingsDev/api/models"
 	"gopkg.in/mgo.v2/bson"
 )
 
