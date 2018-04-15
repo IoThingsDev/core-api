@@ -47,7 +47,7 @@ func (db *mongo) GetDevices(user *models.User) ([]*models.Device, error) {
 	devices := db.C(models.DevicesCollection).With(session)
 
 	list := []*models.Device{}
-	err := devices.Find(params.M{"userId": user.Id}).All(&list)
+	err := devices.Find(params.M{"userId": user.Id}).Sort("-lastAcc").All(&list)
 	if err != nil {
 		return nil, helpers.NewError(http.StatusNotFound, "devices_not_found", "Devices not found")
 	}
@@ -103,7 +103,7 @@ func (db *mongo) GetDevice(user *models.User, id string) (*models.Device, error)
 	return device, nil
 }
 
-func (db *mongo) GetLastMessages(id string) ([]*models.SigfoxMessage, error) {
+func (db *mongo) GetLastDeviceMessages(id string) ([]*models.SigfoxMessage, error) {
 	session := db.Session.Copy()
 	defer session.Close()
 	devices := db.C(models.DevicesCollection).With(session)
@@ -125,7 +125,7 @@ func (db *mongo) GetLastMessages(id string) ([]*models.SigfoxMessage, error) {
 	return list, nil
 }
 
-func (db *mongo) GetLastLocations(id string) ([]*models.Location, error) {
+func (db *mongo) GetLastDeviceLocations(id string) ([]*models.Location, error) {
 	session := db.Session.Copy()
 	defer session.Close()
 	devices := db.C(models.DevicesCollection).With(session)
@@ -146,7 +146,7 @@ func (db *mongo) GetLastLocations(id string) ([]*models.Location, error) {
 
 	return list, nil
 }
-func (db *mongo) GetAllMessages(id string) ([]*models.SigfoxMessage, error) {
+func (db *mongo) GetAllDeviceMessages(id string) ([]*models.SigfoxMessage, error) {
 	session := db.Session.Copy()
 	defer session.Close()
 	devices := db.C(models.DevicesCollection).With(session)
@@ -168,7 +168,7 @@ func (db *mongo) GetAllMessages(id string) ([]*models.SigfoxMessage, error) {
 	return list, nil
 }
 
-func (db *mongo) GetAllLocations(id string) ([]*models.Location, error) {
+func (db *mongo) GetAllDeviceLocations(id string) ([]*models.Location, error) {
 	session := db.Session.Copy()
 	defer session.Close()
 	devices := db.C(models.DevicesCollection).With(session)

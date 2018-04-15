@@ -5,10 +5,14 @@ import (
 	"golang.org/x/net/context"
 )
 
-func CreateMessage(c context.Context, message *models.SigfoxMessage) error {
+func CreateSigfoxMessage(c context.Context, message *models.SigfoxMessage) error {
 	return FromContext(c).CreateMessage(message)
 }
 
-func CreateLocation(c context.Context, location *models.Location) error {
-	return FromContext(c).CreateLocation(location)
+func CreateSigfoxLocationWithMessage(c context.Context, location *models.Location, message *models.SigfoxMessage) error {
+	return FromContext(c).CreateLocationWithMessage(location, message)
+}
+
+func GetLastDevicesSigfoxMessages(c context.Context) ([]*models.SigfoxMessage, error) {
+	return FromContext(c).GetLastDevicesSigfoxMessages(Current(c))
 }

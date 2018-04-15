@@ -23,7 +23,7 @@ func (a *API) SetupRouter() {
 	router.Use(middlewares.CorsMiddleware(middlewares.Config{
 		Origins:         "*",
 		Methods:         "GET, PUT, POST, DELETE",
-		RequestHeaders:  "Origin, Authorization, Content-Type",
+		RequestHeaders:  "Origin, Authorization, Content-Type, X-Requested-With, Accept, Token",
 		ExposedHeaders:  "",
 		MaxAge:          50 * time.Second,
 		Credentials:     true,
@@ -42,6 +42,9 @@ func (a *API) SetupRouter() {
 	v1 := router.Group("/v1")
 	{
 		v1.GET("/", Index)
+		//TODO : Implement robots.txt :
+		//User-Agent: *
+		//Disallow: /
 		userController := controllers.NewUserController()
 		//v1.POST("/reset_password", userController.ResetPasswordRequest)
 		users := v1.Group("/users")
@@ -67,8 +70,11 @@ func (a *API) SetupRouter() {
 		sigfox := v1.Group("/sigfox")
 		{
 			sigfoxController := controllers.NewSigfoxController()
-			sigfox.POST("/locations", sigfoxController.CreateLocation)
 			sigfox.POST("/messages", sigfoxController.CreateMessage)
+
+			locationController := controllers.NewLocationController()
+			sigfox.POST("/locations", locationController.CreateLocation)
+			sigfox.POST("/atlas", locationController.CreateLocation)
 		}
 
 		devices := v1.Group("/devices")
@@ -80,17 +86,24 @@ func (a *API) SetupRouter() {
 			devices.PUT("/:id", deviceController.UpdateDevice)
 			devices.GET("/:id", deviceController.GetDevice)
 			devices.DELETE("/:id", deviceController.DeleteDevice)
-			devices.GET("/:id/locations", deviceController.GetAllLocations)
-			devices.GET("/:id/messages", deviceController.GetAllMessages)
-			devices.GET("/:id/lastLocations", deviceController.GetLastLocations)
-			devices.GET("/:id/lastMessages", deviceController.GetLastMessages)
+			devices.GET("/:id/locations", deviceController.GetAllDeviceLocations)
+			devices.GET("/:id/messages", deviceController.GetAllDeviceMessages)
+			devices.GET("/:id/lastLocations", deviceController.GetLastDeviceLocations)
+			devices.GET("/:id/lastMessages", deviceController.GetLastDeviceMessages)
+		}
+
+		messages := v1.Group("/messages")
+		{
+			messages.Use(authMiddleware)
+			messagesController := controllers.NewSigfoxController()
+			messages.GET("/", messagesController.GetLastDevicesSigfoxMessages)
 		}
 
 		locations := v1.Group("/locations")
 		{
 			locations.Use(authMiddleware)
 			locationController := controllers.NewLocationController()
-			locations.GET("/", locationController.GetAllDevicesLocations)
+			locations.GET("/", locationController.GetLastDevicesLocations)
 
 		}
 

@@ -33,11 +33,11 @@ func TestCreateMessage(t *testing.T) {
 func TestCreateLocation(t *testing.T) {
 	parameters := []byte(`
 	{
-		"sigfoxId": "17CA54",
-		"latitude": 2,
-		"timestamp": 1491209486,
-		"longitude": 12,
-		"radius": 15.78,
+		"sigfoxId": "36DC07",
+		"timestamp": 1522152070,
+		"latitude": 45.7621635049846,
+		"longitude": 4.819336257006938,
+		"radius": 4083,
 		"spotIt": true
 	}`)
 

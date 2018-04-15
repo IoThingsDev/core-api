@@ -7,13 +7,16 @@ import (
 )
 
 type Location struct {
-	Id        string  `json:"id" bson:"_id,omitempty" valid:"-"`
-	SigfoxId  string  `json:"sigfoxId" bson:"sigfoxId" valid:"-"`
-	Timestamp int64   `json:"timestamp" bson:"timestamp" valid:"-"`
-	Latitude  float64 `json:"latitude" bson:"latitude" valid:"-"`
-	Longitude float64 `json:"longitude" bson:"longitude" valid:"-"`
-	Radius    float64 `json:"radius" bson:"radius" valid:"-"`
-	SpotIt    bool    `json:"spotIt" bson:"spotIt" valid:"-"`
+	Id          string  `json:"id" bson:"_id,omitempty" valid:"-"`
+	SigfoxId    string  `json:"sigfoxId" bson:"sigfoxId" valid:"-"`
+	FrameNumber uint    `json:"frameNumber" bson:"frameNumber" valid:"-"` //Device : (daily frames under 140)
+	Timestamp   int64   `json:"timestamp" bson:"timestamp" valid:"-"`
+	Latitude    float64 `json:"latitude" bson:"latitude" valid:"-"`
+	Longitude   float64 `json:"longitude" bson:"longitude" valid:"-"`
+	Radius      float64 `json:"radius" bson:"radius" valid:"-"`
+	SpotIt      bool    `json:"spotIt" bson:"spotIt" valid:"-"`
+	GPS         bool    `json:"gps" bson:"gps" valid:"-"`
+	WiFi        bool    `json:"wifi" bson:"wifi" valid:"-"`
 }
 
 type LastLocation struct {

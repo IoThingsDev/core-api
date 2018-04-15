@@ -98,8 +98,8 @@ func (dc DeviceController) GetDevice(c *gin.Context) {
 	c.JSON(http.StatusOK, device)
 }
 
-func (dc DeviceController) GetLastMessages(c *gin.Context) {
-	sigfoxMessages, err := store.GetLastMessages(c, c.Param("id"))
+func (dc DeviceController) GetLastDeviceMessages(c *gin.Context) {
+	sigfoxMessages, err := store.GetLastDeviceMessages(c, c.Param("id"))
 
 	if err != nil {
 		c.Error(err)
@@ -110,8 +110,8 @@ func (dc DeviceController) GetLastMessages(c *gin.Context) {
 	c.JSON(http.StatusOK, sigfoxMessages)
 }
 
-func (dc DeviceController) GetLastLocations(c *gin.Context) {
-	locations, err := store.GetLastLocations(c, c.Param("id"))
+func (dc DeviceController) GetLastDeviceLocations(c *gin.Context) {
+	locations, err := store.GetLastDeviceLocations(c, c.Param("id"))
 
 	if err != nil {
 		c.Error(err)
@@ -122,8 +122,8 @@ func (dc DeviceController) GetLastLocations(c *gin.Context) {
 	c.JSON(http.StatusOK, locations)
 }
 
-func (dc DeviceController) GetAllMessages(c *gin.Context) {
-	sigfoxMessages, err := store.GetAllMessages(c, c.Param("id"))
+func (dc DeviceController) GetAllDeviceMessages(c *gin.Context) {
+	sigfoxMessages, err := store.GetAllDeviceMessages(c, c.Param("id"))
 
 	if err != nil {
 		c.Error(err)
@@ -134,8 +134,8 @@ func (dc DeviceController) GetAllMessages(c *gin.Context) {
 	c.JSON(http.StatusOK, sigfoxMessages)
 }
 
-func (dc DeviceController) GetAllLocations(c *gin.Context) {
-	locations, err := store.GetAllLocations(c, c.Param("id"))
+func (dc DeviceController) GetAllDeviceLocations(c *gin.Context) {
+	locations, err := store.GetAllDeviceLocations(c, c.Param("id"))
 
 	if err != nil {
 		c.Error(err)

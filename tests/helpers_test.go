@@ -109,7 +109,7 @@ func SetupApi() *server.API {
 		panic(err)
 	}
 
-	services.SetStripeKeyAndBackend(api.Config)
+	// services.SetStripeKeyAndBackend(api.Config)
 
 	api.SetupRedis()
 
