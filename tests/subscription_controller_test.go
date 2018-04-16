@@ -1,13 +1,6 @@
 package tests
 
-import (
-	"net/http"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-)
-
-func TestCreateSubscription(t *testing.T) {
+/*func TestCreateSubscription(t *testing.T) {
 	parameters := []byte(`
 	{
 		"id":"fakeplanid"
@@ -25,4 +18,4 @@ func TestGetSubscriptions(t *testing.T) {
 func TestDeleteSubscription(t *testing.T) {
 	resp := SendRequestWithToken(nil, "DELETE", "/v1/billing/subscriptions/fakeid", authToken)
 	assert.Equal(t, http.StatusOK, resp.Code)
-}
+}*/
