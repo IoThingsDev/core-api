@@ -10,7 +10,7 @@ import (
 func TestCreateMessage(t *testing.T) {
 	parameters := []byte(`
 {
-    "sigfoxId": "36DC07",
+    "sigfoxId": "AABBCC",
     "time": 1523521574,
     "data": "4e2d2f114504301e00411757",
     "mesType":3,
@@ -29,12 +29,12 @@ func TestCreateMessage(t *testing.T) {
 func TestCreateLocation(t *testing.T) {
 	parameters := []byte(`
 {
-               	"sigfoxId": "36D374",
+               	"sigfoxId": "17CA54",
                	"spotIt": true,
                 "seqNumber": 358, 
                 "timestamp": 1523019829,
-                "latitude": 45.76383684732488,
-                "longitude": 4.815785261894964,
+                "latitude": 45.4540056,
+                "longitude": 4.10510950,
                 "radius": 3813
 }`)
 

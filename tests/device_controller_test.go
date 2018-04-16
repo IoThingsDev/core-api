@@ -13,7 +13,7 @@ func TestDeviceController(t *testing.T) {
 	deviceReq := []byte(`
 	{
 		"name":"Device 1",
-		"sigfoxId":"17CA54",
+		"sigfoxId":"AABBCC",
 		"bleMac": "AA:BB:CC:DD:EE",
 		"lastAcc": 1491209490,
 		"active": true
@@ -25,7 +25,7 @@ func TestDeviceController(t *testing.T) {
 	deviceReq = []byte(`
 	{
 		"name":"Device 1",
-		"sigfoxId":"17CA54",
+		"sigfoxId":"AABBCC",
 		"bleMac": "AA:BB:CC:DD:EO",
 		"lastAcc": 1491209490,
 		"active": true
@@ -48,7 +48,7 @@ func TestDeviceController(t *testing.T) {
 	deviceReq = []byte(`
 	{
 		"name":"Device 1",
-		"sigfoxId":"17CA54",
+		"sigfoxId":"AABBCC",
 		"bleMac": "AA:3B:CC:DD:EE",
 		"lastAcc": 1491809490,
 		"active": false
