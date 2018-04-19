@@ -24,7 +24,7 @@ ENV GIN_MODE release
 ENV BASEAPI_ENV prod
 
 # Run the outyet command by default when the container starts.
-ENTRYPOINT /go/bin/things-api
+ENTRYPOINT /go/bin/api
 
 # Document that the service listens on port 4000.
 EXPOSE 4000
