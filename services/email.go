@@ -54,7 +54,7 @@ func (f *FakeEmailSender) SendEmailFromTemplate(user *models.User, subject strin
 
 func NewSendGridEmailSender(config *viper.Viper) EmailSender {
 	return &SendGridEmailSender{
-		config.GetString("sendgrid_address"),
+		config.GetString("sendgrid_mail_address"),
 		config.GetString("sendgrid_name"),
 		config.GetString("sendgrid_api_key"),
 		config.GetString("base_url"),

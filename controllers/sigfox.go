@@ -6,6 +6,7 @@ import (
 
 	"context"
 	"fmt"
+	"github.com/IoThingsDev/api/config"
 	"github.com/IoThingsDev/api/helpers"
 	"github.com/IoThingsDev/api/models"
 	"github.com/IoThingsDev/api/store"
@@ -21,7 +22,7 @@ func NewSigfoxController() SigfoxController {
 	return SigfoxController{}
 }
 
-func getWifiPosition(msg models.SigfoxMessage) models.Location {
+func resolveWifiPosition(contxt *gin.Context, msg models.SigfoxMessage) models.Location {
 	fmt.Print("WiFi frame: \t\t\t")
 	var wifiLoc models.Location
 
@@ -43,8 +44,10 @@ func getWifiPosition(msg models.SigfoxMessage) models.Location {
 	}
 
 	fmt.Print("SSID1: ", ssid1, "\t SSID2:", ssid2, "\t\t\t")
-	// TODO: Put Google API Key in config file, like: config.GetString(c, "google_api_key")
-	c, err := maps.NewClient(maps.WithAPIKey("AIzaSyCN0Z78M1sIT6c2H8PL0KaaFmjkBUE4avQ"))
+
+	googleApiKey := config.GetString(contxt, "google_api_key")
+
+	c, err := maps.NewClient(maps.WithAPIKey(googleApiKey))
 	if err != nil {
 		log.Fatalf("API connection fatal error: %s", err)
 	}
@@ -199,7 +202,7 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 				fmt.Println("Wisol No GPS Frame")
 			}
 		} else {
-			decodedWifiFrame := getWifiPosition(*sigfoxMessage)
+			decodedWifiFrame := resolveWifiPosition(c, *sigfoxMessage)
 			computedLocation = &decodedWifiFrame
 			fmt.Println("Wisol WiFi Frame, contaning: ", computedLocation)
 			//store.CreateLocation(context.Background(), &wifiLoc)
