@@ -49,12 +49,12 @@ func (dc FleetController) GetAverageTemperature(c *gin.Context) {
 		return
 	}
 
-	sum := float32(0)
+	sum := float64(0)
 	for _, message := range sigfoxMessages {
-		sum += message.Temperature
+		sum += message.Data2
 	}
 
-	average := sum / float32(len(sigfoxMessages))
+	average := sum / float64(len(sigfoxMessages))
 
 	c.JSON(http.StatusOK, gin.H{
 		"value": average,
