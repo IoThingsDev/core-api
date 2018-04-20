@@ -12,9 +12,9 @@ To send mails (for user account management) things-api uses Sendgrid, so you sho
 
 To resolve WiFi geolocations, things-api uses Google, so you should get an API key.
 
-Create a .env.prod file from the included .env file, while customizing data such as domain name, API keys...
+Create a `.env.prod` file from the included `.env` file, while customizing data such as domain name, API keys...
 
-Install docker and docker compose
+Install `docker` and `docker-compose`
 
 Run `docker-compose up -d`
 
@@ -81,12 +81,12 @@ to your `etc/nginx/sites-enabled/yourdomain`
 `sudo service nginx reload`
 
 
-## API Routes documentation
-A swagger documentation is available [here]()
+## API documentation and client generator
+A swagger documentation is available [here](https://app.swaggerhub.com/apis/IoThings/Things-API/1.0.0), you can automatically generate a client in your favourite language!
 
 
 ## Roadmap
-Some features would be nice to have, such as user roles management, Stripe billing management, Twililo SMS alerts.... And may be implemented in the future.
+Some features would be nice to have, such as user roles management, Stripe billing management, Twilio SMS alerts.... And may be implemented in the future.
 
 ## Miscellaneous
 If you want something you consider relevant to be implemented, feel free to fork the repo, and create a PR
