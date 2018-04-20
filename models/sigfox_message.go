@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	//"github.com/IoThingsDev/api/store"
+	"gopkg.in/gin-gonic/gin.v1"
+	"time"
 )
 
 /*func NewStoreController() UserController {
@@ -218,6 +220,20 @@ func convertInt16toFloat(value float64, min float64, max float64) float64 {
 
 func convertUInt16toFloat(value float64, min float64, max float64) float64 {
 	return (value * (max - min)) / 65536
+}
+
+func (l *SigfoxMessage) FormatData(valueType string) gin.H {
+	receivedTime := time.Unix(l.Timestamp, 0)
+	var value interface{}
+	//TODO: Handle devices configurations
+	switch valueType {
+	case "humidity":
+		value = l.Data3
+	case "temperature":
+		value = l.Data2
+	}
+
+	return gin.H{"value": value, "latitude": 50.434995, "longitude": 30.823634, "timestamp": receivedTime.String()}
 }
 
 const SigfoxMessagesCollection = "sigfox_messages"

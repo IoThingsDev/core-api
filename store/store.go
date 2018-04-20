@@ -23,12 +23,19 @@ type Store interface {
 	UpdateDevice(string, params.M) error
 	DeleteDevice(string) error
 	GetDevice(*models.User, string) (*models.Device, error)
+	GetDeviceLastMessage(id string) (*models.SigfoxMessage, error)
 	GetLastDeviceMessages(string) ([]*models.SigfoxMessage, error)
 	GetLastDeviceLocations(string) ([]*models.Location, error)
 	GetAllDeviceMessages(string) ([]*models.SigfoxMessage, error)
 	GetAllDeviceLocations(string) ([]*models.Location, error)
 
 	GetLastDevicesLocations(*models.User) ([]*models.LastLocation, error)
+
+	GetAllFleets() ([]models.Fleet, error)
+	CreateFleet(*models.Fleet) error
+	GetFleetById(string) (*models.Fleet, error)
+	GetLastFleetMessages(id string) ([]*models.SigfoxMessage, error)
+	DeleteFleet(id string) error
 
 	AddLoginToken(*models.User, string) (*models.LoginToken, error)
 	RemoveLoginToken(*models.User, string) error

@@ -27,6 +27,10 @@ func GetDevice(c context.Context, id string) (*models.Device, error) {
 	return FromContext(c).GetDevice(Current(c), id)
 }
 
+func GetDeviceLastMessage(c context.Context, id string) (*models.SigfoxMessage, error) {
+	return FromContext(c).GetDeviceLastMessage(id)
+}
+
 func GetLastDeviceMessages(c context.Context, id string) ([]*models.SigfoxMessage, error) {
 	return FromContext(c).GetLastDeviceMessages(id)
 }

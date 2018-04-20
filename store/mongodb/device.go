@@ -125,6 +125,20 @@ func (db *mongo) GetLastDeviceMessages(id string) ([]*models.SigfoxMessage, erro
 	return list, nil
 }
 
+func (db *mongo) GetDeviceLastMessage(id string) (*models.SigfoxMessage, error) {
+	session := db.Session.Copy()
+	defer session.Close()
+	sigfoxMessages := db.C(models.SigfoxMessagesCollection).With(session)
+
+	var message models.SigfoxMessage
+	err := sigfoxMessages.Find(bson.M{"sigfoxId": id}).Sort("-$natural").One(&message)
+	if err != nil {
+		return nil, helpers.NewError(http.StatusInternalServerError, "query_failed", "Failed to query the Database: "+err.Error())
+	}
+
+	return &message, nil
+}
+
 func (db *mongo) GetLastDeviceLocations(id string) ([]*models.Location, error) {
 	session := db.Session.Copy()
 	defer session.Close()
