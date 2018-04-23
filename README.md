@@ -1,6 +1,9 @@
 # Things API
 
-CI Badges
+CI Badge 
+[![Go Report Card](https://goreportcard.com/badge/github.com/IoThingsDev/api)](https://goreportcard.com/report/github.com/IoThingsDev/api)
+[![GoDoc](https://godoc.org/github.com/IoThingsDev/api?status.svg)](https://godoc.org/github.com/IoThingsDev/api)
+[![Generic badge](https://img.shields.io/badge/Postman-Here-orange.svg)](https://app.swaggerhub.com/apis/IoThings/Things-API/1.0.0)
 
 Things API is an open-source, fast and scalable solution that enables you to speed up your IoT project development, by defining standard common features.
 
@@ -8,11 +11,11 @@ Things API rely on GoLang Gin Gonic web framework, MongoDB, Redis (for cache) an
 
 ## Getting started
 ### Generate API Keys
-To send mails (for user account management) things-api uses Sendgrid, so you should get an API key.
+If you want to send mails (for user account management) things-api uses Sendgrid, so you should get an [API key](https://app.sendgrid.com).
 
-To resolve WiFi geolocations, things-api uses Google, so you should get an API key.
+To resolve WiFi geolocations, things-api uses Google, so you should get an [API key](https://console.cloud.google.com/apis/).
 
-Create a `.env.prod` file from the included `.env` file, while customizing data such as domain name, API keys...
+Create a `.env.prod` file from the included `.env` file template, while customizing data such as domain name, API keys...
 
 Install `docker` and `docker-compose`
 
@@ -24,8 +27,11 @@ Congratulations, you are all set !
 
 ## Sigfox Use
 Connect to your account, select your device type and create two callbacks:
+
 Type: `DATA` `UPLINK`,
+
 URL: `https://youraddress/v1/sigfox/messages`
+
 Method: `POST`,
 
 Content-type: `application/json`
@@ -48,7 +54,9 @@ Content-type: `application/json`
 
 
 Type: `SERVICE` `GEOLOC`,
+
 URL: `https://youraddress/v1/sigfox/messages`
+
 Method: `POST`,
 
 Content-type: `application/json`
@@ -56,6 +64,7 @@ Content-type: `application/json`
 ```
 {
 	"sigfoxId": "{device}",
+	"frameNumber": {seqNumber}, 
 	"timestamp": {time},
 	"latitude": {lat},
 	"longitude": {lng},
@@ -74,7 +83,7 @@ Copy paste and customize the [nginx/conf-https-step-2](https://github.com/IoThin
 to your `etc/nginx/sites-enabled/yourdomain`
 `sudo service nginx reload`
 
-###Without HTTPS
+### Without HTTPS
 
 Copy paste and customize the conf-http
 to your `etc/nginx/sites-enabled/yourdomain`
@@ -89,4 +98,4 @@ A swagger documentation is available [here](https://app.swaggerhub.com/apis/IoTh
 Some features would be nice to have, such as user roles management, Stripe billing management, Twilio SMS alerts.... And may be implemented in the future.
 
 ## Miscellaneous
-If you want something you consider relevant to be implemented, feel free to fork the repo, and create a PR
+If you want something you consider relevant to be implemented, feel free to fork the repo, and create a PR.
