@@ -1,9 +1,11 @@
 # Things API
 
-CI Badge 
+[![Presentation](https://img.shields.io/badge/Presentation-Here-blue.svg)](https://iothings.fr)
+[![Documentation](https://img.shields.io/badge/Docs-Here-green.svg)](https://docs.iothings.fr) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/IoThingsDev/api)](https://goreportcard.com/report/github.com/IoThingsDev/api)
 [![GoDoc](https://godoc.org/github.com/IoThingsDev/api?status.svg)](https://godoc.org/github.com/IoThingsDev/api)
-[![Generic badge](https://img.shields.io/badge/Postman-Here-orange.svg)](https://app.swaggerhub.com/apis/IoThings/Things-API/1.0.0)
+[![Swagger](https://img.shields.io/badge/Postman-Here-orange.svg)](https://app.swaggerhub.com/apis/IoThings/Things-API/1.0.0)
+CI
 
 Things API is an open-source, fast and scalable solution that enables you to speed up your IoT project development, by defining standard common features.
 
@@ -47,7 +49,7 @@ Content-type: `application/json`
    	"snr": {snr},
    	"avgSnr": {avgSnr},
    	"rssi": {rssi},
-    "mesType":1,
+   	"mesType":1,
    	"data": "{data}"
 }
 ```
