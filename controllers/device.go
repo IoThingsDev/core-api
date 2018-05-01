@@ -10,13 +10,16 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
+// Controller that gather all Device related methods
 type DeviceController struct {
 }
 
+// Initiate a controller for router
 func NewDeviceController() DeviceController {
 	return DeviceController{}
 }
 
+// Create a device
 func (dc DeviceController) CreateDevice(c *gin.Context) {
 	device := &models.Device{}
 
@@ -35,6 +38,7 @@ func (dc DeviceController) CreateDevice(c *gin.Context) {
 	c.JSON(http.StatusCreated, device)
 }
 
+// Update all devices
 func (dc DeviceController) GetDevices(c *gin.Context) {
 	devices, err := store.GetDevices(c)
 
@@ -47,6 +51,7 @@ func (dc DeviceController) GetDevices(c *gin.Context) {
 	c.JSON(http.StatusOK, devices)
 }
 
+// Update a specific device
 func (dc DeviceController) UpdateDevice(c *gin.Context) {
 	device := models.Device{}
 
@@ -74,6 +79,7 @@ func (dc DeviceController) UpdateDevice(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
+// Delete a specific device
 func (dc DeviceController) DeleteDevice(c *gin.Context) {
 	err := store.DeleteDevice(c, c.Param("id"))
 
@@ -86,6 +92,7 @@ func (dc DeviceController) DeleteDevice(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
+// Getting details from a specific device
 func (dc DeviceController) GetDevice(c *gin.Context) {
 	device, err := store.GetDevice(c, c.Param("id"))
 
@@ -98,6 +105,7 @@ func (dc DeviceController) GetDevice(c *gin.Context) {
 	c.JSON(http.StatusOK, device)
 }
 
+// Getting last messages from a specific device
 func (dc DeviceController) GetLastDeviceMessages(c *gin.Context) {
 	sigfoxMessages, err := store.GetLastDeviceMessages(c, c.Param("id"))
 
@@ -110,6 +118,7 @@ func (dc DeviceController) GetLastDeviceMessages(c *gin.Context) {
 	c.JSON(http.StatusOK, sigfoxMessages)
 }
 
+// Getting last locations from a specific device
 func (dc DeviceController) GetLastDeviceLocations(c *gin.Context) {
 	locations, err := store.GetLastDeviceLocations(c, c.Param("id"))
 
@@ -122,6 +131,7 @@ func (dc DeviceController) GetLastDeviceLocations(c *gin.Context) {
 	c.JSON(http.StatusOK, locations)
 }
 
+// Getting all messages from a specific device
 func (dc DeviceController) GetAllDeviceMessages(c *gin.Context) {
 	sigfoxMessages, err := store.GetAllDeviceMessages(c, c.Param("id"))
 
@@ -134,6 +144,7 @@ func (dc DeviceController) GetAllDeviceMessages(c *gin.Context) {
 	c.JSON(http.StatusOK, sigfoxMessages)
 }
 
+// Getting all locations from a specific device
 func (dc DeviceController) GetAllDeviceLocations(c *gin.Context) {
 	locations, err := store.GetAllDeviceLocations(c, c.Param("id"))
 

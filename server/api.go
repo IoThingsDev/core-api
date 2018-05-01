@@ -7,6 +7,7 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
+// API Structure that gathers all services
 type API struct {
 	Router      *gin.Engine
 	Config      *viper.Viper

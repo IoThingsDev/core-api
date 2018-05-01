@@ -18,6 +18,7 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
+// Middleware that handles token management
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenReader := c.Request.Header.Get("Authorization")
@@ -64,8 +65,12 @@ func AuthMiddleware() gin.HandlerFunc {
 				c.AbortWithError(http.StatusUnauthorized, helpers.ErrorWithCode("token_not_valid", "This token isn't valid"))
 				return
 			}
-			err = services.GetRedis(c).SetValueForKey(user.Id, &user)
 
+			err = services.GetRedis(c).SetValueForKey(user.Id, &user)
+			if err != nil {
+				c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("user_cache_error", "Error with user caching"))
+				return
+			}
 		}
 
 		// Check if the token is still valid in the database

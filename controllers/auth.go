@@ -66,6 +66,10 @@ func (ac AuthController) Authentication(c *gin.Context) {
 
 	token.Claims = claims
 	tokenString, err := token.SignedString(privateKey)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, helpers.ErrorWithCode("signing_error", "Error when signing token"))
+		return
+	}
 
 	services.GetRedis(c).InvalidateObject(user.Id)
 

@@ -7,6 +7,7 @@ import (
 	mgo "gopkg.in/mgo.v2"
 )
 
+// Middleware that handles store layer
 func StoreMiddleware(db *mgo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		store.ToContext(c, mongodb.New(db))
