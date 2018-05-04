@@ -18,7 +18,7 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
-// Middleware that handles token management
+// AuthMiddleware that handles token management
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenReader := c.Request.Header.Get("Authorization")

@@ -67,7 +67,7 @@ func (r *Redis) SetValueForKey(key string, value interface{}) error {
 	return nil
 }
 
-// Invalidates an object in the redis store.
+// InvalidateObject an object in the redis store.
 func (r *Redis) InvalidateObject(id string) error {
 	redisConn := r.Pool.Get()
 	defer redisConn.Close()
