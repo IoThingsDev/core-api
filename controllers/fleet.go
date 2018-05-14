@@ -9,14 +9,17 @@ import (
 	"os"
 )
 
+//FleetController handles things related to fleets
 type FleetController struct {
 }
 
+//NewFleetController instantiate a FleetController
 func NewFleetController() FleetController {
 	return FleetController{}
 }
 
-func (dc FleetController) GetTemperatures(c *gin.Context) {
+//Getting all Temperatures from all devices
+func (fc FleetController) GetTemperatures(c *gin.Context) {
 	id := c.Param("id")
 
 	sigfoxMessages, err := store.GetLastFleetMessages(c, id)
@@ -38,7 +41,8 @@ func (dc FleetController) GetTemperatures(c *gin.Context) {
 	c.JSON(http.StatusOK, formattedMessages)
 }
 
-func (dc FleetController) GetAverageTemperature(c *gin.Context) {
+//Getting mean Temperatures from all devices
+func (fc FleetController) GetAverageTemperature(c *gin.Context) {
 	id := c.Param("id")
 
 	sigfoxMessages, err := store.GetLastFleetMessages(c, id)
@@ -61,7 +65,8 @@ func (dc FleetController) GetAverageTemperature(c *gin.Context) {
 	})
 }
 
-func (gtc FleetController) GetFleets(c *gin.Context) {
+//Getting all fleets
+func (fc FleetController) GetFleets(c *gin.Context) {
 	fleets, err := store.GetAllFleets(c)
 	if err != nil {
 		c.Error(err)
@@ -72,7 +77,8 @@ func (gtc FleetController) GetFleets(c *gin.Context) {
 	c.JSON(http.StatusOK, fleets)
 }
 
-func (gtc FleetController) GetFleetById(c *gin.Context) {
+//Getting a single fleet
+func (fc FleetController) GetFleetById(c *gin.Context) {
 	id := c.Param("id")
 
 	fleet, err := store.GetFleetById(c, id)
@@ -85,7 +91,8 @@ func (gtc FleetController) GetFleetById(c *gin.Context) {
 	c.JSON(http.StatusOK, fleet)
 }
 
-func (gtc FleetController) CreateFleet(c *gin.Context) {
+//Creating a fleet
+func (fc FleetController) CreateFleet(c *gin.Context) {
 	fleet := &models.Fleet{}
 
 	if err := c.BindJSON(fleet); err != nil {
@@ -102,7 +109,8 @@ func (gtc FleetController) CreateFleet(c *gin.Context) {
 	c.JSON(http.StatusCreated, fleet)
 }
 
-func (dc FleetController) DeleteFleet(c *gin.Context) {
+//Delete a fleet
+func (fc FleetController) DeleteFleet(c *gin.Context) {
 	err := store.DeleteFleet(c, c.Param("id"))
 
 	if err != nil {
