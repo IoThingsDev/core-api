@@ -38,7 +38,7 @@ func (dc DeviceController) CreateDevice(c *gin.Context) {
 	c.JSON(http.StatusCreated, device)
 }
 
-// Update all devices
+// Get all devices of a User
 func (dc DeviceController) GetDevices(c *gin.Context) {
 	devices, err := store.GetDevices(c)
 
@@ -103,6 +103,19 @@ func (dc DeviceController) GetDevice(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, device)
+}
+
+// Getting last message from a specific device
+func (dc DeviceController) GetDeviceLastMessage(c *gin.Context) {
+	sigfoxMessage, err := store.GetDeviceLastMessage(c, c.Param("id"))
+
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, sigfoxMessage)
 }
 
 // Getting last messages from a specific device

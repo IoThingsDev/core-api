@@ -9,6 +9,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// Storing a Sigfox Message
 func (db *mongo) CreateMessage(message *models.SigfoxMessage) error {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -41,6 +42,7 @@ func (db *mongo) CreateMessage(message *models.SigfoxMessage) error {
 	return nil
 }
 
+// Storing both Sigfox Message and Location
 func (db *mongo) CreateLocationWithMessage(location *models.Location, message *models.SigfoxMessage) error {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -71,6 +73,7 @@ func (db *mongo) CreateLocationWithMessage(location *models.Location, message *m
 	return nil
 }
 
+// Get Last Sigfox Messages from Devices
 func (db *mongo) GetLastDevicesSigfoxMessages(user *models.User) ([]*models.SigfoxMessage, error) {
 	session := db.Session.Copy()
 	defer session.Close()

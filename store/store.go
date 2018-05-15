@@ -23,7 +23,7 @@ type Store interface {
 	UpdateDevice(string, params.M) error
 	DeleteDevice(string) error
 	GetDevice(*models.User, string) (*models.Device, error)
-	GetDeviceLastMessage(id string) (*models.SigfoxMessage, error)
+	GetDeviceLastMessage(string) (*models.SigfoxMessage, error)
 	GetLastDeviceMessages(string) ([]*models.SigfoxMessage, error)
 	GetLastDeviceLocations(string) ([]*models.Location, error)
 	GetAllDeviceMessages(string) ([]*models.SigfoxMessage, error)

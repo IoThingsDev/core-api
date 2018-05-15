@@ -10,6 +10,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// MongoDB: Create a device
 func (db *mongo) CreateDevice(device *models.Device, user *models.User) error {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -40,6 +41,7 @@ func (db *mongo) CreateDevice(device *models.Device, user *models.User) error {
 	return nil
 }
 
+// MongoDB: Get all devices of a User
 func (db *mongo) GetDevices(user *models.User) ([]*models.Device, error) {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -55,6 +57,7 @@ func (db *mongo) GetDevices(user *models.User) ([]*models.Device, error) {
 	return list, nil
 }
 
+// MongoDB: Update a specific device
 func (db *mongo) UpdateDevice(id string, m params.M) error {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -75,6 +78,7 @@ func (db *mongo) UpdateDevice(id string, m params.M) error {
 	return nil
 }
 
+// MongoDB: Delete a specific device
 func (db *mongo) DeleteDevice(id string) error {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -88,6 +92,7 @@ func (db *mongo) DeleteDevice(id string) error {
 	return nil
 }
 
+// MongoDB: Getting details from a specific device
 func (db *mongo) GetDevice(user *models.User, id string) (*models.Device, error) {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -103,6 +108,7 @@ func (db *mongo) GetDevice(user *models.User, id string) (*models.Device, error)
 	return device, nil
 }
 
+// MongoDB: Getting last messages from a specific device
 func (db *mongo) GetLastDeviceMessages(id string) ([]*models.SigfoxMessage, error) {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -125,6 +131,7 @@ func (db *mongo) GetLastDeviceMessages(id string) ([]*models.SigfoxMessage, erro
 	return list, nil
 }
 
+// MongoDB: Getting last message from a specific device
 func (db *mongo) GetDeviceLastMessage(id string) (*models.SigfoxMessage, error) {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -139,6 +146,7 @@ func (db *mongo) GetDeviceLastMessage(id string) (*models.SigfoxMessage, error) 
 	return &message, nil
 }
 
+// MongoDB: Getting last locations from a specific device
 func (db *mongo) GetLastDeviceLocations(id string) ([]*models.Location, error) {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -160,6 +168,8 @@ func (db *mongo) GetLastDeviceLocations(id string) ([]*models.Location, error) {
 
 	return list, nil
 }
+
+// MongoDB: Getting all messages from a specific device
 func (db *mongo) GetAllDeviceMessages(id string) ([]*models.SigfoxMessage, error) {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -182,6 +192,7 @@ func (db *mongo) GetAllDeviceMessages(id string) ([]*models.SigfoxMessage, error
 	return list, nil
 }
 
+// MongoDB: Getting all locations from a specific device
 func (db *mongo) GetAllDeviceLocations(id string) ([]*models.Location, error) {
 	session := db.Session.Copy()
 	defer session.Close()

@@ -16,6 +16,7 @@ func NewLocationController() LocationController {
 	return LocationController{}
 }
 
+// Create a single Location
 func (lc LocationController) CreateLocation(c *gin.Context) {
 	location := &models.Location{}
 
@@ -35,6 +36,7 @@ func (lc LocationController) CreateLocation(c *gin.Context) {
 	c.JSON(http.StatusCreated, location)
 }
 
+// Getting Last Locations from all devices of a user
 func (lc LocationController) GetLastDevicesLocations(c *gin.Context) {
 	locations, err := store.GetLastDevicesLocations(c)
 

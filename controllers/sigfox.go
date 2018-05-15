@@ -160,6 +160,7 @@ func decodeGPSFrame(msg models.SigfoxMessage) (models.Location, float64, bool) {
 	return gpsLoc, temperature, status
 }
 
+
 func (sc SigfoxController) CreateMessage(c *gin.Context) {
 	sigfoxMessage := &models.SigfoxMessage{}
 

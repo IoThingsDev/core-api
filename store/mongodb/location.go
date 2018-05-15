@@ -8,6 +8,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// Create a single Location
 func (db *mongo) CreateLocation(location *models.Location) error {
 	session := db.Session.Copy()
 	defer session.Close()
@@ -22,6 +23,7 @@ func (db *mongo) CreateLocation(location *models.Location) error {
 	return nil
 }
 
+// Getting Last Locations from all devices of a user
 func (db *mongo) GetLastDevicesLocations(user *models.User) ([]*models.LastLocation, error) {
 	session := db.Session.Copy()
 	defer session.Close()
