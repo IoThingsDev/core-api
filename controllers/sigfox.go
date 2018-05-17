@@ -160,7 +160,6 @@ func decodeGPSFrame(msg models.SigfoxMessage) (models.Location, float64, bool) {
 	return gpsLoc, temperature, status
 }
 
-
 func (sc SigfoxController) CreateMessage(c *gin.Context) {
 	sigfoxMessage := &models.SigfoxMessage{}
 
@@ -241,6 +240,45 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, sigfoxMessage)
+}
+
+// Route for Sigfox Message creation without any rate limit (to import from Sigfox API quickly)
+func (sc SigfoxController) ImportMessage(c *gin.Context) {
+	sigfoxMessage := &models.SigfoxMessage{}
+
+	err := c.BindJSON(sigfoxMessage)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
+		return
+	}
+
+	err = store.CreateSigfoxMessage(c, sigfoxMessage)
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	c.JSON(http.StatusCreated, sigfoxMessage)
+}
+
+// Route for Sigfox Location creation without any rate limit (to import from Sigfox API quickly)
+func (lc SigfoxController) ImportLocation(c *gin.Context) {
+	location := &models.Location{}
+
+	err := c.BindJSON(location)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, helpers.ErrorWithCode("invalid_input", "Failed to bind the body data"))
+		return
+	}
+
+	err = store.CreateLocation(c, location)
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusCreated, location)
 }
 
 func (sc SigfoxController) GetLastDevicesSigfoxMessages(c *gin.Context) {
