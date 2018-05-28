@@ -17,7 +17,7 @@ If you want to send mails (for user account management) things-api uses Sendgrid
 
 To resolve WiFi geolocations, things-api uses Google, so you should get an [API key](https://console.cloud.google.com/apis/).
 
-Create a `.env.prod` file from the included `.env` file template, while customizing data such as domain name, API keys...
+Create a `.env.prod` file from the included `.env.example` file template, while customizing data such as domain name, API keys...
 
 Install `docker` and `docker-compose`
 

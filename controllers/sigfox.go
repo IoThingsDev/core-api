@@ -26,10 +26,15 @@ func resolveWifiPosition(contxt *gin.Context, msg models.SigfoxMessage) models.L
 	fmt.Print("WiFi frame: \t\t\t")
 	var wifiLoc models.Location
 
+	if len(msg.Data) <= 12 {
+		fmt.Println("Only one WiFi, frame don't resolve for privacy issues")
+		return nil
+	}
+
 	ssid1 := ""
 	for i := 0; i <= 10; i += 2 {
 		if i == 10 {
-			ssid1 += fmt.Sprint(string(msg.Data[i : i+2]))
+			ssid1 += fmt.Sprint(string(msg.Data[i:i+2]))
 		} else {
 			ssid1 += fmt.Sprint(string(msg.Data[i:i+2]), ":")
 		}
@@ -37,7 +42,7 @@ func resolveWifiPosition(contxt *gin.Context, msg models.SigfoxMessage) models.L
 	ssid2 := ""
 	for i := 12; i <= 22; i += 2 {
 		if i == 22 {
-			ssid2 += fmt.Sprint(string(msg.Data[i : i+2]))
+			ssid2 += fmt.Sprint(string(msg.Data[i:i+2]))
 		} else {
 			ssid2 += fmt.Sprint(string(msg.Data[i:i+2]), ":")
 		}
@@ -61,17 +66,15 @@ func resolveWifiPosition(contxt *gin.Context, msg models.SigfoxMessage) models.L
 	}
 	resp, err := c.Geolocate(context.Background(), r)
 	if err != nil {
-		fmt.Println("Google Maps Geolocation Request error:", err)
-		fmt.Println("Faking geoloc to SiDo")
-		wifiLoc.Latitude = 45.7853901
-		wifiLoc.Longitude = 4.85622890
-	} else {
-		fmt.Println("Google Maps Geolocation resolved")
-		wifiLoc.Latitude = resp.Location.Lat
-		wifiLoc.Longitude = resp.Location.Lng
-		wifiLoc.Radius = resp.Accuracy
-	}
+		fmt.Println("Google Maps Geolocation Request, Position:", err)
+		return nil
+	} 
 
+	//Else, position is resolved
+	fmt.Println("Google Maps Geolocation resolved")
+	wifiLoc.Latitude = resp.Location.Lat
+	wifiLoc.Longitude = resp.Location.Lng
+	wifiLoc.Radius = resp.Accuracy
 	wifiLoc.FrameNumber = msg.FrameNumber
 	wifiLoc.SpotIt = false
 	wifiLoc.GPS = false
@@ -203,6 +206,10 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 			}
 		} else {
 			decodedWifiFrame := resolveWifiPosition(c, *sigfoxMessage)
+			if decodedWifiFrame == nil {
+				fmt.Println("Error while resolving WiFi computed location")
+				return
+			}
 			computedLocation = &decodedWifiFrame
 			fmt.Println("Wisol WiFi Frame, contaning: ", computedLocation)
 			//store.CreateLocation(context.Background(), &wifiLoc)
