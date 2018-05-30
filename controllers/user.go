@@ -58,7 +58,10 @@ func (uc UserController) ActivateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully activated your account."})
+	c.HTML(http.StatusOK, "user_activated.tmpl", gin.H{
+		"url": config.GetString(c, "FRONT_URL"),
+	})
+	//c.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully activated your account."})
 }
 
 // TODO: Reset Password: rate limit: 6h, 10 total

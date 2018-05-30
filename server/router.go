@@ -18,6 +18,8 @@ func Index(c *gin.Context) {
 func (a *API) SetupRouter() {
 	router := a.Router
 
+	router.LoadHTMLGlob("templates/pages")
+
 	router.Use(middlewares.ErrorMiddleware())
 
 	router.Use(middlewares.CorsMiddleware(middlewares.Config{
@@ -116,6 +118,7 @@ func (a *API) SetupRouter() {
 		{
 			authController := controllers.NewAuthController()
 			authentication.POST("/", authController.Authentication)
+			authentication.OPTIONS("/", authController.Preflight)
 			authentication.Use(authMiddleware)
 			authentication.GET("/logout", authController.LogOut)
 		}

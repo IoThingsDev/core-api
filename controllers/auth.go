@@ -76,6 +76,13 @@ func (ac AuthController) Authentication(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": tokenString, "users": user.Sanitize()})
 }
 
+
+func (ac AuthController) Preflight(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+	c.JSON(http.StatusOK, struct{}{})
+}
+
 func (ac AuthController) LogOut(c *gin.Context) {
 	if err := store.RemoveLoginToken(c); err != nil {
 		c.Error(err)

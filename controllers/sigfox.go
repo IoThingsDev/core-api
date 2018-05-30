@@ -22,13 +22,13 @@ func NewSigfoxController() SigfoxController {
 	return SigfoxController{}
 }
 
-func resolveWifiPosition(contxt *gin.Context, msg models.SigfoxMessage) models.Location {
+func resolveWifiPosition(contxt *gin.Context, msg models.SigfoxMessage) (bool, models.Location) {
 	fmt.Print("WiFi frame: \t\t\t")
 	var wifiLoc models.Location
 
 	if len(msg.Data) <= 12 {
 		fmt.Println("Only one WiFi, frame don't resolve for privacy issues")
-		return nil
+		return false, wifiLoc
 	}
 
 	ssid1 := ""
@@ -67,7 +67,7 @@ func resolveWifiPosition(contxt *gin.Context, msg models.SigfoxMessage) models.L
 	resp, err := c.Geolocate(context.Background(), r)
 	if err != nil {
 		fmt.Println("Google Maps Geolocation Request, Position:", err)
-		return nil
+		return false, wifiLoc
 	} 
 
 	//Else, position is resolved
@@ -82,7 +82,7 @@ func resolveWifiPosition(contxt *gin.Context, msg models.SigfoxMessage) models.L
 
 	fmt.Println(resp)
 	fmt.Println(wifiLoc)
-	return wifiLoc
+	return true, wifiLoc
 }
 
 func decodeGPSFrame(msg models.SigfoxMessage) (models.Location, float64, bool) {
@@ -205,8 +205,8 @@ func (sc SigfoxController) CreateMessage(c *gin.Context) {
 				fmt.Println("Wisol No GPS Frame")
 			}
 		} else {
-			decodedWifiFrame := resolveWifiPosition(c, *sigfoxMessage)
-			if decodedWifiFrame == nil {
+			res, decodedWifiFrame := resolveWifiPosition(c, *sigfoxMessage)
+			if res == false {
 				fmt.Println("Error while resolving WiFi computed location")
 				return
 			}
